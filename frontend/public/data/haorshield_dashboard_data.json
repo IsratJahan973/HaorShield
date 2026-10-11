@@ -1,0 +1,287 @@
+{
+  "project": "HaorShield",
+  "study_area": "Seven districts of northeastern Bangladesh",
+  "event_labels": {
+    "4382": "2016 Jul-Aug",
+    "4459": "2017 Mar-Apr",
+    "4508": "2017 Aug"
+  },
+  "event_summary": [
+    {
+      "event_id": 4382,
+      "total_cropland_ha": 1211011.437187,
+      "observed_cropland_ha": 1210580.733592,
+      "unobserved_cropland_ha": 430.703595,
+      "permanent_water_overlap_ha": 3875.773394,
+      "flooded_cropland_ha": 525068.086144,
+      "flooded_pct_total_cropland": 43.357814,
+      "flooded_pct_observed_cropland": 43.37324
+    },
+    {
+      "event_id": 4459,
+      "total_cropland_ha": 1211011.437187,
+      "observed_cropland_ha": 1210580.733592,
+      "unobserved_cropland_ha": 430.703595,
+      "permanent_water_overlap_ha": 3875.773394,
+      "flooded_cropland_ha": 291276.191168,
+      "flooded_pct_total_cropland": 24.052307,
+      "flooded_pct_observed_cropland": 24.060865
+    },
+    {
+      "event_id": 4508,
+      "total_cropland_ha": 1211011.437187,
+      "observed_cropland_ha": 1210580.733592,
+      "unobserved_cropland_ha": 430.703595,
+      "permanent_water_overlap_ha": 3875.773394,
+      "flooded_cropland_ha": 515943.588897,
+      "flooded_pct_total_cropland": 42.604353,
+      "flooded_pct_observed_cropland": 42.619511
+    }
+  ],
+  "district_event_exposure": [
+    {
+      "event_id": 4382,
+      "district": "Brahamanbaria",
+      "total_cropland_ha": 133601.751856,
+      "observed_cropland_ha": 133601.514943,
+      "unobserved_cropland_ha": 0.236913,
+      "permanent_water_overlap_ha": 428.255754,
+      "flooded_cropland_ha": 56294.928739,
+      "flooded_pct_total_cropland": 42.13637,
+      "flooded_pct_observed_cropland": 42.136445
+    },
+    {
+      "event_id": 4382,
+      "district": "Habiganj",
+      "total_cropland_ha": 171958.676433,
+      "observed_cropland_ha": 171949.834354,
+      "unobserved_cropland_ha": 8.84208,
+      "permanent_water_overlap_ha": 136.878765,
+      "flooded_cropland_ha": 40305.019963,
+      "flooded_pct_total_cropland": 23.438782,
+      "flooded_pct_observed_cropland": 23.439988
+    },
+    {
+      "event_id": 4382,
+      "district": "Kishoreganj",
+      "total_cropland_ha": 182210.123252,
+      "observed_cropland_ha": 182209.960015,
+      "unobserved_cropland_ha": 0.163236,
+      "permanent_water_overlap_ha": 1055.320897,
+      "flooded_cropland_ha": 115932.366045,
+      "flooded_pct_total_cropland": 63.625645,
+      "flooded_pct_observed_cropland": 63.625702
+    },
+    {
+      "event_id": 4382,
+      "district": "Maulvibazar",
+      "total_cropland_ha": 110914.725782,
+      "observed_cropland_ha": 110861.220584,
+      "unobserved_cropland_ha": 53.505197,
+      "permanent_water_overlap_ha": 159.312229,
+      "flooded_cropland_ha": 13210.435296,
+      "flooded_pct_total_cropland": 11.910443,
+      "flooded_pct_observed_cropland": 11.916191
+    },
+    {
+      "event_id": 4382,
+      "district": "Netrakona",
+      "total_cropland_ha": 200242.910897,
+      "observed_cropland_ha": 200220.434111,
+      "unobserved_cropland_ha": 22.476786,
+      "permanent_water_overlap_ha": 214.831475,
+      "flooded_cropland_ha": 88618.031916,
+      "flooded_pct_total_cropland": 44.255266,
+      "flooded_pct_observed_cropland": 44.260234
+    },
+    {
+      "event_id": 4382,
+      "district": "Sunamganj",
+      "total_cropland_ha": 209671.403905,
+      "observed_cropland_ha": 209597.261001,
+      "unobserved_cropland_ha": 74.142904,
+      "permanent_water_overlap_ha": 727.237634,
+      "flooded_cropland_ha": 146467.497431,
+      "flooded_pct_total_cropland": 69.855734,
+      "flooded_pct_observed_cropland": 69.880444
+    },
+    {
+      "event_id": 4382,
+      "district": "Sylhet",
+      "total_cropland_ha": 202411.845062,
+      "observed_cropland_ha": 202140.508583,
+      "unobserved_cropland_ha": 271.336479,
+      "permanent_water_overlap_ha": 1153.93664,
+      "flooded_cropland_ha": 64239.806753,
+      "flooded_pct_total_cropland": 31.737178,
+      "flooded_pct_observed_cropland": 31.779779
+    },
+    {
+      "event_id": 4459,
+      "district": "Brahamanbaria",
+      "total_cropland_ha": 133601.751856,
+      "observed_cropland_ha": 133601.514943,
+      "unobserved_cropland_ha": 0.236913,
+      "permanent_water_overlap_ha": 428.255754,
+      "flooded_cropland_ha": 209.941257,
+      "flooded_pct_total_cropland": 0.15714,
+      "flooded_pct_observed_cropland": 0.15714
+    },
+    {
+      "event_id": 4459,
+      "district": "Habiganj",
+      "total_cropland_ha": 171958.676433,
+      "observed_cropland_ha": 171949.834354,
+      "unobserved_cropland_ha": 8.84208,
+      "permanent_water_overlap_ha": 136.878765,
+      "flooded_cropland_ha": 8817.986558,
+      "flooded_pct_total_cropland": 5.127968,
+      "flooded_pct_observed_cropland": 5.128232
+    },
+    {
+      "event_id": 4459,
+      "district": "Kishoreganj",
+      "total_cropland_ha": 182210.123252,
+      "observed_cropland_ha": 182209.960015,
+      "unobserved_cropland_ha": 0.163236,
+      "permanent_water_overlap_ha": 1055.320897,
+      "flooded_cropland_ha": 38588.776936,
+      "flooded_pct_total_cropland": 21.178174,
+      "flooded_pct_observed_cropland": 21.178193
+    },
+    {
+      "event_id": 4459,
+      "district": "Maulvibazar",
+      "total_cropland_ha": 110914.725782,
+      "observed_cropland_ha": 110861.220584,
+      "unobserved_cropland_ha": 53.505197,
+      "permanent_water_overlap_ha": 159.312229,
+      "flooded_cropland_ha": 18228.931168,
+      "flooded_pct_total_cropland": 16.435087,
+      "flooded_pct_observed_cropland": 16.443019
+    },
+    {
+      "event_id": 4459,
+      "district": "Netrakona",
+      "total_cropland_ha": 200242.910897,
+      "observed_cropland_ha": 200220.434111,
+      "unobserved_cropland_ha": 22.476786,
+      "permanent_water_overlap_ha": 214.831475,
+      "flooded_cropland_ha": 26794.659735,
+      "flooded_pct_total_cropland": 13.381078,
+      "flooded_pct_observed_cropland": 13.38258
+    },
+    {
+      "event_id": 4459,
+      "district": "Sunamganj",
+      "total_cropland_ha": 209671.403905,
+      "observed_cropland_ha": 209597.261001,
+      "unobserved_cropland_ha": 74.142904,
+      "permanent_water_overlap_ha": 727.237634,
+      "flooded_cropland_ha": 108901.419761,
+      "flooded_pct_total_cropland": 51.93909,
+      "flooded_pct_observed_cropland": 51.957463
+    },
+    {
+      "event_id": 4459,
+      "district": "Sylhet",
+      "total_cropland_ha": 202411.845062,
+      "observed_cropland_ha": 202140.508583,
+      "unobserved_cropland_ha": 271.336479,
+      "permanent_water_overlap_ha": 1153.93664,
+      "flooded_cropland_ha": 89734.475753,
+      "flooded_pct_total_cropland": 44.332621,
+      "flooded_pct_observed_cropland": 44.392129
+    },
+    {
+      "event_id": 4508,
+      "district": "Brahamanbaria",
+      "total_cropland_ha": 133601.751856,
+      "observed_cropland_ha": 133601.514943,
+      "unobserved_cropland_ha": 0.236913,
+      "permanent_water_overlap_ha": 428.255754,
+      "flooded_cropland_ha": 52632.825207,
+      "flooded_pct_total_cropland": 39.395311,
+      "flooded_pct_observed_cropland": 39.395381
+    },
+    {
+      "event_id": 4508,
+      "district": "Habiganj",
+      "total_cropland_ha": 171958.676433,
+      "observed_cropland_ha": 171949.834354,
+      "unobserved_cropland_ha": 8.84208,
+      "permanent_water_overlap_ha": 136.878765,
+      "flooded_cropland_ha": 40805.174836,
+      "flooded_pct_total_cropland": 23.72964,
+      "flooded_pct_observed_cropland": 23.73086
+    },
+    {
+      "event_id": 4508,
+      "district": "Kishoreganj",
+      "total_cropland_ha": 182210.123252,
+      "observed_cropland_ha": 182209.960015,
+      "unobserved_cropland_ha": 0.163236,
+      "permanent_water_overlap_ha": 1055.320897,
+      "flooded_cropland_ha": 112865.195585,
+      "flooded_pct_total_cropland": 61.94233,
+      "flooded_pct_observed_cropland": 61.942385
+    },
+    {
+      "event_id": 4508,
+      "district": "Maulvibazar",
+      "total_cropland_ha": 110914.725782,
+      "observed_cropland_ha": 110861.220584,
+      "unobserved_cropland_ha": 53.505197,
+      "permanent_water_overlap_ha": 159.312229,
+      "flooded_cropland_ha": 23560.807497,
+      "flooded_pct_total_cropland": 21.242272,
+      "flooded_pct_observed_cropland": 21.252524
+    },
+    {
+      "event_id": 4508,
+      "district": "Netrakona",
+      "total_cropland_ha": 200242.910897,
+      "observed_cropland_ha": 200220.434111,
+      "unobserved_cropland_ha": 22.476786,
+      "permanent_water_overlap_ha": 214.831475,
+      "flooded_cropland_ha": 73375.101374,
+      "flooded_pct_total_cropland": 36.643046,
+      "flooded_pct_observed_cropland": 36.647159
+    },
+    {
+      "event_id": 4508,
+      "district": "Sunamganj",
+      "total_cropland_ha": 209671.403905,
+      "observed_cropland_ha": 209597.261001,
+      "unobserved_cropland_ha": 74.142904,
+      "permanent_water_overlap_ha": 727.237634,
+      "flooded_cropland_ha": 132835.76538,
+      "flooded_pct_total_cropland": 63.35426,
+      "flooded_pct_observed_cropland": 63.37667
+    },
+    {
+      "event_id": 4508,
+      "district": "Sylhet",
+      "total_cropland_ha": 202411.845062,
+      "observed_cropland_ha": 202140.508583,
+      "unobserved_cropland_ha": 271.336479,
+      "permanent_water_overlap_ha": 1153.93664,
+      "flooded_cropland_ha": 79868.719017,
+      "flooded_pct_total_cropland": 39.45852,
+      "flooded_pct_observed_cropland": 39.511486
+    }
+  ],
+  "methodology": {
+    "flood_source": "Global Flood Database MODIS Events V1",
+    "cropland_source": "ESA WorldCover 2021, class 40",
+    "analysis_type": "Historical flood exposure",
+    "metric": "Estimated flooded cropland hectares",
+    "limitations": [
+      "Not flood forecasting",
+      "Not verified crop damage",
+      "2021 cropland used as proxy for historical events",
+      "GFD spatial resolution approximately 250 m",
+      "Event-window detections may occur after SAR acquisition"
+    ]
+  }
+}

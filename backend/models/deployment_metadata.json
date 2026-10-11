@@ -1,0 +1,56 @@
+{
+  "project": "HaorShield",
+  "task": "Retrospective historical flood classification",
+  "feature_names": [
+    "VV_pre",
+    "VH_pre",
+    "VV_during",
+    "VH_during",
+    "VV_change",
+    "VH_change",
+    "rain_1d_mm",
+    "rain_3d_mm",
+    "rain_7d_mm",
+    "rain_30d_mm",
+    "temperature_24h_c",
+    "soil_moisture_24h",
+    "elevation_m",
+    "slope_deg"
+  ],
+  "feature_count": 14,
+  "training_samples": 6000,
+  "class_mapping": {
+    "0": "MODIS flood not detected",
+    "1": "MODIS flood detected"
+  },
+  "threshold": 0.5,
+  "random_forest": {
+    "file": "haorshield_random_forest.joblib",
+    "n_estimators": 400,
+    "min_samples_leaf": 2,
+    "random_state": 42,
+    "note": "Deployment configuration; may differ from evaluated RF baseline"
+  },
+  "attention_model": {
+    "file": "haorshield_attention_c6.keras",
+    "preprocessor_file": "haorshield_attention_preprocessors.joblib",
+    "hyperparameters": {
+      "id": "C6",
+      "lr": 0.0005,
+      "dropout": 0.2,
+      "l2": 0.001,
+      "width": 24,
+      "batch": 32
+    },
+    "selected_epochs": 56,
+    "seed": 42,
+    "parameters": 2710
+  },
+  "evaluation_note": "Previously reported LOEO results come from held-out-event experiments. These final models were trained on all 6000 records and have no independent test evaluation.",
+  "limitations": [
+    "Only three historical flood events",
+    "Retrospective classification, not advance flood forecasting",
+    "Negative labels mean flood not detected, not confirmed dry",
+    "Balanced dataset does not reflect real-world flood prevalence"
+  ]
+}
