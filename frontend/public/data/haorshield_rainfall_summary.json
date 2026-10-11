@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-11T22:55:14.359924+06:00",
+  "generated_at": "2026-10-12T00:14:51.715565+06:00",
   "source": "Open-Meteo forecast API",
   "method": "10 km spatial rainfall-screening grid",
-  "disclaimer": "Rainfall-based screening only. Not a validated flood forecast, flood probability, or predicted inundation area.",
+  "disclaimer": "Rainfall screening only. Not a validated flood forecast, probability or inundation estimate.",
   "total_cells": 306,
   "successful_cells": 306,
   "failed_cells": 0,
@@ -91,6 +91,5 @@
         }
       }
     }
-  },
-  "district_names_corrected_at": "2026-10-11T23:18:34.553040+06:00"
+  }
 }
