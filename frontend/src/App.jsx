@@ -1,7 +1,12 @@
+import FloodRiskChecker from "./FloodRiskChecker.jsx";
+import RainfallRiskMap from "./RainfallRiskMap.jsx";
+import LiveWeather from "./LiveWeather.jsx";
 import Classification from "./Classification.jsx";
 import FloodMap from "./FloodMap.jsx";
 import React, { useEffect, useState } from "react";
 import {
+  CloudSun,
+  CloudRain,
   LayoutDashboard,
   Map,
   Sprout,
@@ -23,6 +28,9 @@ import {
 } from "recharts";
 
 const NAV = [
+  { id: "checker", label: "Check My Risk", icon: ShieldCheck },
+  { id: "rainfall-risk", label: "Rainfall Risk Map", icon: CloudRain },
+  { id: "weather", label: "Live Weather", icon: CloudSun },
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "map", label: "Flood Map", icon: Map },
   { id: "agriculture", label: "Agriculture", icon: Sprout },
@@ -45,7 +53,7 @@ function StatCard({ title, value, subtitle }) {
 }
 
 export default function App() {
-  const [page, setPage] = useState("overview");
+  const [page, setPage] = useState("checker");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -148,7 +156,7 @@ export default function App() {
                 {NAV.find((item) => item.id === page)?.label}
               </h2>
               <p className="text-xs text-slate-500">
-                Historical flood and agricultural exposure analysis
+                Live weather and flood intelligence for northeastern Bangladesh
               </p>
             </div>
           </div>
@@ -163,6 +171,14 @@ export default function App() {
           )}
 
           {!data && !error && <p>Loading dashboard data...</p>}
+
+          {page === "checker" && (
+            <FloodRiskChecker
+              onOpenMap={() => setPage("rainfall-risk")}
+            />
+          )}
+          {page === "weather" && <LiveWeather />}
+          {page === "rainfall-risk" && <RainfallRiskMap />}
 
           {data && page === "overview" && (
             <>
