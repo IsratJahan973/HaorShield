@@ -1,0 +1,95 @@
+{
+  "generated_at": "2026-10-11T22:55:14.359924+06:00",
+  "source": "Open-Meteo forecast API",
+  "method": "10 km spatial rainfall-screening grid",
+  "disclaimer": "Rainfall-based screening only. Not a validated flood forecast, flood probability, or predicted inundation area.",
+  "total_cells": 306,
+  "successful_cells": 306,
+  "failed_cells": 0,
+  "windows": {
+    "24": {
+      "total_area_by_category_km2": {
+        "Low Forecast Rainfall": 19528.39
+      },
+      "districts": {
+        "District 1": {
+          "Low Forecast Rainfall": 1913.64
+        },
+        "District 2": {
+          "Low Forecast Rainfall": 2557.44
+        },
+        "District 3": {
+          "Low Forecast Rainfall": 2789.83
+        },
+        "District 4": {
+          "Low Forecast Rainfall": 2590.07
+        },
+        "District 5": {
+          "Low Forecast Rainfall": 2553.63
+        },
+        "District 6": {
+          "Low Forecast Rainfall": 3649.67
+        },
+        "District 7": {
+          "Low Forecast Rainfall": 3474.1
+        }
+      }
+    },
+    "48": {
+      "total_area_by_category_km2": {
+        "Low Forecast Rainfall": 19528.39
+      },
+      "districts": {
+        "District 1": {
+          "Low Forecast Rainfall": 1913.64
+        },
+        "District 2": {
+          "Low Forecast Rainfall": 2557.44
+        },
+        "District 3": {
+          "Low Forecast Rainfall": 2789.83
+        },
+        "District 4": {
+          "Low Forecast Rainfall": 2590.07
+        },
+        "District 5": {
+          "Low Forecast Rainfall": 2553.63
+        },
+        "District 6": {
+          "Low Forecast Rainfall": 3649.67
+        },
+        "District 7": {
+          "Low Forecast Rainfall": 3474.1
+        }
+      }
+    },
+    "72": {
+      "total_area_by_category_km2": {
+        "Low Forecast Rainfall": 19528.39
+      },
+      "districts": {
+        "District 1": {
+          "Low Forecast Rainfall": 1913.64
+        },
+        "District 2": {
+          "Low Forecast Rainfall": 2557.44
+        },
+        "District 3": {
+          "Low Forecast Rainfall": 2789.83
+        },
+        "District 4": {
+          "Low Forecast Rainfall": 2590.07
+        },
+        "District 5": {
+          "Low Forecast Rainfall": 2553.63
+        },
+        "District 6": {
+          "Low Forecast Rainfall": 3649.67
+        },
+        "District 7": {
+          "Low Forecast Rainfall": 3474.1
+        }
+      }
+    }
+  }
+}
