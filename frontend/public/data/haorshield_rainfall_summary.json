@@ -12,25 +12,25 @@
         "Low Forecast Rainfall": 19528.39
       },
       "districts": {
-        "District 1": {
+        "Brahmanbaria": {
           "Low Forecast Rainfall": 1913.64
         },
-        "District 2": {
+        "Kishoreganj": {
           "Low Forecast Rainfall": 2557.44
         },
-        "District 3": {
+        "Netrakona": {
           "Low Forecast Rainfall": 2789.83
         },
-        "District 4": {
+        "Habiganj": {
           "Low Forecast Rainfall": 2590.07
         },
-        "District 5": {
+        "Moulvibazar": {
           "Low Forecast Rainfall": 2553.63
         },
-        "District 6": {
+        "Sunamganj": {
           "Low Forecast Rainfall": 3649.67
         },
-        "District 7": {
+        "Sylhet": {
           "Low Forecast Rainfall": 3474.1
         }
       }
@@ -40,25 +40,25 @@
         "Low Forecast Rainfall": 19528.39
       },
       "districts": {
-        "District 1": {
+        "Brahmanbaria": {
           "Low Forecast Rainfall": 1913.64
         },
-        "District 2": {
+        "Kishoreganj": {
           "Low Forecast Rainfall": 2557.44
         },
-        "District 3": {
+        "Netrakona": {
           "Low Forecast Rainfall": 2789.83
         },
-        "District 4": {
+        "Habiganj": {
           "Low Forecast Rainfall": 2590.07
         },
-        "District 5": {
+        "Moulvibazar": {
           "Low Forecast Rainfall": 2553.63
         },
-        "District 6": {
+        "Sunamganj": {
           "Low Forecast Rainfall": 3649.67
         },
-        "District 7": {
+        "Sylhet": {
           "Low Forecast Rainfall": 3474.1
         }
       }
@@ -68,28 +68,29 @@
         "Low Forecast Rainfall": 19528.39
       },
       "districts": {
-        "District 1": {
+        "Brahmanbaria": {
           "Low Forecast Rainfall": 1913.64
         },
-        "District 2": {
+        "Kishoreganj": {
           "Low Forecast Rainfall": 2557.44
         },
-        "District 3": {
+        "Netrakona": {
           "Low Forecast Rainfall": 2789.83
         },
-        "District 4": {
+        "Habiganj": {
           "Low Forecast Rainfall": 2590.07
         },
-        "District 5": {
+        "Moulvibazar": {
           "Low Forecast Rainfall": 2553.63
         },
-        "District 6": {
+        "Sunamganj": {
           "Low Forecast Rainfall": 3649.67
         },
-        "District 7": {
+        "Sylhet": {
           "Low Forecast Rainfall": 3474.1
         }
       }
     }
-  }
+  },
+  "district_names_corrected_at": "2026-10-11T23:18:34.553040+06:00"
 }
