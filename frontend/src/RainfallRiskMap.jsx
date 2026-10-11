@@ -246,7 +246,7 @@ export default function RainfallRiskMap() {
 
             <div className="h-[450px] rounded-xl overflow-hidden">
               <MapContainer
-                center={[24.65, 91.25]}
+                center={[24.65, 91.05]}
                 zoom={8}
                 style={{height:"100%", width:"100%"}}
               >
@@ -319,7 +319,7 @@ export default function RainfallRiskMap() {
             Resolution: approximately 10 km screening grid.
             Areas are clipped geographic cell areas.
             Forecast values are not flood probabilities.
-            This static map does not automatically refresh.
+            Forecast data is scheduled to refresh every six hours through GitHub Actions; updates may be delayed.
           </p>
         </>
       )}
