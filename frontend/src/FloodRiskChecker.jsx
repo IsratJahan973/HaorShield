@@ -41,8 +41,59 @@ function category(mm) {
     background: "bg-amber-50", level: "Moderate Rainfall Alert"
   };
   return {
-    label: "Low Forecast Rainfall", color: "text-emerald-700",
-    background: "bg-emerald-50", level: "Low Rainfall Alert"
+    label: "Low Forecast Rainfall", color: "text-slate-700",
+    background: "bg-slate-100", level: "Low Rainfall Alert"
+  };
+}
+
+
+function rainfallGuidance(mm) {
+  if (mm >= 100) {
+    return {
+      heading: "Very heavy rainfall — heightened awareness",
+      message: "Very heavy forecast rainfall may increase local flooding concerns, especially in low-lying areas.",
+      actions: [
+        "Monitor official flood and weather bulletins.",
+        "Avoid flooded roads and fast-moving water.",
+        "Prepare essential documents, medicines and emergency supplies.",
+        "Follow local authority instructions if warnings are issued."
+      ]
+    };
+  }
+
+  if (mm >= 50) {
+    return {
+      heading: "Heavy rainfall — prepare and monitor",
+      message: "Heavy forecast rainfall may cause waterlogging and increase concern in vulnerable locations.",
+      actions: [
+        "Check official weather and river-level updates.",
+        "Keep important belongings above floor level where appropriate.",
+        "Avoid crossing waterlogged roads without knowing the depth.",
+        "Check local emergency contact information."
+      ]
+    };
+  }
+
+  if (mm >= 20) {
+    return {
+      heading: "Moderate rainfall — stay informed",
+      message: "Moderate forecast rainfall warrants attention to local drainage and changing conditions.",
+      actions: [
+        "Follow local forecasts and official advisories.",
+        "Be cautious near canals, rivers and low-lying roads.",
+        "Plan outdoor travel with possible rainfall in mind."
+      ]
+    };
+  }
+
+  return {
+    heading: "Low forecast rainfall — continue monitoring",
+    message: "Low local rainfall does not rule out river flooding, upstream rainfall effects or existing inundation.",
+    actions: [
+      "Continue checking official flood and river-level bulletins.",
+      "Watch for changes in upstream conditions.",
+      "Do not interpret this screening result as a flood-safety clearance."
+    ]
   };
 }
 
@@ -588,7 +639,30 @@ export default function FloodRiskChecker({ onOpenMap }) {
             </div>
           </div>
 
-          <div className="bg-white border rounded-2xl p-6 space-y-3">
+          
+            <div className="rounded-2xl border border-slate-200 bg-white p-6">
+              <h3 className="text-lg font-bold text-slate-900 mb-2">
+                {rainfallGuidance(result.rainfall).heading}
+              </h3>
+              <p className="text-sm text-slate-700 mb-3">
+                {rainfallGuidance(result.rainfall).message}
+              </p>
+              <p className="font-semibold text-slate-900 mb-2">
+                Recommended precautions
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-sm text-slate-700">
+                {rainfallGuidance(result.rainfall).actions.map((action, i) => (
+                  <li key={i}>{action}</li>
+                ))}
+              </ul>
+              <p className="mt-4 text-xs text-slate-500">
+                General preparedness guidance only. Follow official
+                Bangladesh Meteorological Department and Flood
+                Forecasting and Warning Centre advisories.
+              </p>
+            </div>
+
+<div className="bg-white border rounded-2xl p-6 space-y-3">
             <h3 className="text-lg font-bold">
               Flood Risk & Potential Land Exposure
             </h3>
