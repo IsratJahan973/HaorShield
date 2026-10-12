@@ -97,6 +97,101 @@ function rainfallGuidance(mm) {
   };
 }
 
+
+function HistoricalAgriculturalExposure({ district }) {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    fetch("/data/haorshield_agricultural_context.json")
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Agricultural data unavailable");
+        }
+        return response.json();
+      })
+      .then(setData)
+      .catch(() => setError(true));
+  }, []);
+
+  if (error) {
+    return (
+      <div className="rounded-2xl border bg-white p-6">
+        Historical agricultural information is temporarily unavailable.
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="rounded-2xl border bg-white p-6">
+        Loading historical agricultural information...
+      </div>
+    );
+  }
+
+  const records = data.districts?.[district] || [];
+
+  if (!records.length) {
+    return (
+      <div className="rounded-2xl border bg-white p-6">
+        No historical agricultural records for this district.
+      </div>
+    );
+  }
+
+  const format = number =>
+    Number(number).toLocaleString("en-US", {
+      maximumFractionDigits: 1
+    });
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-6">
+      <h3 className="text-lg font-bold text-slate-900">
+        Historical Agricultural Exposure — {district}
+      </h3>
+
+      <p className="mt-2 text-sm text-slate-600">
+        Estimated mapped cropland overlapping historical
+        MODIS-detected flooding. These are past flood events,
+        not predictions for your selected forecast date.
+      </p>
+
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-slate-100">
+            <tr>
+              <th className="p-3">Historical event</th>
+              <th className="p-3">Flooded cropland (ha)</th>
+              <th className="p-3">Exposure (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {records.map(event => (
+              <tr key={event.event_id} className="border-b">
+                <td className="p-3">{event.event_label}</td>
+                <td className="p-3">
+                  {format(event.historically_flooded_cropland_ha)}
+                </td>
+                <td className="p-3">
+                  {format(event.historical_exposure_pct)}%
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="mt-4 text-xs text-slate-500">
+        Sources: Global Flood Database MODIS Events V1 and
+        ESA WorldCover 2021 cropland (class 40).
+        The 2021 cropland layer is used as a proxy for earlier
+        events. Estimates are not verified crop damage.
+      </p>
+    </section>
+  );
+}
+
 export default function FloodRiskChecker({ onOpenMap }) {
   const [district, setDistrict] = useState("Sunamganj");
   const [date, setDate] = useState(localDate());
@@ -684,6 +779,11 @@ export default function FloodRiskChecker({ onOpenMap }) {
               be assessed.
             </p>
           </div>
+
+
+          <HistoricalAgriculturalExposure
+            district={result.supportedDistrict}
+          />
 
           <button
             onClick={onOpenMap}
