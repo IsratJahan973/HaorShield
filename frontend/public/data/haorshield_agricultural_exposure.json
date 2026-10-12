@@ -1,0 +1,325 @@
+{
+  "title": "HaorShield Agricultural Exposure",
+  "forecast_generated_at": "2026-10-12T00:04:33.425207+06:00",
+  "cropland_source": "ESA WorldCover 2021",
+  "historical_events": [
+    4382,
+    4459,
+    4508
+  ],
+  "districts": {
+    "Brahmanbaria": {
+      "mapped_cropland_ha": 133601.75,
+      "historical_mean_exposed_ha": 36379.23,
+      "historical_min_exposed_ha": 209.94,
+      "historical_max_exposed_ha": 56294.93,
+      "historical_events": [
+        {
+          "event_id": 4382,
+          "event_label": "2016 Jul-Aug",
+          "mapped_cropland_ha": 133601.75,
+          "historically_flooded_cropland_ha": 56294.93,
+          "historical_exposure_pct": 42.14
+        },
+        {
+          "event_id": 4459,
+          "event_label": "2017 Mar-Apr",
+          "mapped_cropland_ha": 133601.75,
+          "historically_flooded_cropland_ha": 209.94,
+          "historical_exposure_pct": 0.16
+        },
+        {
+          "event_id": 4508,
+          "event_label": "2017 Aug",
+          "mapped_cropland_ha": 133601.75,
+          "historically_flooded_cropland_ha": 52632.83,
+          "historical_exposure_pct": 39.4
+        }
+      ],
+      "forecast_screening": {
+        "24": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "48": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "72": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        }
+      },
+      "predicted_flooded_cropland_ha": null
+    },
+    "Habiganj": {
+      "mapped_cropland_ha": 171958.68,
+      "historical_mean_exposed_ha": 29976.06,
+      "historical_min_exposed_ha": 8817.99,
+      "historical_max_exposed_ha": 40805.17,
+      "historical_events": [
+        {
+          "event_id": 4382,
+          "event_label": "2016 Jul-Aug",
+          "mapped_cropland_ha": 171958.68,
+          "historically_flooded_cropland_ha": 40305.02,
+          "historical_exposure_pct": 23.44
+        },
+        {
+          "event_id": 4459,
+          "event_label": "2017 Mar-Apr",
+          "mapped_cropland_ha": 171958.68,
+          "historically_flooded_cropland_ha": 8817.99,
+          "historical_exposure_pct": 5.13
+        },
+        {
+          "event_id": 4508,
+          "event_label": "2017 Aug",
+          "mapped_cropland_ha": 171958.68,
+          "historically_flooded_cropland_ha": 40805.17,
+          "historical_exposure_pct": 23.73
+        }
+      ],
+      "forecast_screening": {
+        "24": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "48": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "72": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        }
+      },
+      "predicted_flooded_cropland_ha": null
+    },
+    "Kishoreganj": {
+      "mapped_cropland_ha": 182210.12,
+      "historical_mean_exposed_ha": 89128.78,
+      "historical_min_exposed_ha": 38588.78,
+      "historical_max_exposed_ha": 115932.37,
+      "historical_events": [
+        {
+          "event_id": 4382,
+          "event_label": "2016 Jul-Aug",
+          "mapped_cropland_ha": 182210.12,
+          "historically_flooded_cropland_ha": 115932.37,
+          "historical_exposure_pct": 63.63
+        },
+        {
+          "event_id": 4459,
+          "event_label": "2017 Mar-Apr",
+          "mapped_cropland_ha": 182210.12,
+          "historically_flooded_cropland_ha": 38588.78,
+          "historical_exposure_pct": 21.18
+        },
+        {
+          "event_id": 4508,
+          "event_label": "2017 Aug",
+          "mapped_cropland_ha": 182210.12,
+          "historically_flooded_cropland_ha": 112865.2,
+          "historical_exposure_pct": 61.94
+        }
+      ],
+      "forecast_screening": {
+        "24": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "48": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "72": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        }
+      },
+      "predicted_flooded_cropland_ha": null
+    },
+    "Moulvibazar": {
+      "mapped_cropland_ha": 110914.73,
+      "historical_mean_exposed_ha": 18333.39,
+      "historical_min_exposed_ha": 13210.44,
+      "historical_max_exposed_ha": 23560.81,
+      "historical_events": [
+        {
+          "event_id": 4382,
+          "event_label": "2016 Jul-Aug",
+          "mapped_cropland_ha": 110914.73,
+          "historically_flooded_cropland_ha": 13210.44,
+          "historical_exposure_pct": 11.91
+        },
+        {
+          "event_id": 4459,
+          "event_label": "2017 Mar-Apr",
+          "mapped_cropland_ha": 110914.73,
+          "historically_flooded_cropland_ha": 18228.93,
+          "historical_exposure_pct": 16.44
+        },
+        {
+          "event_id": 4508,
+          "event_label": "2017 Aug",
+          "mapped_cropland_ha": 110914.73,
+          "historically_flooded_cropland_ha": 23560.81,
+          "historical_exposure_pct": 21.24
+        }
+      ],
+      "forecast_screening": {
+        "24": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "48": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "72": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        }
+      },
+      "predicted_flooded_cropland_ha": null
+    },
+    "Netrakona": {
+      "mapped_cropland_ha": 200242.91,
+      "historical_mean_exposed_ha": 62929.26,
+      "historical_min_exposed_ha": 26794.66,
+      "historical_max_exposed_ha": 88618.03,
+      "historical_events": [
+        {
+          "event_id": 4382,
+          "event_label": "2016 Jul-Aug",
+          "mapped_cropland_ha": 200242.91,
+          "historically_flooded_cropland_ha": 88618.03,
+          "historical_exposure_pct": 44.26
+        },
+        {
+          "event_id": 4459,
+          "event_label": "2017 Mar-Apr",
+          "mapped_cropland_ha": 200242.91,
+          "historically_flooded_cropland_ha": 26794.66,
+          "historical_exposure_pct": 13.38
+        },
+        {
+          "event_id": 4508,
+          "event_label": "2017 Aug",
+          "mapped_cropland_ha": 200242.91,
+          "historically_flooded_cropland_ha": 73375.1,
+          "historical_exposure_pct": 36.64
+        }
+      ],
+      "forecast_screening": {
+        "24": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "48": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "72": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        }
+      },
+      "predicted_flooded_cropland_ha": null
+    },
+    "Sunamganj": {
+      "mapped_cropland_ha": 209671.4,
+      "historical_mean_exposed_ha": 129401.56,
+      "historical_min_exposed_ha": 108901.42,
+      "historical_max_exposed_ha": 146467.5,
+      "historical_events": [
+        {
+          "event_id": 4382,
+          "event_label": "2016 Jul-Aug",
+          "mapped_cropland_ha": 209671.4,
+          "historically_flooded_cropland_ha": 146467.5,
+          "historical_exposure_pct": 69.86
+        },
+        {
+          "event_id": 4459,
+          "event_label": "2017 Mar-Apr",
+          "mapped_cropland_ha": 209671.4,
+          "historically_flooded_cropland_ha": 108901.42,
+          "historical_exposure_pct": 51.94
+        },
+        {
+          "event_id": 4508,
+          "event_label": "2017 Aug",
+          "mapped_cropland_ha": 209671.4,
+          "historically_flooded_cropland_ha": 132835.77,
+          "historical_exposure_pct": 63.35
+        }
+      ],
+      "forecast_screening": {
+        "24": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "48": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "72": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        }
+      },
+      "predicted_flooded_cropland_ha": null
+    },
+    "Sylhet": {
+      "mapped_cropland_ha": 202411.85,
+      "historical_mean_exposed_ha": 77947.67,
+      "historical_min_exposed_ha": 64239.81,
+      "historical_max_exposed_ha": 89734.48,
+      "historical_events": [
+        {
+          "event_id": 4382,
+          "event_label": "2016 Jul-Aug",
+          "mapped_cropland_ha": 202411.85,
+          "historically_flooded_cropland_ha": 64239.81,
+          "historical_exposure_pct": 31.74
+        },
+        {
+          "event_id": 4459,
+          "event_label": "2017 Mar-Apr",
+          "mapped_cropland_ha": 202411.85,
+          "historically_flooded_cropland_ha": 89734.48,
+          "historical_exposure_pct": 44.33
+        },
+        {
+          "event_id": 4508,
+          "event_label": "2017 Aug",
+          "mapped_cropland_ha": 202411.85,
+          "historically_flooded_cropland_ha": 79868.72,
+          "historical_exposure_pct": 39.46
+        }
+      ],
+      "forecast_screening": {
+        "24": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "48": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        },
+        "72": {
+          "elevated_cells": 0,
+          "screened_area_km2": 0.0
+        }
+      },
+      "predicted_flooded_cropland_ha": null
+    }
+  },
+  "interpretation": {
+    "historical_exposure": "Satellite-observed historical flood overlap with the 2021 cropland baseline.",
+    "forecast_screening": "Geographic rainfall and historical-susceptibility screening. Not predicted inundation.",
+    "future_cropland_exposure": "Not yet available as a validated estimate."
+  }
+}
