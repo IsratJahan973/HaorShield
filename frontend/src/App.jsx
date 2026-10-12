@@ -1,5 +1,6 @@
 import FloodRiskChecker from "./FloodRiskChecker.jsx";
 import RainfallRiskMap from "./RainfallRiskMap.jsx";
+import FloodExposureMap from "./FloodExposureMap.jsx";
 import LiveWeather from "./LiveWeather.jsx";
 import Classification from "./Classification.jsx";
 import FloodMap from "./FloodMap.jsx";
@@ -30,6 +31,7 @@ import {
 const NAV = [
   { id: "checker", label: "Check My Risk", icon: ShieldCheck },
   { id: "rainfall-risk", label: "Rainfall Risk Map", icon: CloudRain },
+  { id: "flood-exposure", label: "Flood Exposure", icon: Map },
   { id: "weather", label: "Live Weather", icon: CloudSun },
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "map", label: "Flood Map", icon: Map },
@@ -179,6 +181,7 @@ export default function App() {
           )}
           {page === "weather" && <LiveWeather />}
           {page === "rainfall-risk" && <RainfallRiskMap />}
+          {page === "flood-exposure" && <FloodExposureMap />}
 
           {data && page === "overview" && (
             <>
