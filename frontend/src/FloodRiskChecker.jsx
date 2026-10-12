@@ -53,6 +53,14 @@ export default function FloodRiskChecker({ onOpenMap }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [geo, setGeo] = useState(null);
+  const [districtBoundaries, setDistrictBoundaries] = useState(null);
+  const [locationMode, setLocationMode] = useState("district");
+  const [searchText, setSearchText] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [gpsLocation, setGpsLocation] = useState(null);
+  const [locationError, setLocationError] = useState("");
 
   useEffect(() => {
     fetch("/data/haorshield_rainfall_risk.geojson")
@@ -61,14 +69,181 @@ export default function FloodRiskChecker({ onOpenMap }) {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    fetch("/data/haorshield_districts.geojson")
+      .then(r => {
+        if (!r.ok) throw new Error("District boundaries unavailable");
+        return r.json();
+      })
+      .then(setDistrictBoundaries)
+      .catch(() => setDistrictBoundaries(null));
+  }, []);
+
+  function pointInRing(lon, lat, ring) {
+    let inside = false;
+
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i][0], yi = ring[i][1];
+      const xj = ring[j][0], yj = ring[j][1];
+
+      if ((yi > lat) !== (yj > lat) &&
+          lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) {
+        inside = !inside;
+      }
+    }
+
+    return inside;
+  }
+
+  function pointInPolygon(lon, lat, polygon) {
+    if (!polygon.length || !pointInRing(lon, lat, polygon[0])) {
+      return false;
+    }
+
+    return !polygon.slice(1).some(
+      hole => pointInRing(lon, lat, hole)
+    );
+  }
+
+  function findSupportedDistrict(lat, lon) {
+    if (!districtBoundaries?.features?.length) {
+      throw new Error(
+        "District boundary data is not ready. Please retry."
+      );
+    }
+
+    for (const feature of districtBoundaries.features) {
+      const geometry = feature.geometry;
+      if (!geometry) continue;
+
+      const polygons = geometry.type === "Polygon"
+        ? [geometry.coordinates]
+        : geometry.type === "MultiPolygon"
+          ? geometry.coordinates
+          : [];
+
+      if (polygons.some(polygon =>
+        pointInPolygon(lon, lat, polygon)
+      )) {
+        const name = feature.properties?.ADM2_NAME || "";
+        return name === "Brahamanbaria"
+          ? "Brahmanbaria"
+          : name === "Maulvibazar"
+            ? "Moulvibazar"
+            : name;
+      }
+    }
+
+    return null;
+  }
+
+  async function searchLocations() {
+    const query = searchText.trim();
+    if (query.length < 2) {
+      setLocationError("Enter at least two characters.");
+      return;
+    }
+
+    setSearching(true);
+    setLocationError("");
+    setSearchResults([]);
+    setSelectedPlace(null);
+
+    try {
+      const url = new URL(
+        "https://geocoding-api.open-meteo.com/v1/search"
+      );
+      url.searchParams.set("name", query);
+      url.searchParams.set("count", "20");
+      url.searchParams.set("language", "en");
+      url.searchParams.set("countryCode", "BD");
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Location search failed.");
+
+      const data = await response.json();
+      const matches = (data.results || []).filter(place =>
+        place.country_code === "BD"
+      );
+
+      setSearchResults(matches);
+
+      if (!matches.length) {
+        setLocationError(
+          "No matching locations found. Try another spelling or nearby town."
+        );
+      }
+    } catch (e) {
+      setLocationError(e.message || "Unable to search locations.");
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  function useGPS() {
+    setLocationError("");
+
+    if (!navigator.geolocation) {
+      setLocationError("GPS is not supported by this browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        setGpsLocation({
+          name: "My GPS Location",
+          lat: position.coords.latitude,
+          lon: position.coords.longitude
+        });
+      },
+      () => setLocationError(
+        "Unable to access GPS. Check browser location permissions."
+      ),
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000
+      }
+    );
+  }
+
+  function getLocation() {
+    if (locationMode === "search") {
+      if (!selectedPlace) {
+        throw new Error("Select a location from the search results.");
+      }
+      return selectedPlace;
+    }
+
+    if (locationMode === "gps") {
+      if (!gpsLocation) {
+        throw new Error("Click Use My GPS Location first.");
+      }
+      return gpsLocation;
+    }
+
+    const selected = DISTRICTS.find(d => d.name === district);
+    if (!selected) throw new Error("Select a district.");
+    return selected;
+  }
+
   async function checkRisk() {
     setLoading(true);
     setError("");
     setResult(null);
 
     try {
-      const selected = DISTRICTS.find(d => d.name === district);
-      if (!selected) throw new Error("Select a district.");
+      const selected = getLocation();
+
+      const supportedDistrict = findSupportedDistrict(
+        selected.lat, selected.lon
+      );
+
+      if (!supportedDistrict) {
+        throw new Error(
+          "This location is outside HaorShield's seven supported districts."
+        );
+      }
 
       const url = new URL("https://api.open-meteo.com/v1/forecast");
       url.searchParams.set("latitude", selected.lat);
@@ -130,7 +305,7 @@ export default function FloodRiskChecker({ onOpenMap }) {
 
         const validSnapshot = age >= 0 && age <= 24 * 3600000;
 
-        if (validSnapshot) {
+        if (validSnapshot && locationMode === "district") {
           const features = geo.features.filter(f =>
             f.properties.district.toLowerCase() ===
             district.toLowerCase()
@@ -147,7 +322,12 @@ export default function FloodRiskChecker({ onOpenMap }) {
       }
 
       setResult({
-        district,
+        district: selected.name,
+        supportedDistrict,
+        coordinates: {
+          lat: selected.lat,
+          lon: selected.lon
+        },
         date,
         rainfall,
         hours: selectedHours.length,
@@ -181,8 +361,119 @@ export default function FloodRiskChecker({ onOpenMap }) {
       </div>
 
       <div className="bg-white border rounded-2xl p-6 space-y-5">
+        <div className="space-y-3">
+          <label className="font-semibold text-sm block">
+            Location selection method
+          </label>
+
+          <div className="flex flex-wrap gap-2">
+            {[
+              ["district", "Select District"],
+              ["search", "Search Location"],
+              ["gps", "Use GPS"]
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setLocationMode(value);
+                  setLocationError("");
+                  setResult(null);
+                }}
+                className={`px-4 py-2 rounded-lg border text-sm font-semibold ${
+                  locationMode === value
+                    ? "bg-sky-800 text-white"
+                    : "bg-white text-slate-700"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {locationMode === "search" && (
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <input
+                  value={searchText}
+                  onChange={e => {
+                    setSearchText(e.target.value);
+                    setSelectedPlace(null);
+                    setSearchResults([]);
+                  }}
+                  placeholder="Search town or upazila"
+                  className="flex-1 min-w-0 border rounded-xl p-3"
+                />
+                <button
+                  type="button"
+                  onClick={searchLocations}
+                  disabled={searching}
+                  className="bg-sky-800 text-white px-4 rounded-xl"
+                >
+                  {searching ? "Searching..." : "Search"}
+                </button>
+              </div>
+
+              {searchResults.length > 0 && (
+                <select
+                  value={selectedPlace
+                    ? `${selectedPlace.lat},${selectedPlace.lon}`
+                    : ""}
+                  onChange={e => {
+                    const match = searchResults.find(p =>
+                      `${p.latitude},${p.longitude}` === e.target.value
+                    );
+                    setSelectedPlace(match ? {
+                      name: match.name +
+                        (match.admin1 ? `, ${match.admin1}` : ""),
+                      lat: match.latitude,
+                      lon: match.longitude
+                    } : null);
+                  }}
+                  className="w-full border rounded-xl p-3"
+                >
+                  <option value="">Select a matching location</option>
+                  {searchResults.map((place, i) => (
+                    <option
+                      key={i}
+                      value={`${place.latitude},${place.longitude}`}
+                    >
+                      {place.name}
+                      {place.admin2 ? `, ${place.admin2}` : ""}
+                      {place.admin1 ? `, ${place.admin1}` : ""}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          )}
+
+          {locationMode === "gps" && (
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={useGPS}
+                className="bg-sky-800 text-white rounded-xl px-4 py-3"
+              >
+                Use My GPS Location
+              </button>
+              {gpsLocation && (
+                <p className="text-sm text-emerald-700">
+                  GPS location received:
+                  {" "}{gpsLocation.lat.toFixed(4)},
+                  {" "}{gpsLocation.lon.toFixed(4)}
+                </p>
+              )}
+            </div>
+          )}
+
+          {locationError && (
+            <p className="text-sm text-red-700">{locationError}</p>
+          )}
+        </div>
+
         <div className="grid md:grid-cols-2 gap-4">
-          <div>
+          {locationMode === "district" && <div>
             <label className="font-semibold text-sm block mb-2">
               <MapPin size={16} className="inline mr-2"/>
               Your location
@@ -199,7 +490,7 @@ export default function FloodRiskChecker({ onOpenMap }) {
             <p className="text-xs text-slate-500 mt-2">
               Currently uses district-center weather coordinates.
             </p>
-          </div>
+          </div>}
 
           <div>
             <label className="font-semibold text-sm block mb-2">
@@ -258,6 +549,17 @@ export default function FloodRiskChecker({ onOpenMap }) {
               This is not a flood-safety clearance or
               a measured flood probability.
             </p>
+          </div>
+
+          <div className="bg-white border rounded-xl p-4 text-sm">
+            <strong>Forecast location:</strong> {result.district}
+            <span className="text-slate-500">
+              {" "}— {result.supportedDistrict} District
+            </span>
+            <span className="text-slate-500">
+              {" "}({result.coordinates.lat.toFixed(4)},
+              {" "}{result.coordinates.lon.toFixed(4)})
+            </span>
           </div>
 
           <div className="grid sm:grid-cols-3 gap-4">
