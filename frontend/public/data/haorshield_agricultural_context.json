@@ -1,0 +1,175 @@
+{
+  "title": "Historical Agricultural Flood Exposure",
+  "data_type": "historical_observation",
+  "cropland_source": "ESA WorldCover 2021, class 40",
+  "flood_source": "Global Flood Database MODIS Events V1",
+  "districts": {
+    "Brahmanbaria": [
+      {
+        "event_id": 4382,
+        "event_label": "2016 Jul-Aug",
+        "mapped_cropland_ha": 133601.75,
+        "historically_flooded_cropland_ha": 56294.93,
+        "historical_exposure_pct": 42.14
+      },
+      {
+        "event_id": 4459,
+        "event_label": "2017 Mar-Apr",
+        "mapped_cropland_ha": 133601.75,
+        "historically_flooded_cropland_ha": 209.94,
+        "historical_exposure_pct": 0.16
+      },
+      {
+        "event_id": 4508,
+        "event_label": "2017 Aug",
+        "mapped_cropland_ha": 133601.75,
+        "historically_flooded_cropland_ha": 52632.83,
+        "historical_exposure_pct": 39.4
+      }
+    ],
+    "Habiganj": [
+      {
+        "event_id": 4382,
+        "event_label": "2016 Jul-Aug",
+        "mapped_cropland_ha": 171958.68,
+        "historically_flooded_cropland_ha": 40305.02,
+        "historical_exposure_pct": 23.44
+      },
+      {
+        "event_id": 4459,
+        "event_label": "2017 Mar-Apr",
+        "mapped_cropland_ha": 171958.68,
+        "historically_flooded_cropland_ha": 8817.99,
+        "historical_exposure_pct": 5.13
+      },
+      {
+        "event_id": 4508,
+        "event_label": "2017 Aug",
+        "mapped_cropland_ha": 171958.68,
+        "historically_flooded_cropland_ha": 40805.17,
+        "historical_exposure_pct": 23.73
+      }
+    ],
+    "Kishoreganj": [
+      {
+        "event_id": 4382,
+        "event_label": "2016 Jul-Aug",
+        "mapped_cropland_ha": 182210.12,
+        "historically_flooded_cropland_ha": 115932.37,
+        "historical_exposure_pct": 63.63
+      },
+      {
+        "event_id": 4459,
+        "event_label": "2017 Mar-Apr",
+        "mapped_cropland_ha": 182210.12,
+        "historically_flooded_cropland_ha": 38588.78,
+        "historical_exposure_pct": 21.18
+      },
+      {
+        "event_id": 4508,
+        "event_label": "2017 Aug",
+        "mapped_cropland_ha": 182210.12,
+        "historically_flooded_cropland_ha": 112865.2,
+        "historical_exposure_pct": 61.94
+      }
+    ],
+    "Moulvibazar": [
+      {
+        "event_id": 4382,
+        "event_label": "2016 Jul-Aug",
+        "mapped_cropland_ha": 110914.73,
+        "historically_flooded_cropland_ha": 13210.44,
+        "historical_exposure_pct": 11.91
+      },
+      {
+        "event_id": 4459,
+        "event_label": "2017 Mar-Apr",
+        "mapped_cropland_ha": 110914.73,
+        "historically_flooded_cropland_ha": 18228.93,
+        "historical_exposure_pct": 16.44
+      },
+      {
+        "event_id": 4508,
+        "event_label": "2017 Aug",
+        "mapped_cropland_ha": 110914.73,
+        "historically_flooded_cropland_ha": 23560.81,
+        "historical_exposure_pct": 21.24
+      }
+    ],
+    "Netrakona": [
+      {
+        "event_id": 4382,
+        "event_label": "2016 Jul-Aug",
+        "mapped_cropland_ha": 200242.91,
+        "historically_flooded_cropland_ha": 88618.03,
+        "historical_exposure_pct": 44.26
+      },
+      {
+        "event_id": 4459,
+        "event_label": "2017 Mar-Apr",
+        "mapped_cropland_ha": 200242.91,
+        "historically_flooded_cropland_ha": 26794.66,
+        "historical_exposure_pct": 13.38
+      },
+      {
+        "event_id": 4508,
+        "event_label": "2017 Aug",
+        "mapped_cropland_ha": 200242.91,
+        "historically_flooded_cropland_ha": 73375.1,
+        "historical_exposure_pct": 36.64
+      }
+    ],
+    "Sunamganj": [
+      {
+        "event_id": 4382,
+        "event_label": "2016 Jul-Aug",
+        "mapped_cropland_ha": 209671.4,
+        "historically_flooded_cropland_ha": 146467.5,
+        "historical_exposure_pct": 69.86
+      },
+      {
+        "event_id": 4459,
+        "event_label": "2017 Mar-Apr",
+        "mapped_cropland_ha": 209671.4,
+        "historically_flooded_cropland_ha": 108901.42,
+        "historical_exposure_pct": 51.94
+      },
+      {
+        "event_id": 4508,
+        "event_label": "2017 Aug",
+        "mapped_cropland_ha": 209671.4,
+        "historically_flooded_cropland_ha": 132835.77,
+        "historical_exposure_pct": 63.35
+      }
+    ],
+    "Sylhet": [
+      {
+        "event_id": 4382,
+        "event_label": "2016 Jul-Aug",
+        "mapped_cropland_ha": 202411.85,
+        "historically_flooded_cropland_ha": 64239.81,
+        "historical_exposure_pct": 31.74
+      },
+      {
+        "event_id": 4459,
+        "event_label": "2017 Mar-Apr",
+        "mapped_cropland_ha": 202411.85,
+        "historically_flooded_cropland_ha": 89734.48,
+        "historical_exposure_pct": 44.33
+      },
+      {
+        "event_id": 4508,
+        "event_label": "2017 Aug",
+        "mapped_cropland_ha": 202411.85,
+        "historically_flooded_cropland_ha": 79868.72,
+        "historical_exposure_pct": 39.46
+      }
+    ]
+  },
+  "limitations": [
+    "Historical exposure, not future flood prediction",
+    "Not verified crop damage",
+    "2021 cropland map used as a proxy for older flood events",
+    "Historical MODIS flood mapping has spatial and observation limitations"
+  ]
+}
