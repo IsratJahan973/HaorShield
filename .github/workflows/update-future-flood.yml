@@ -1,0 +1,38 @@
+name: Update Experimental Flood Forecasts
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: haorshield-flood-updates
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "numpy==2.1.3" "pandas==2.3.3" "scikit-learn==1.6.1" "requests==2.34.2" "joblib==1.6.0" pyarrow
+      - name: Update forecast JSON
+        run: python scripts/update_future_flood.py
+      - name: Commit and push updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data/haorshield_experimental_flood_forecasts.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update HaorShield experimental flood forecasts"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
