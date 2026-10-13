@@ -26,11 +26,15 @@ jobs:
           python -m pip install "numpy==2.1.3" "pandas==2.3.3" "scikit-learn==1.6.1" "requests==2.34.2" "joblib==1.6.0" pyarrow
       - name: Update forecast JSON
         run: python scripts/update_future_flood.py
+
+      - name: Update forecast-rainfall experiment
+        run: python scripts/update_forecast_rain_experiment.py
       - name: Commit and push updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add frontend/public/data/haorshield_experimental_flood_forecasts.json
+          git add frontend/public/data/haorshield_future_rain_experimental.json
           if ! git diff --cached --quiet; then
             git commit -m "Update HaorShield experimental flood forecasts"
             git pull --rebase origin main
