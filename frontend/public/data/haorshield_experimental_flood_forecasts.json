@@ -1,0 +1,69 @@
+{
+  "issued_at": "2026-10-13T10:17:04.690116+06:00",
+  "coverage": "Six northeast-region river stations",
+  "forecast_horizons_hours": [
+    24,
+    48,
+    72
+  ],
+  "status": "EXPERIMENTAL_NOT_VALIDATED",
+  "warning": "Experimental future flood-label model scores. NOT validated flood probabilities, inundation forecasts, or official safety warnings.",
+  "future_rainfall_used_as_predictor": false,
+  "predictor_note": "Lagged rainfall and static terrain inputs; upstream grid is an approximate catchment proxy.",
+  "scores": [
+    {
+      "station_id": "SW267",
+      "station": "Sunamganj",
+      "latitude": 25.0658,
+      "longitude": 91.395,
+      "experimental_24h_score_pct": 0.01,
+      "experimental_48h_score_pct": 0.24,
+      "experimental_72h_score_pct": 3.47
+    },
+    {
+      "station_id": "SW174",
+      "station": "Sylhet",
+      "latitude": 24.8949,
+      "longitude": 91.8687,
+      "experimental_24h_score_pct": 0.06,
+      "experimental_48h_score_pct": 1.15,
+      "experimental_72h_score_pct": 3.32
+    },
+    {
+      "station_id": "KU01",
+      "station": "Sherpur (Sylhet)",
+      "latitude": 24.6833,
+      "longitude": 91.8667,
+      "experimental_24h_score_pct": 0.02,
+      "experimental_48h_score_pct": 0.39,
+      "experimental_72h_score_pct": 3.17
+    },
+    {
+      "station_id": "KU02",
+      "station": "Amalshid",
+      "latitude": 24.8167,
+      "longitude": 92.2,
+      "experimental_24h_score_pct": 0.03,
+      "experimental_48h_score_pct": 0.52,
+      "experimental_72h_score_pct": 4.04
+    },
+    {
+      "station_id": "NM01",
+      "station": "Durgapur (Netrakona)",
+      "latitude": 25.15,
+      "longitude": 90.7333,
+      "experimental_24h_score_pct": 0.01,
+      "experimental_48h_score_pct": 0.2,
+      "experimental_72h_score_pct": 3.1
+    },
+    {
+      "station_id": "ME02",
+      "station": "Bhairab Bazar",
+      "latitude": 24.05,
+      "longitude": 90.9833,
+      "experimental_24h_score_pct": 0.33,
+      "experimental_48h_score_pct": 1.02,
+      "experimental_72h_score_pct": 3.73
+    }
+  ]
+}
