@@ -1,3 +1,4 @@
+import ExperimentalFloodForecast from "./ExperimentalFloodForecast.jsx";
 import FloodRiskChecker from "./FloodRiskChecker.jsx";
 import RainfallRiskMap from "./RainfallRiskMap.jsx";
 import FloodExposureMap from "./FloodExposureMap.jsx";
@@ -33,7 +34,6 @@ const NAV = [
   { id: "rainfall-risk", label: "Rainfall Risk Map", icon: CloudRain },
   { id: "flood-exposure", label: "Flood Exposure", icon: Map },
   { id: "weather", label: "Live Weather", icon: CloudSun },
-  { id: "agriculture", label: "Agriculture", icon: Sprout },
   { id: "model", label: "Classification", icon: BrainCircuit }
 ];
 
@@ -115,7 +115,7 @@ export default function App() {
       </nav>
 
       <div className="px-6 mt-8 text-xs text-slate-400">
-        Historical flood classification
+        Flood and rainfall research
         <br />
         Northeastern Bangladesh
       </div>
@@ -173,9 +173,12 @@ export default function App() {
           {!data && !error && <p>Loading dashboard data...</p>}
 
           {page === "checker" && (
-            <FloodRiskChecker
+            <>
+<FloodRiskChecker
               onOpenMap={() => setPage("rainfall-risk")}
             />
+<ExperimentalFloodForecast />
+</>
           )}
           {page === "weather" && <LiveWeather />}
           {page === "rainfall-risk" && <RainfallRiskMap />}

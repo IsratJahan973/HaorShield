@@ -781,9 +781,7 @@ export default function FloodRiskChecker({ onOpenMap }) {
           </div>
 
 
-          <HistoricalAgriculturalExposure
-            district={result.supportedDistrict}
-          />
+          
 
           <button
             onClick={onOpenMap}
