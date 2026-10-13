@@ -24,8 +24,8 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install "numpy==2.1.3" "pandas==2.3.3" "scikit-learn==1.6.1" "requests==2.34.2" "joblib==1.6.0" pyarrow
-      - name: Update forecast JSON
-        run: python scripts/update_future_flood.py
+            - name: Update forecast JSON
+            run: echo "Legacy rainfall-only model preserved as fallback; skipping its API requests."
 
       - name: Update forecast-rainfall experiment
         run: python scripts/update_forecast_rain_experiment.py
