@@ -1,273 +1,242 @@
 
-import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import React, { useEffect, useState } from "react";
 import {
-  MapPin, CloudRain, Thermometer, Droplets,
-  Wind, RefreshCw, AlertCircle
+  CloudSun, CloudRain, Thermometer, Droplets,
+  Wind, Clock, AlertTriangle
 } from "lucide-react";
 
-const DISTRICTS = [
-  { name: "Brahmanbaria", lat: 23.96, lon: 91.11 },
-  { name: "Habiganj", lat: 24.38, lon: 91.42 },
-  { name: "Kishoreganj", lat: 24.44, lon: 90.78 },
-  { name: "Moulvibazar", lat: 24.48, lon: 91.77 },
-  { name: "Netrakona", lat: 24.88, lon: 90.73 },
-  { name: "Sunamganj", lat: 25.07, lon: 91.40 },
-  { name: "Sylhet", lat: 24.89, lon: 91.87 }
-];
+const HOURS = [24, 48, 72];
 
-function WeatherCard({ title, value, subtitle, Icon }) {
+function formatNumber(value, suffix = "") {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+    return "Unavailable";
+  }
+  return `${Number(value).toLocaleString("en-BD", {
+    maximumFractionDigits: 1
+  })}${suffix}`;
+}
+
+function WeatherCard({ icon: Icon, label, value, detail }) {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+    <div className="rounded-2xl bg-white border border-slate-200 p-5 shadow-sm">
       <div className="flex items-center gap-2 text-slate-500 text-sm">
-        <Icon size={18} />
-        <span>{title}</span>
+        <Icon size={17} />
+        <span>{label}</span>
       </div>
-      <div className="text-2xl font-bold text-slate-900 mt-3">
-        {value}
-      </div>
-      {subtitle && (
-        <p className="text-xs text-slate-500 mt-2">{subtitle}</p>
-      )}
+      <p className="text-2xl font-bold text-slate-900 mt-3">{value}</p>
+      {detail && <p className="text-xs text-slate-500 mt-2">{detail}</p>}
     </div>
   );
 }
 
 export default function LiveWeather() {
-  const [selected, setSelected] = useState("Sunamganj");
-  const [weather, setWeather] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState(null);
+  const [district, setDistrict] = useState("Sunamganj");
+  const [hours, setHours] = useState(72);
   const [error, setError] = useState("");
 
-  const location = DISTRICTS.find(d => d.name === selected);
+  useEffect(() => {
+    const controller = new AbortController();
 
-  async function loadWeather() {
-    setLoading(true);
-    setError("");
-    setWeather(null);
-
-    try {
-      const params = new URLSearchParams({
-        latitude: String(location.lat),
-        longitude: String(location.lon),
-        current:
-          "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m",
-        hourly: "precipitation",
-        forecast_days: "4",
-        timezone: "Asia/Dhaka"
+    fetch(`/data/haorshield_live_weather.json?t=${Date.now()}`, {
+      signal: controller.signal,
+      cache: "no-store"
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Weather data unavailable");
+        return response.json();
+      })
+      .then((payload) => {
+        if (!Array.isArray(payload.districts) || payload.districts.length !== 7) {
+          throw new Error("Incomplete district weather dataset");
+        }
+        setData(payload);
+        setError("");
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") {
+          setError(err.message || "Unable to load weather forecast");
+        }
       });
 
-      const response = await fetch(
-        `https://api.open-meteo.com/v1/forecast?${params}`
-      );
+    return () => controller.abort();
+  }, []);
 
-      if (!response.ok) {
-        throw new Error("Weather service unavailable.");
-      }
-
-      const result = await response.json();
-
-      if (!result.current || !result.hourly) {
-        throw new Error("Incomplete weather response.");
-      }
-
-      const times = result.hourly.time || [];
-      const rainfall = result.hourly.precipitation || [];
-
-      // Select future forecast hours after the current observation time.
-      const currentTime = result.current.time;
-      const firstFutureIndex = times.findIndex(
-        t => t > currentTime
-      );
-
-      if (firstFutureIndex < 0) {
-        throw new Error("Future rainfall forecast unavailable.");
-      }
-
-      const futureRainfall = rainfall
-        .slice(firstFutureIndex, firstFutureIndex + 72)
-        .map(v => Number(v) || 0);
-
-      if (futureRainfall.length < 72) {
-        throw new Error("72-hour rainfall forecast is incomplete.");
-      }
-
-      const sumRain = hours =>
-        futureRainfall
-          .slice(0, hours)
-          .reduce((sum, value) => sum + value, 0);
-
-      setWeather({
-        temperature: result.current.temperature_2m,
-        humidity: result.current.relative_humidity_2m,
-        precipitation: result.current.precipitation,
-        wind: result.current.wind_speed_10m,
-        rain24: sumRain(24),
-        rain48: sumRain(48),
-        rain72: sumRain(72),
-        updated: currentTime
-      });
-
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  if (error) {
+    return (
+      <div className="p-6 bg-white border rounded-2xl text-red-700">
+        Weather unavailable: {error}
+      </div>
+    );
   }
 
-  useEffect(() => {
-    loadWeather();
-  }, [selected]);
+  if (!data) {
+    return <div className="p-6">Loading live weather forecast...</div>;
+  }
 
-  const formatRain = n => `${n.toFixed(1)} mm`;
+  const selected = data.districts.find(
+    (item) => item.district === district
+  ) || data.districts[0];
+
+  const forecast = selected.forecast[`${hours}h`];
+  const observedAt = selected.current.observed_time;
+
+  const issue = new Date(data.issued_at);
+  const ageHours = (Date.now() - issue.getTime()) / 3600000;
+  const stale = !Number.isFinite(ageHours) || ageHours > 12;
+
+  const formatTime = (value) => {
+    if (!value) return "Unknown";
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime())
+      ? value
+      : parsed.toLocaleString("en-BD", {
+          timeZone: "Asia/Dhaka",
+          dateStyle: "medium",
+          timeStyle: "short"
+        });
+  };
 
   return (
-    <div className="space-y-7">
-
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900">
-          Live Weather & Rainfall Monitoring
-        </h2>
-        <p className="text-slate-500 mt-2">
-          Current weather and upcoming rainfall forecasts
-          across seven northeastern districts of Bangladesh.
-        </p>
-      </div>
-
-      <div className="bg-white p-6 rounded-2xl border border-slate-200">
-        <label className="block text-sm font-semibold mb-3">
-          <MapPin size={17} className="inline mr-2" />
-          Select your district
-        </label>
-
-        <select
-          value={selected}
-          onChange={e => setSelected(e.target.value)}
-          className="w-full md:w-96 p-3 border border-slate-300 rounded-xl"
-        >
-          {DISTRICTS.map(d => (
-            <option key={d.name} value={d.name}>
-              {d.name}
-            </option>
-          ))}
-        </select>
-
-        <p className="text-xs text-slate-500 mt-3">
-          Weather is retrieved for an approximate district-center
-          coordinate, not every village within the district.
-        </p>
-      </div>
-
-      {loading && (
-        <div className="bg-cyan-50 p-5 rounded-xl text-cyan-800">
-          <RefreshCw className="inline animate-spin mr-2" size={18} />
-          Loading latest weather information...
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-50 p-5 rounded-xl text-red-700">
-          <AlertCircle className="inline mr-2" size={18} />
-          {error}
-        </div>
-      )}
-
-      {weather && !loading && (
-        <>
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-            <WeatherCard
-              title="Temperature"
-              value={`${weather.temperature} °C`}
-              subtitle="Latest available conditions"
-              Icon={Thermometer}
-            />
-            <WeatherCard
-              title="Humidity"
-              value={`${weather.humidity}%`}
-              subtitle="Relative humidity"
-              Icon={Droplets}
-            />
-            <WeatherCard
-              title="Precipitation"
-              value={`${weather.precipitation} mm`}
-              subtitle="Current reported interval"
-              Icon={CloudRain}
-            />
-            <WeatherCard
-              title="Wind Speed"
-              value={`${weather.wind} km/h`}
-              subtitle="Current wind conditions"
-              Icon={Wind}
-            />
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 p-6">
-            <h3 className="text-lg font-bold mb-5">
-              Forecast Rainfall
-            </h3>
-
-            <div className="grid sm:grid-cols-3 gap-4">
-              {[
-                ["Next 24 Hours", weather.rain24],
-                ["Next 48 Hours", weather.rain48],
-                ["Next 72 Hours", weather.rain72]
-              ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="bg-cyan-50 rounded-xl p-5"
-                >
-                  <p className="text-sm text-slate-600">{label}</p>
-                  <p className="text-2xl font-bold text-cyan-900 mt-2">
-                    {formatRain(value)}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <p className="text-xs text-slate-500 mt-5">
-              Forecast source: Open-Meteo.
-              Weather update: {weather.updated} (Asia/Dhaka).
-              Rainfall totals are cumulative forecast amounts,
-              not flood probabilities.
+    <div className="space-y-6">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6">
+        <div className="flex items-center gap-3">
+          <CloudSun className="text-sky-600" size={28} />
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">
+              Live Weather & Rainfall Forecast
+            </h1>
+            <p className="text-slate-600 text-sm mt-1">
+              Current weather and the next 24–72 hours of forecast rainfall
+              for seven northeastern Bangladesh district centers.
             </p>
           </div>
-        </>
-      )}
+        </div>
 
-      <div className="bg-white p-5 rounded-2xl border border-slate-200">
-        <h3 className="font-bold text-lg mb-4">
-          Selected District Location
-        </h3>
-
-        <div className="h-80 rounded-xl overflow-hidden">
-          <MapContainer
-            key={selected}
-            center={[location.lat, location.lon]}
-            zoom={10}
-            style={{ height: "100%", width: "100%" }}
+        <div className="flex flex-wrap gap-3 mt-6 items-center">
+          <label htmlFor="district-weather" className="text-sm font-semibold">
+            District
+          </label>
+          <select
+            id="district-weather"
+            value={selected.district}
+            onChange={(event) => setDistrict(event.target.value)}
+            className="rounded-xl border border-slate-300 bg-white px-4 py-3"
           >
-            <TileLayer
-              attribution='&copy; OpenStreetMap contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <Marker position={[location.lat, location.lon]}>
-              <Popup>{selected}, Bangladesh</Popup>
-            </Marker>
-          </MapContainer>
+            {data.districts.map((item) => (
+              <option key={item.district} value={item.district}>
+                {item.district}
+              </option>
+            ))}
+          </select>
+
+          <div className="flex flex-wrap gap-2">
+            {HOURS.map((h) => (
+              <button
+                key={h}
+                type="button"
+                onClick={() => setHours(h)}
+                className={`px-4 py-3 rounded-xl border font-semibold ${
+                  hours === h
+                    ? "bg-slate-900 text-white border-slate-900"
+                    : "bg-white text-slate-700 border-slate-300"
+                }`}
+              >
+                {h} hours
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <p className="text-sm text-slate-500 mt-4">
+          <Clock size={14} className="inline mr-1" />
+          Forecast issued: {formatTime(data.issued_at)}
+        </p>
+
+        {stale && (
+          <div
+            role="alert"
+            className="flex gap-2 mt-4 rounded-xl bg-amber-50 border border-amber-300 p-4 text-amber-900 text-sm"
+          >
+            <AlertTriangle size={20} className="shrink-0" />
+            This forecast is more than 12 hours old or its issue time is invalid.
+            Check an updated forecast before making decisions.
+          </div>
+        )}
+      </div>
+
+      <div>
+        <h2 className="text-lg font-bold mb-3">Current conditions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <WeatherCard
+            icon={Thermometer}
+            label="Temperature"
+            value={formatNumber(selected.current.temperature_c, "°C")}
+            detail={`Observation time: ${observedAt}`}
+          />
+          <WeatherCard
+            icon={Droplets}
+            label="Relative humidity"
+            value={formatNumber(
+              selected.current.relative_humidity_pct, "%"
+            )}
+          />
+          <WeatherCard
+            icon={CloudRain}
+            label="Current precipitation"
+            value={formatNumber(selected.current.precipitation_mm, " mm")}
+          />
+          <WeatherCard
+            icon={Wind}
+            label="Wind speed"
+            value={formatNumber(selected.current.wind_speed_kmh, " km/h")}
+          />
         </div>
       </div>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
-        <p className="font-semibold text-amber-900">
-          Weather information is not a flood warning.
-        </p>
-        <p className="text-sm text-amber-800 mt-2">
-          This module displays current weather and forecast rainfall.
-          Flood-risk forecasting and estimated danger-area mapping
-          will be developed separately and require validation.
-        </p>
+      <div>
+        <h2 className="text-lg font-bold mb-3">
+          Next {hours}-hour rainfall forecast
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <WeatherCard
+            icon={CloudRain}
+            label="Total forecast rainfall"
+            value={formatNumber(forecast.rainfall_total_mm, " mm")}
+          />
+          <WeatherCard
+            icon={Droplets}
+            label="Maximum hourly rain chance"
+            value={formatNumber(
+              forecast.max_hourly_precipitation_probability_pct, "%"
+            )}
+            detail="Highest single-hour probability, not the chance of rain at least once."
+          />
+          <WeatherCard
+            icon={CloudRain}
+            label="Peak hourly intensity"
+            value={forecast.rainfall_intensity || "Unavailable"}
+            detail={formatNumber(
+              forecast.maximum_hourly_rainfall_mm, " mm/hour"
+            )}
+          />
+          <WeatherCard
+            icon={Clock}
+            label="Forecast horizon"
+            value={`${hours} hours`}
+            detail="Beginning at the forecast issue window"
+          />
+        </div>
       </div>
 
+      <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-sm text-slate-600">
+        <strong>Source:</strong> Open-Meteo.
+        Rainfall intensity categories are project-defined.
+        Weather forecasts are not flood predictions.
+        Upstream river flooding can occur even with little local rainfall.
+        Always consult official flood warnings.
+      </div>
     </div>
   );
 }
