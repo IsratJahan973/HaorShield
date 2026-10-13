@@ -33,8 +33,6 @@ const NAV = [
   { id: "rainfall-risk", label: "Rainfall Risk Map", icon: CloudRain },
   { id: "flood-exposure", label: "Flood Exposure", icon: Map },
   { id: "weather", label: "Live Weather", icon: CloudSun },
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "map", label: "Flood Map", icon: Map },
   { id: "agriculture", label: "Agriculture", icon: Sprout },
   { id: "model", label: "Classification", icon: BrainCircuit }
 ];
