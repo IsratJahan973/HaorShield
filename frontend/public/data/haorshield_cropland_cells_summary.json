@@ -1,0 +1,48 @@
+{
+  "title": "HaorShield Cropland Geographic Baseline",
+  "data_type": "cropland_landcover_baseline",
+  "landcover_source": "ESA WorldCover 2021 v200",
+  "landcover_class": 40,
+  "method": "Original 10m WorldCover cropland pixels within each of 306 geographic cells; pixel area measured using EPSG:6933.",
+  "cells": 306,
+  "district_count": 7,
+  "total_mapped_cropland_ha": 1210634.39,
+  "districts": {
+    "Brahmanbaria": {
+      "cells": 35,
+      "mapped_cropland_ha": 133577.98
+    },
+    "Habiganj": {
+      "cells": 42,
+      "mapped_cropland_ha": 171849.33
+    },
+    "Kishoreganj": {
+      "cells": 40,
+      "mapped_cropland_ha": 182100.17
+    },
+    "Moulvibazar": {
+      "cells": 45,
+      "mapped_cropland_ha": 110906.2
+    },
+    "Netrakona": {
+      "cells": 42,
+      "mapped_cropland_ha": 200144.3
+    },
+    "Sunamganj": {
+      "cells": 52,
+      "mapped_cropland_ha": 209637.33
+    },
+    "Sylhet": {
+      "cells": 50,
+      "mapped_cropland_ha": 202419.08
+    }
+  },
+  "existing_rainfall_screening": {
+    "available": true,
+    "generated_at": "2026-10-12T00:04:33.425207+06:00",
+    "age_hours": 35.67,
+    "fresh": false
+  },
+  "predicted_flooded_cropland_ha": null,
+  "warning": "Cropland area is not flooded area. No future flood inundation has been validated. Do not infer safety from missing rainfall alerts."
+}
