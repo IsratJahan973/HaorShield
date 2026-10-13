@@ -1,0 +1,235 @@
+{
+  "issued_at": "2026-10-13T09:55:54.541376+06:00",
+  "forecast_start": "2026-10-13T10:00:00+06:00",
+  "forecast_end": "2026-10-16T10:00:00+06:00",
+  "source": "Open-Meteo",
+  "coverage": "Seven district-center coordinates",
+  "precipitation_probability_definition": "Maximum single-hour precipitation probability within the specified horizon; NOT the probability of rain occurring at least once.",
+  "rainfall_intensity_definition": "Project-defined category based on highest forecast hourly rainfall intensity (mm/hour).",
+  "districts": [
+    {
+      "district": "Brahmanbaria",
+      "latitude": 23.96,
+      "longitude": 91.11,
+      "current": {
+        "observed_time": "2026-10-13T09:45",
+        "temperature_c": 31.7,
+        "relative_humidity_pct": 60,
+        "precipitation_mm": 0.0,
+        "wind_speed_kmh": 6.5
+      },
+      "forecast": {
+        "24h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 0.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "48h": {
+          "rainfall_total_mm": 0.3,
+          "max_hourly_precipitation_probability_pct": 9.0,
+          "maximum_hourly_rainfall_mm": 0.3,
+          "rainfall_intensity": "Light"
+        },
+        "72h": {
+          "rainfall_total_mm": 0.9,
+          "max_hourly_precipitation_probability_pct": 18.0,
+          "maximum_hourly_rainfall_mm": 0.3,
+          "rainfall_intensity": "Light"
+        }
+      }
+    },
+    {
+      "district": "Habiganj",
+      "latitude": 24.38,
+      "longitude": 91.42,
+      "current": {
+        "observed_time": "2026-10-13T09:45",
+        "temperature_c": 30.7,
+        "relative_humidity_pct": 67,
+        "precipitation_mm": 0.0,
+        "wind_speed_kmh": 4.4
+      },
+      "forecast": {
+        "24h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 2.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "48h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 9.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "72h": {
+          "rainfall_total_mm": 0.3,
+          "max_hourly_precipitation_probability_pct": 10.0,
+          "maximum_hourly_rainfall_mm": 0.1,
+          "rainfall_intensity": "Light"
+        }
+      }
+    },
+    {
+      "district": "Kishoreganj",
+      "latitude": 24.44,
+      "longitude": 90.78,
+      "current": {
+        "observed_time": "2026-10-13T09:45",
+        "temperature_c": 31.0,
+        "relative_humidity_pct": 62,
+        "precipitation_mm": 0.0,
+        "wind_speed_kmh": 3.2
+      },
+      "forecast": {
+        "24h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 0.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "48h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 7.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "72h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 7.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        }
+      }
+    },
+    {
+      "district": "Moulvibazar",
+      "latitude": 24.48,
+      "longitude": 91.77,
+      "current": {
+        "observed_time": "2026-10-13T09:45",
+        "temperature_c": 30.2,
+        "relative_humidity_pct": 69,
+        "precipitation_mm": 0.0,
+        "wind_speed_kmh": 4.7
+      },
+      "forecast": {
+        "24h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 6.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "48h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 10.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "72h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 15.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        }
+      }
+    },
+    {
+      "district": "Netrakona",
+      "latitude": 24.88,
+      "longitude": 90.73,
+      "current": {
+        "observed_time": "2026-10-13T09:45",
+        "temperature_c": 29.9,
+        "relative_humidity_pct": 75,
+        "precipitation_mm": 0.0,
+        "wind_speed_kmh": 4.1
+      },
+      "forecast": {
+        "24h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 0.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "48h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 2.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "72h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 8.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        }
+      }
+    },
+    {
+      "district": "Sunamganj",
+      "latitude": 25.07,
+      "longitude": 91.4,
+      "current": {
+        "observed_time": "2026-10-13T09:45",
+        "temperature_c": 30.1,
+        "relative_humidity_pct": 67,
+        "precipitation_mm": 0.0,
+        "wind_speed_kmh": 4.5
+      },
+      "forecast": {
+        "24h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 0.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "48h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 4.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "72h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 16.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        }
+      }
+    },
+    {
+      "district": "Sylhet",
+      "latitude": 24.89,
+      "longitude": 91.87,
+      "current": {
+        "observed_time": "2026-10-13T09:45",
+        "temperature_c": 30.1,
+        "relative_humidity_pct": 66,
+        "precipitation_mm": 0.0,
+        "wind_speed_kmh": 3.8
+      },
+      "forecast": {
+        "24h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 0.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "48h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 6.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        },
+        "72h": {
+          "rainfall_total_mm": 0.0,
+          "max_hourly_precipitation_probability_pct": 16.0,
+          "maximum_hourly_rainfall_mm": 0.0,
+          "rainfall_intensity": "None"
+        }
+      }
+    }
+  ]
+}
