@@ -1,3 +1,4 @@
+import HydrologicalExposure from "./HydrologicalExposure";
 
 import React, { useEffect, useMemo, useState } from "react";
 import L from "leaflet";
@@ -106,7 +107,7 @@ function CellMap({ features, hours }) {
   );
 }
 
-export default function FloodExposureMap() {
+function OriginalFloodExposureMap() {
   const [geo, setGeo] = useState(null);
   const [summary, setSummary] = useState(null);
   const [hours, setHours] = useState(72);
@@ -382,5 +383,14 @@ export default function FloodExposureMap() {
         </>
       )}
     </section>
+  );
+}
+
+export default function FloodExposureWithHydrology(props) {
+  return (
+    <>
+      <HydrologicalExposure />
+      <OriginalFloodExposureMap {...props} />
+    </>
   );
 }
