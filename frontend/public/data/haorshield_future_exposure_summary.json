@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-10-14T04:20:17.617107+00:00",
+  "data_type": "forecast_conditioned_historical_exposure_screening",
+  "forecast_start_utc": "2026-10-15",
+  "river_forecast_source": "Copernicus GloFAS v4",
+  "rainfall_forecast_fresh": false,
+  "rainfall_data_issued_at": "2026-10-12T00:04:33.425207+06:00",
+  "historic_flood_events": [
+    4382,
+    4459,
+    4508
+  ],
+  "cell_count": 306,
+  "is_validated_flood_prediction": false,
+  "is_future_inundation_prediction": false,
+  "predicted_flooded_cropland_ha": null,
+  "predicted_flooded_land_ha": null,
+  "geographic_assignment": "Nearest one of six GloFAS reference locations within 120 km; not hydrological catchment routing",
+  "rainfall_thresholds_mm": {
+    "24": {
+      "monitor": 25,
+      "elevated": 50
+    },
+    "48": {
+      "monitor": 40,
+      "elevated": 80
+    },
+    "72": {
+      "monitor": 60,
+      "elevated": 100
+    }
+  },
+  "warning": "Screened land represents historical event-maximum flood footprints in cells with elevated future river-discharge/rainfall signals. Screened cropland is total mapped cropland inside those cells. Neither quantity is predicted flooded hectares.",
+  "horizons": {
+    "24": {
+      "monitor_cells": 0,
+      "elevated_cells": 0,
+      "screened_historical_land_ha": 0.0,
+      "screened_cropland_ha": 0.0,
+      "districts": {}
+    },
+    "48": {
+      "monitor_cells": 0,
+      "elevated_cells": 0,
+      "screened_historical_land_ha": 0.0,
+      "screened_cropland_ha": 0.0,
+      "districts": {}
+    },
+    "72": {
+      "monitor_cells": 0,
+      "elevated_cells": 0,
+      "screened_historical_land_ha": 0.0,
+      "screened_cropland_ha": 0.0,
+      "districts": {}
+    }
+  }
+}
