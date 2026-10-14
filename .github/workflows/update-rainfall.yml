@@ -1,4 +1,3 @@
-
 name: Update HaorShield Rainfall Forecast
 
 on:
@@ -31,8 +30,11 @@ jobs:
 
       - name: Refresh rainfall data
         run: python scripts/update_rainfall.py
+
       - name: Generate spatial cropland screening
         run: python scripts/update_cropland_screening.py
+      - name: Update GloFAS hydrological exposure
+        run: python scripts/update_glofas_exposure.py
 
       - name: Commit updated forecasts
         run: |
@@ -43,6 +45,7 @@ jobs:
           git add frontend/public/data/haorshield_flood_screening.geojson
           git add frontend/public/data/haorshield_flood_screening_summary.json
           git add frontend/public/data/haorshield_cropland_rainfall_screening_summary.json
+          git add frontend/public/data/haorshield_glofas_forecast.json frontend/public/data/haorshield_future_exposure_screening.geojson frontend/public/data/haorshield_future_exposure_summary.json
           if ! git diff --cached --quiet; then
             git commit -m "Auto-update HaorShield rainfall forecasts"
             git push
