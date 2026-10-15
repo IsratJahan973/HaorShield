@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-10-13T10:17:04.690116+06:00",
+  "issued_at": "2026-10-16T03:24:03.769534+06:00",
   "coverage": "Six northeast-region river stations",
   "forecast_horizons_hours": [
     24,
@@ -17,17 +17,17 @@
       "latitude": 25.0658,
       "longitude": 91.395,
       "experimental_24h_score_pct": 0.01,
-      "experimental_48h_score_pct": 0.24,
-      "experimental_72h_score_pct": 3.47
+      "experimental_48h_score_pct": 1.85,
+      "experimental_72h_score_pct": 2.29
     },
     {
       "station_id": "SW174",
       "station": "Sylhet",
       "latitude": 24.8949,
       "longitude": 91.8687,
-      "experimental_24h_score_pct": 0.06,
-      "experimental_48h_score_pct": 1.15,
-      "experimental_72h_score_pct": 3.32
+      "experimental_24h_score_pct": 0.22,
+      "experimental_48h_score_pct": 1.68,
+      "experimental_72h_score_pct": 2.18
     },
     {
       "station_id": "KU01",
@@ -35,17 +35,17 @@
       "latitude": 24.6833,
       "longitude": 91.8667,
       "experimental_24h_score_pct": 0.02,
-      "experimental_48h_score_pct": 0.39,
-      "experimental_72h_score_pct": 3.17
+      "experimental_48h_score_pct": 2.24,
+      "experimental_72h_score_pct": 3.24
     },
     {
       "station_id": "KU02",
       "station": "Amalshid",
       "latitude": 24.8167,
       "longitude": 92.2,
-      "experimental_24h_score_pct": 0.03,
-      "experimental_48h_score_pct": 0.52,
-      "experimental_72h_score_pct": 4.04
+      "experimental_24h_score_pct": 0.41,
+      "experimental_48h_score_pct": 2.82,
+      "experimental_72h_score_pct": 4.46
     },
     {
       "station_id": "NM01",
@@ -53,17 +53,17 @@
       "latitude": 25.15,
       "longitude": 90.7333,
       "experimental_24h_score_pct": 0.01,
-      "experimental_48h_score_pct": 0.2,
-      "experimental_72h_score_pct": 3.1
+      "experimental_48h_score_pct": 1.73,
+      "experimental_72h_score_pct": 2.47
     },
     {
       "station_id": "ME02",
       "station": "Bhairab Bazar",
       "latitude": 24.05,
       "longitude": 90.9833,
-      "experimental_24h_score_pct": 0.33,
-      "experimental_48h_score_pct": 1.02,
-      "experimental_72h_score_pct": 3.73
+      "experimental_24h_score_pct": 2.89,
+      "experimental_48h_score_pct": 5.92,
+      "experimental_72h_score_pct": 8.5
     }
   ]
 }

@@ -1,10 +1,10 @@
 {
-  "issued_at": "2026-10-13T13:20:46.152573+06:00",
-  "target_window_start_local": "2026-10-14",
+  "issued_at": "2026-10-16T03:24:07.865169+06:00",
+  "target_window_start_local": "2026-10-17",
   "target_window_end_local": {
-    "24": "2026-10-15",
-    "48": "2026-10-16",
-    "72": "2026-10-17"
+    "24": "2026-10-18",
+    "48": "2026-10-19",
+    "72": "2026-10-20"
   },
   "forecast_horizons_hours": [
     24,
@@ -37,10 +37,10 @@
       "longitude": 91.8687,
       "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 1.98,
-      "forecast_rain_48h_mm": 0.4,
-      "experimental_48h_score_pct": 2.33,
-      "forecast_rain_72h_mm": 0.7,
-      "experimental_72h_score_pct": 2.2
+      "forecast_rain_48h_mm": 0.0,
+      "experimental_48h_score_pct": 2.32,
+      "forecast_rain_72h_mm": 0.0,
+      "experimental_72h_score_pct": 2.18
     },
     {
       "station_id": "KU01",
@@ -49,9 +49,9 @@
       "longitude": 91.8667,
       "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 2.22,
-      "forecast_rain_48h_mm": 0.1,
+      "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.63,
-      "forecast_rain_72h_mm": 0.1,
+      "forecast_rain_72h_mm": 0.0,
       "experimental_72h_score_pct": 4.75
     },
     {
@@ -61,10 +61,10 @@
       "longitude": 92.2,
       "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 2.27,
-      "forecast_rain_48h_mm": 0.1,
+      "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 3.25,
-      "forecast_rain_72h_mm": 1.8,
-      "experimental_72h_score_pct": 6.9
+      "forecast_rain_72h_mm": 0.0,
+      "experimental_72h_score_pct": 6.77
     },
     {
       "station_id": "NM01",
@@ -72,7 +72,7 @@
       "latitude": 25.15,
       "longitude": 90.7333,
       "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.07,
+      "experimental_24h_score_pct": 2.06,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.52,
       "forecast_rain_72h_mm": 0.0,
@@ -84,11 +84,11 @@
       "latitude": 24.05,
       "longitude": 90.9833,
       "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.38,
+      "experimental_24h_score_pct": 2.39,
       "forecast_rain_48h_mm": 0.0,
-      "experimental_48h_score_pct": 3.21,
+      "experimental_48h_score_pct": 3.23,
       "forecast_rain_72h_mm": 0.0,
-      "experimental_72h_score_pct": 8.41
+      "experimental_72h_score_pct": 8.42
     }
   ]
 }
