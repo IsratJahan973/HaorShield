@@ -17,13 +17,13 @@ const DISTRICTS = [
 // Local district suggestions work immediately, even if the geocoding API is offline.
 // Search suggestions are only an aid; polygon validation still happens on submit.
 const DISTRICT_ALIASES = {
-  Brahmanbaria: ["brahmanbaria", "brahman bariya", "brahmanbaria", "brahmanbariya"],
-  Habiganj: ["habiganj", "hobigonj", "habigonj"],
-  Kishoreganj: ["kishoreganj", "kishorganj", "kishorgonj", "kishoregonj", "kishoreganj"],
-  Moulvibazar: ["moulvibazar", "maulvibazar", "moulvibazaar", "moulovi bazar"],
-  Netrakona: ["netrakona", "netrokona", "netrakona"],
-  Sunamganj: ["sunamganj", "sunamgonj", "sunamganj"],
-  Sylhet: ["sylhet", "silhet", "silet"]
+  Brahmanbaria: ["brahmanbaria", "brahmanbariya", "brahman bariya", "brahmanbaria district", "brahman bari", "brahmonbaria"],
+  Habiganj: ["habiganj", "hobiganj", "hobigonj", "habigonj", "habigunj"],
+  Kishoreganj: ["kishoreganj", "kishoregonj", "kishorganj", "kishorgonj", "kishorganj", "kishoregunj"],
+  Moulvibazar: ["moulvibazar", "moulvi bazar", "maulvibazar", "maulvi bazar", "moulvibazaar", "moulobi bazar"],
+  Netrakona: ["netrakona", "netrokona", "netrokona", "netrokona district"],
+  Sunamganj: ["sunamganj", "sunamgonj", "sunamgunj", "sunamganj district"],
+  Sylhet: ["sylhet", "silhet", "silet", "sylhat"]
 };
 
 function normalizePlace(text) {
@@ -658,6 +658,9 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                   setLocationMode(value);
                   setLocationError("");
                   setResult(null);
+                  setSearchText("");
+                  setSelectedPlace(null);
+                  setSearchResults([]);
                   setShowSuggestions(false);
                 }}
                 className={`px-4 py-2 rounded-lg border text-sm font-semibold ${
@@ -683,7 +686,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                     setShowSuggestions(true);
                     setLocationError("");
                   }}
-                  placeholder="Type 'ki' for Kishoreganj"
+                  placeholder=""
                   autoComplete="off"
                   aria-label="Search a district or town"
                   onFocus={() => setShowSuggestions(true)}
