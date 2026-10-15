@@ -52,7 +52,8 @@ export default function CropEarlyAction({ district, date, rainfallMm, forecastHo
   const [stage, setStage] = useState("unknown");
   const [condition, setCondition] = useState("unknown");
   const t = MESSAGES;
-  const intensity24h = forecastHours > 0 ? rainfallMm * 24 / forecastHours : 0;
+  const rainfallAvailable = forecastHours > 0 && Number.isFinite(rainfallMm);
+  const intensity24h = rainfallAvailable ? rainfallMm * 24 / forecastHours : null;
   const month = Number((date || "").slice(5, 7));
   const season = useMemo(() => {
     if ([3, 4, 5].includes(month)) return "Mar–May: Boro harvesting occurs in some areas";
@@ -63,7 +64,7 @@ export default function CropEarlyAction({ district, date, rainfallMm, forecastHo
 
   const advice = [
     t.monitoring,
-    condition === "river" ? t.river : condition === "wet" ? t.wet : intensity24h >= 50 ? t.heavy : t.low,
+    condition === "river" ? t.river : condition === "wet" ? t.wet : rainfallAvailable ? (intensity24h >= 50 ? t.heavy : t.low) : "No usable rainfall forecast is available for this date. Follow official warnings and check local conditions before making field decisions.",
     t[stage],
     crop === "vegetables" ? t.vegetable : crop.startsWith("rice_") ? t.rice : null
   ].filter(Boolean);
@@ -94,7 +95,7 @@ export default function CropEarlyAction({ district, date, rainfallMm, forecastHo
         </label>
       </div>
       <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-950">
-        <p className="font-semibold">{district} · {date} · {Number(rainfallMm).toFixed(1)} mm / {forecastHours} {t.window}</p>
+        <p className="font-semibold">{district} · {date} · {rainfallAvailable ? `${Number(rainfallMm).toFixed(1)} mm / ${forecastHours} ${t.window}` : "Rainfall forecast unavailable"}</p>
         <p className="mt-1">{t.seasonal}: {season}. {t.seasonalExplanation}</p>
       </div>
       {isOutdated && <p role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">{t.stale}</p>}

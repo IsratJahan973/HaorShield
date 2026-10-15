@@ -710,6 +710,16 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         </div>
       )}
 
+      {!result && (
+        <CropEarlyAction
+          district={district}
+          date={date}
+          rainfallMm={null}
+          forecastHours={0}
+          isOutdated={true}
+        />
+      )}
+
       {result && (
         <div className="space-y-5">
           <div className={`rounded-2xl border p-6 ${result.status.background}`}>
