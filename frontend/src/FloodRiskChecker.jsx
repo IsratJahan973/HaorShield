@@ -14,6 +14,57 @@ const DISTRICTS = [
   { name: "Sylhet", lat: 24.89, lon: 91.87 }
 ];
 
+// Local district suggestions work immediately, even if the geocoding API is offline.
+// Search suggestions are only an aid; polygon validation still happens on submit.
+const DISTRICT_ALIASES = {
+  Brahmanbaria: ["brahmanbaria", "brahman bariya", "brahmanbaria", "brahmanbariya"],
+  Habiganj: ["habiganj", "hobigonj", "habigonj"],
+  Kishoreganj: ["kishoreganj", "kishorganj", "kishorgonj", "kishoregonj", "kishoreganj"],
+  Moulvibazar: ["moulvibazar", "maulvibazar", "moulvibazaar", "moulovi bazar"],
+  Netrakona: ["netrakona", "netrokona", "netrakona"],
+  Sunamganj: ["sunamganj", "sunamgonj", "sunamganj"],
+  Sylhet: ["sylhet", "silhet", "silet"]
+};
+
+function normalizePlace(text) {
+  return String(text || "").toLowerCase().replace(/[^a-z]/g, "");
+}
+
+function editDistance(a, b) {
+  const previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const next = [i];
+    for (let j = 1; j <= b.length; j++) {
+      next[j] = Math.min(next[j - 1] + 1, previous[j] + 1,
+        previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    previous.splice(0, previous.length, ...next);
+  }
+  return previous[b.length];
+}
+
+function districtSuggestions(input) {
+  const q = normalizePlace(input);
+  if (q.length < 2) return [];
+  return DISTRICTS.map(place => {
+    const aliases = DISTRICT_ALIASES[place.name] || [place.name];
+    const score = Math.min(...aliases.map(alias => {
+      const name = normalizePlace(alias);
+      if (name === q) return 0;
+      if (name.startsWith(q)) return 1;
+      if (q.length >= 3 && name.includes(q)) return 2;
+      if (q.length >= 3) {
+        const distance = editDistance(q, name.slice(0, q.length));
+        if (distance <= (q.length >= 6 ? 2 : 1)) return 3 + distance;
+        if (editDistance(q, name) <= 2) return 6;
+      }
+      return 99;
+    }));
+    return { ...place, score };
+  }).filter(p => p.score < 99).sort((a, b) => a.score - b.score)
+    .slice(0, 5);
+}
+
 function localDate(offset = 0) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Dhaka",
@@ -225,6 +276,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [gpsLocation, setGpsLocation] = useState(null);
   const [locationError, setLocationError] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestions = selectedPlace ? [] : districtSuggestions(searchText);
 
   useEffect(() => {
     fetch("/data/haorshield_rainfall_risk.geojson")
@@ -301,6 +354,16 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
     return null;
   }
 
+  function chooseSuggestedDistrict(place) {
+    setSelectedPlace({ name: place.name, lat: place.lat, lon: place.lon });
+    setDistrict(place.name);
+    setSearchText(place.name);
+    setSearchResults([]);
+    setShowSuggestions(false);
+    setLocationError("");
+    setResult(null);
+  }
+
   async function searchLocations() {
     const query = searchText.trim();
     if (query.length < 2) {
@@ -308,37 +371,50 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       return;
     }
 
+    // Keep a supported district match usable without any external service.
+    const localMatches = districtSuggestions(query);
     setSearching(true);
     setLocationError("");
+    setShowSuggestions(false);
     setSearchResults([]);
     setSelectedPlace(null);
 
     try {
-      const url = new URL(
-        "https://geocoding-api.open-meteo.com/v1/search"
-      );
+      const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
       url.searchParams.set("name", query);
-      url.searchParams.set("count", "20");
+      url.searchParams.set("count", "30");
       url.searchParams.set("language", "en");
       url.searchParams.set("countryCode", "BD");
-
       const response = await fetch(url);
-      if (!response.ok) throw new Error("Location search failed.");
-
+      if (!response.ok) throw new Error("Location search service unavailable.");
       const data = await response.json();
-      const matches = (data.results || []).filter(place =>
-        place.country_code === "BD"
-      );
 
-      setSearchResults(matches);
-
-      if (!matches.length) {
-        setLocationError(
-          "No matching locations found. Try another spelling or nearby town."
-        );
+      // Do not offer misleading outside-district names (e.g. Kishoreganj,
+      // Nilphamari). The SAME boundary check is applied again on submit.
+      const supported = (data.results || []).filter(place => {
+        if (place.country_code !== "BD" ||
+            !Number.isFinite(place.latitude) ||
+            !Number.isFinite(place.longitude)) return false;
+        try {
+          return DISTRICTS.some(d => d.name ===
+            findSupportedDistrict(place.latitude, place.longitude));
+        } catch { return false; }
+      });
+      const unique = supported.filter((p, i, all) =>
+        all.findIndex(other => other.latitude === p.latitude &&
+          other.longitude === p.longitude) === i);
+      setSearchResults(unique);
+      if (!unique.length) {
+        setShowSuggestions(true);
+        setLocationError(localMatches.length
+          ? "No additional supported towns found. Choose a suggested district."
+          : "No supported places found. Try a district name or another spelling.");
       }
-    } catch (e) {
-      setLocationError(e.message || "Unable to search locations.");
+    } catch {
+      setShowSuggestions(true);
+      setLocationError(localMatches.length
+        ? "Town search is temporarily unavailable. Choose a district suggestion."
+        : "Town search is temporarily unavailable. Try a supported district name.");
     } finally {
       setSearching(false);
     }
@@ -582,6 +658,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                   setLocationMode(value);
                   setLocationError("");
                   setResult(null);
+                  setShowSuggestions(false);
                 }}
                 className={`px-4 py-2 rounded-lg border text-sm font-semibold ${
                   locationMode === value
@@ -603,8 +680,20 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                     setSearchText(e.target.value);
                     setSelectedPlace(null);
                     setSearchResults([]);
+                    setShowSuggestions(true);
+                    setLocationError("");
                   }}
-                  placeholder="Search town or upazila"
+                  placeholder="Type 'ki' for Kishoreganj"
+                  autoComplete="off"
+                  aria-label="Search a district or town"
+                  onFocus={() => setShowSuggestions(true)}
+                  onKeyDown={e => {
+                    if (e.key === "Escape") setShowSuggestions(false);
+                    if (e.key === "Enter" && suggestions.length) {
+                      e.preventDefault();
+                      chooseSuggestedDistrict(suggestions[0]);
+                    }
+                  }}
                   className="flex-1 min-w-0 border rounded-xl p-3"
                 />
                 <button
@@ -617,6 +706,20 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                 </button>
               </div>
 
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden" role="listbox" aria-label="Suggested supported districts">
+                  <p className="px-3 py-2 text-xs text-slate-500">Suggested supported districts</p>
+                  {suggestions.map(place => (
+                    <button key={place.name} type="button" role="option"
+                      aria-selected={false}
+                      onClick={() => chooseSuggestedDistrict(place)}
+                      className="block w-full text-left px-3 py-3 text-sm border-t hover:bg-sky-50 focus:bg-sky-50">
+                      {place.name} District, Bangladesh
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {searchResults.length > 0 && (
                 <select
                   value={selectedPlace
@@ -626,6 +729,11 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                     const match = searchResults.find(p =>
                       `${p.latitude},${p.longitude}` === e.target.value
                     );
+                    if (match) {
+                      setSearchText(match.name);
+                      setShowSuggestions(false);
+                      setLocationError("");
+                    }
                     setSelectedPlace(match ? {
                       name: match.name +
                         (match.admin1 ? `, ${match.admin1}` : ""),
