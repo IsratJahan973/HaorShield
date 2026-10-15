@@ -16,7 +16,49 @@ const SUMMARY_URL =
   "/data/haorshield_sar_future_summary.json";
 
 const fmt = (v) =>
-  Math.round(Number(v) || 0).toLocaleString("en-BD");
+  Number.isFinite(Number(v)) && v !== null && v !== ""
+    ? Math.round(Number(v)).toLocaleString("en-BD") : "Unavailable";
+
+const EXPECTED_DISTRICTS = new Set([
+  "Brahmanbaria", "Habiganj", "Kishoreganj", "Moulvibazar",
+  "Netrakona", "Sunamganj", "Sylhet"
+]);
+
+// Reject incomplete research datasets instead of making missing values look like zero.
+function validateSpatial(mapData, summaryData) {
+  if (mapData?.type !== "FeatureCollection" ||
+      mapData.features?.length !== 306 ||
+      summaryData?.cells !== 306 ||
+      summaryData?.is_validated_flood_probability !== false ||
+      summaryData?.is_validated_inundation_prediction !== false ||
+      !Number.isFinite(Date.parse(summaryData.generated_at || ""))) {
+    return false;
+  }
+  const seen = new Set();
+  for (const feature of mapData.features) {
+    const p = feature?.properties;
+    if (!p || !EXPECTED_DISTRICTS.has(p.district) ||
+        seen.has(String(p.cell_id)) ||
+        !Number.isFinite(Number(p.cell_area_ha)) || Number(p.cell_area_ha) <= 0 ||
+        !Number.isFinite(Number(p.cropland_ha)) || Number(p.cropland_ha) < 0 ||
+        Number(p.cropland_ha) > Number(p.cell_area_ha) + 0.01) return false;
+    seen.add(String(p.cell_id));
+    for (const h of HORIZONS) {
+      const f = Number(p[`sar_candidate_fraction_${h}h`]);
+      const land = Number(p[`research_land_proxy_ha_${h}h`]);
+      const crop = Number(p[`research_cropland_proxy_ha_${h}h`]);
+      const rain = p[`future_rain_${h}h_mm`];
+      if (!Number.isFinite(f) || f < 0 || f > 1 ||
+          !Number.isFinite(land) || land < 0 ||
+          !Number.isFinite(crop) || crop < 0 ||
+          land > Number(p.cell_area_ha) + 0.01 ||
+          crop > Number(p.cropland_ha) + 0.01 ||
+          rain === null || !Number.isFinite(Number(rain)) || Number(rain) < 0) return false;
+    }
+  }
+  return seen.size === 306 &&
+    new Set(mapData.features.map(f => f.properties.district)).size === 7;
+}
 
 function FitSelected({ features }) {
   const map = useMap();
@@ -66,13 +108,7 @@ export default function FutureSpatialOutlook({ initialDistrict = "All Districts"
         const [mapData, summaryData] =
           await Promise.all([a.json(), b.json()]);
 
-        if (
-          mapData.type !== "FeatureCollection" ||
-          mapData.features?.length !== 306 ||
-          summaryData.cells !== 306 ||
-          summaryData.is_validated_flood_probability !== false ||
-          summaryData.is_validated_inundation_prediction !== false
-        ) {
+        if (!validateSpatial(mapData, summaryData)) {
           throw new Error("Spatial data validation failed.");
         }
 
@@ -235,6 +271,11 @@ export default function FutureSpatialOutlook({ initialDistrict = "All Districts"
           not calibrated flood probabilities.
         </p>
         <p className="mt-2 text-xs text-slate-500">
+          Research data generated: {summary?.generated_at
+            ? new Date(summary.generated_at).toLocaleString("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" }) + " Bangladesh time"
+            : "Unavailable"}
+        </p>
+        <p className="mt-2 text-xs text-slate-500">
           Forecast issue anchor:{" "}
           {summary?.issue_anchor_date_utc || "Unavailable"}
           {" "}UTC
@@ -314,6 +355,7 @@ export default function FutureSpatialOutlook({ initialDistrict = "All Districts"
             <h3 className="font-semibold">Geographic area of concern (illustrative)</h3>
             <p className="mt-1">{fmt(stats.concernCells)} cells meet the project-selected SAR-candidate threshold of 10% or greater.</p>
             <p className="mt-2 font-semibold">Full area of those cells: {stats.concernAreaKm2.toFixed(1)} km² · Mapped cropland within those cells: {fmt(stats.concernCroplandHa)} ha</p>
+            <p className="mt-2">Selected area: {district}; forecast research horizon: {hours} hours. The concern threshold is a screening choice, not an official risk classification.</p>
             <p className="mt-2">These are entire geographic grid-cell areas. They are NOT predicted inundated square kilometres, flooded cropland hectares, verified risk levels or field-level impact. The 10% threshold is illustrative and not calibrated.</p>
           </div>
 
