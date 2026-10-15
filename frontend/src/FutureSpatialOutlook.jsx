@@ -352,11 +352,11 @@ export default function FutureSpatialOutlook({ initialDistrict = "All Districts"
           </div>
 
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-            <h3 className="font-semibold">Geographic area of concern (illustrative)</h3>
-            <p className="mt-1">{fmt(stats.concernCells)} cells meet the project-selected SAR-candidate threshold of 10% or greater.</p>
-            <p className="mt-2 font-semibold">Full area of those cells: {stats.concernAreaKm2.toFixed(1)} km² · Mapped cropland within those cells: {fmt(stats.concernCroplandHa)} ha</p>
-            <p className="mt-2">Selected area: {district}; forecast research horizon: {hours} hours. The concern threshold is a screening choice, not an official risk classification.</p>
-            <p className="mt-2">These are entire geographic grid-cell areas. They are NOT predicted inundated square kilometres, flooded cropland hectares, verified risk levels or field-level impact. The 10% threshold is illustrative and not calibrated.</p>
+            <h3 className="font-semibold">Experimental flagged grid area — not a flood prediction</h3>
+            <p className="mt-1">{fmt(stats.concernCells)} grid cells reach the research-only SAR-candidate threshold of 10% or greater.</p>
+            <p className="mt-2 font-semibold">Combined full area of flagged cells: {stats.concernAreaKm2.toFixed(1)} km² · Mapped cropland inside flagged cells: {fmt(stats.concernCroplandHa)} ha</p>
+            <p className="mt-2">Selected area: {district}; forecast research horizon: {hours} hours. The cutoff is only a research screening rule, not an official flood-risk category.</p>
+            <p className="mt-2">These totals count entire grid cells, not the land expected to flood. Flagged cells can appear even when local rain is low, because this experimental research uses additional inputs and a different time window. Neither the cell area nor its cropland is predicted flooding, verified crop damage, or an official warning. A repeated total across horizons can mean the same cells cross the cutoff each time.</p>
           </div>
 
           <div className="rounded-xl border bg-white p-3">
@@ -403,8 +403,8 @@ export default function FutureSpatialOutlook({ initialDistrict = "All Districts"
                   <th className="p-2">Cells</th>
                   <th className="p-2">Land proxy (ha)</th>
                   <th className="p-2">Cropland proxy (ha)</th>
-                  <th className="p-2">Concern cells (km²)</th>
-                  <th className="p-2">Cropland in concern cells (ha)</th>
+                  <th className="p-2">Flagged grid area (km²)</th>
+                  <th className="p-2">Cropland within flagged cells (ha)</th>
                 </tr>
               </thead>
               <tbody>
