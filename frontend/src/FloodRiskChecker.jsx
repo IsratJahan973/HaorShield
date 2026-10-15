@@ -984,16 +984,23 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
               Not yet estimated for the selected date.
             </p>
             <p className="text-sm text-slate-600">
-              Heavy rainfall may increase concern, but river levels,
-              upstream flows, terrain and drainage must also
-              be assessed.
+              Local rain is only one factor. Upstream rainfall, river conditions,
+              saturated land and drainage may also affect flooding. A low local
+              rainfall forecast does not mean that flooding is impossible.
             </p>
 
             <section className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 space-y-3">
-              <h4 className="font-semibold text-slate-900">Experimental geographic and cropland screening</h4>
+              <h4 className="font-semibold text-slate-900">Experimental map screening — not a flood warning</h4>
               <p className="text-sm text-slate-700">
-                These are separate 24/48/72-hour research scenarios for {result.supportedDistrict}.
-                They are <strong>not predictions for {result.date}</strong> and are not verified flooded areas.
+                Your selected date's rainfall result and this experimental map are different assessments.
+                The rainfall result describes local forecast rain on {result.date}. The map flags grid cells
+                for additional research attention using separate 24/48/72-hour model scenarios for {result.supportedDistrict}.
+                <strong> Flagged cells are not predicted flooded areas or verified flood-risk zones.</strong>
+              </p>
+              <p className="text-sm text-slate-700">
+                Little or no local forecast rain does not rule out flooding caused by upstream rainfall,
+                rivers or drainage. However, a flagged experimental grid cell does not establish that
+                flooding is likely, either. Check official FFWC/BMD warnings for current decisions.
               </p>
               {scenarioError && <p role="alert" className="text-sm text-amber-900">{scenarioError}</p>}
               {!scenarioData && !scenarioError && <p className="text-sm">Loading experimental scenario information...</p>}
@@ -1007,7 +1014,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                   <p className="text-xs text-slate-700">Research data issue date: {summary.issue_anchor_date_utc || "Unknown"} (UTC). {stale ? "This research snapshot is outdated or its timestamp is uncertain. Do not use it for current decisions." : "This is a recent experimental snapshot, not an official flood warning."}</p>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[450px] text-left text-sm">
-                      <thead><tr className="border-b border-emerald-200"><th className="py-2 pr-3">Research horizon</th><th className="py-2 pr-3">Concern area (km²)</th><th className="py-2">Cropland in concern cells (ha)</th></tr></thead>
+                      <thead><tr className="border-b border-emerald-200"><th className="py-2 pr-3">Research horizon</th><th className="py-2 pr-3">Flagged grid area (km²)</th><th className="py-2">Cropland in flagged cells (ha)</th></tr></thead>
                       <tbody>{[24,48,72].map(h => {
                         const valid = cells.every(f => {
                           const p = f.properties;
@@ -1025,7 +1032,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                       })}</tbody>
                     </table>
                   </div>
-                  <p className="text-xs text-slate-700">The full area of each cell passing an illustrative 10% SAR-candidate cutoff is counted. These figures do not measure inundation, confirmed crop damage or a calibrated risk level.</p>
+                  <p className="text-xs text-slate-700">The full area of every grid cell passing the research-only 10% SAR-candidate cutoff is counted. The same cells may pass this cutoff at several horizons, producing repeated totals. This does not mean the model forecasts unchanged flooding. The areas do not measure predicted inundation, crop damage or validated flood risk.</p>
                 </>;
               })()}
             </section>
