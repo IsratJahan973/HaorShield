@@ -850,6 +850,24 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
 
       {result && (
         <div className="space-y-5">
+          <section aria-label="Your flood awareness summary" className="rounded-2xl bg-white border border-sky-200 p-5 md:p-7 space-y-3">
+            <h3 className="text-xl md:text-2xl font-bold text-slate-900">Your area's outlook — {result.supportedDistrict}</h3>
+            <p className="text-sm text-slate-600">Weather for {result.date} · {result.hours} forecast hours available</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl bg-sky-50 p-4">
+                <p className="text-sm font-semibold text-slate-700">Rain expected</p>
+                <p className="text-2xl font-bold text-slate-900">{result.rainfall.toFixed(1)} mm</p>
+                <p className="text-sm text-slate-600">{result.status.label} rainfall · {result.maxHourlyPrecipChance === null ? "Rain chance unavailable" : `${result.maxHourlyPrecipChance.toFixed(0)}% highest hourly rain chance`}</p>
+              </div>
+              <div className="rounded-xl bg-amber-50 p-4">
+                <p className="text-sm font-semibold text-slate-700">Will flooding happen?</p>
+                <p className="text-lg font-bold text-amber-950">Not yet possible to predict reliably</p>
+                <p className="text-sm text-slate-700">Little local rain does not rule out river or upstream flooding. Follow official warnings.</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-700">Below you can check your weather, choose your crop for practical precautions, and view separately labelled experimental map screening. The map is not a prediction of flooded land.</p>
+            {result.currentOutdated && <p className="text-sm font-semibold text-amber-900" role="alert">Current weather observations may be outdated.</p>}
+          </section>
           <div className={`rounded-2xl border p-6 ${result.status.background}`}>
             <div className="flex items-center gap-3">
               {result.rainRate24 < 10
@@ -863,13 +881,11 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                 </h3>
               </div>
             </div>
-            <p className="text-sm mt-3">
-              Screening bands use a 24-hour-equivalent rainfall rate:
-              No Rain (0), Light (&gt;0–&lt;10), Moderate (10–&lt;50),
-              Heavy (50–&lt;100), Very Heavy (100+ mm/24h).
-              These are project-defined weather categories, not official flood-risk levels.
-              This is not a flood-safety clearance or a measured flood probability.
-            </p>
+            <p className="text-sm mt-3">This describes forecast rain, not flood safety or flood probability.</p>
+            <details className="mt-3 text-sm text-slate-700">
+              <summary className="cursor-pointer font-semibold">How is rainfall classified?</summary>
+              <p className="mt-2">Our project uses 24-hour-equivalent rainfall bands: No Rain (0 mm), Light (above 0 and below 10 mm), Moderate (10–49.9 mm), Heavy (50–99.9 mm), and Very Heavy (100 mm or more). These are not official flood-risk categories.</p>
+            </details>
           </div>
 
           <div className="bg-white border rounded-xl p-4 text-sm">
@@ -920,7 +936,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
               </p>
             </div>
             <div className="bg-white border rounded-xl p-5">
-              <p className="text-slate-500 text-sm">Chance of precipitation</p>
+              <p className="text-slate-500 text-sm">Highest hourly chance of rain</p>
               <p className="text-2xl font-bold mt-2">
                 {result.maxHourlyPrecipChance === null ? "Unavailable" : `${result.maxHourlyPrecipChance.toFixed(0)}%`}
               </p>
@@ -969,7 +985,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
 
 <div className="bg-white border rounded-2xl p-6 space-y-3">
             <h3 className="text-lg font-bold">
-              Flood Risk & Potential Land Exposure
+              Flooding and agricultural land — what we know
             </h3>
             <p className="text-sm">
               <strong>Flood probability:</strong> Not available —
@@ -980,8 +996,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
               rainfall alone cannot establish inundation boundaries.
             </p>
             <p className="text-sm">
-              <strong>Potential agricultural exposure:</strong>
-              Not yet estimated for the selected date.
+              <strong>Expected flooded cropland:</strong>
+              Not known for this date. The research screening below only shows mapped cropland within flagged grid cells.
             </p>
             <p className="text-sm text-slate-600">
               Local rain is only one factor. Upstream rainfall, river conditions,
@@ -992,7 +1008,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
             <section className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 space-y-3">
               <h4 className="font-semibold text-slate-900">Experimental map screening — not a flood warning</h4>
               <p className="text-sm text-slate-700">
-                Your selected date's rainfall result and this experimental map are different assessments.
+                This separate research map highlights grid cells to investigate, not areas expected to flood. Your selected date's rainfall result and this experimental map are different assessments.
                 The rainfall result describes local forecast rain on {result.date}. The map flags grid cells
                 for additional research attention using separate 24/48/72-hour model scenarios for {result.supportedDistrict}.
                 <strong> Flagged cells are not predicted flooded areas or verified flood-risk zones.</strong>
