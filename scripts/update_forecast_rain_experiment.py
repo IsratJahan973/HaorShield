@@ -24,13 +24,105 @@ NOW = datetime.now(TZ)
 TODAY = NOW.date()
 START = TODAY + timedelta(days=1)
 
+
+# Respect temporary API limits; never fabricate missing rainfall.
+def resilient_get(url, params, timeout=65):
+    import time
+    from email.utils import parsedate_to_datetime
+    from datetime import datetime, timezone
+
+    waits = [30, 90, 150]
+
+    for attempt in range(len(waits) + 1):
+        try:
+            response = requests.get(
+                url,
+                params=params,
+                timeout=timeout
+            )
+
+            if response.status_code == 429:
+                if attempt == len(waits):
+                    response.raise_for_status()
+
+                delay = waits[attempt]
+                retry_after = response.headers.get("Retry-After")
+
+                if retry_after:
+                    try:
+                        delay = max(
+                            delay, float(retry_after)
+                        )
+                    except ValueError:
+                        try:
+                            until = parsedate_to_datetime(
+                                retry_after
+                            )
+                            if until.tzinfo is None:
+                                until = until.replace(
+                                    tzinfo=timezone.utc
+                                )
+                            delay = max(
+                                delay,
+                                (until - datetime.now(
+                                    timezone.utc
+                                )).total_seconds()
+                            )
+                        except Exception:
+                            pass
+
+                delay = min(max(delay, 1), 180)
+                print(
+                    f"Open-Meteo rate limited; "
+                    f"retrying in {delay:.0f}s "
+                    f"(attempt {attempt + 1}/3)",
+                    flush=True
+                )
+                time.sleep(delay)
+                continue
+
+            # Retry temporary server errors, not all 4xx errors.
+            if response.status_code in (
+                500, 502, 503, 504
+            ) and attempt < len(waits):
+                delay = waits[attempt]
+                print(
+                    f"Open-Meteo HTTP {response.status_code}; "
+                    f"retrying in {delay}s",
+                    flush=True
+                )
+                time.sleep(delay)
+                continue
+
+            response.raise_for_status()
+            return response
+
+        except (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.Timeout
+        ):
+            if attempt == len(waits):
+                raise
+
+            delay = waits[attempt]
+            print(
+                f"Temporary connection problem; "
+                f"retrying in {delay}s",
+                flush=True
+            )
+            time.sleep(delay)
+
+    raise RuntimeError("Open-Meteo retries exhausted")
+
+
 def request_weather(lat, lon, params):
-    response = requests.get(
+    response = resilient_get(
         "https://api.open-meteo.com/v1/forecast",
         params={"latitude": lat, "longitude": lon, **params},
         timeout=65
     )
-    response.raise_for_status()
+    import time
+    time.sleep(2)
     return response.json()
 
 def process(item):
@@ -125,7 +217,7 @@ def process(item):
 
     return output
 
-with ThreadPoolExecutor(max_workers=3) as pool:
+with ThreadPoolExecutor(max_workers=1) as pool:
     records = list(pool.map(process, STATIONS.items()))
 
 assert len(records) == 6

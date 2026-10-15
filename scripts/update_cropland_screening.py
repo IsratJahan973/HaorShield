@@ -259,6 +259,10 @@ for h in (24, 48, 72):
 
 # Only write after all spatial and numerical checks pass.
 save("haorshield_flood_screening.geojson", spatial)
+# This exact 306-cell layer is consumed by both the agricultural
+# guidance panel and the Flood Exposure page. Keep it synchronized
+# with the summary on EVERY successful rainfall refresh.
+save("haorshield_cropland_rainfall_screening.geojson", spatial)
 save("haorshield_flood_screening_summary.json", screen_summary)
 save("haorshield_cropland_rainfall_screening_summary.json", crop_summary)
 
