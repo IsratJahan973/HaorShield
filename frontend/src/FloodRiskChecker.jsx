@@ -267,7 +267,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
-  const [geo, setGeo] = useState(null);
+  const [scenarioData, setScenarioData] = useState(null);
+  const [scenarioError, setScenarioError] = useState("");
   const [districtBoundaries, setDistrictBoundaries] = useState(null);
   const [locationMode, setLocationMode] = useState("district");
   const [searchText, setSearchText] = useState("");
@@ -280,10 +281,25 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   const suggestions = selectedPlace ? [] : districtSuggestions(searchText);
 
   useEffect(() => {
-    fetch("/data/haorshield_rainfall_risk.geojson")
-      .then(r => r.ok ? r.json() : Promise.reject())
-      .then(setGeo)
-      .catch(() => {});
+    const controller = new AbortController();
+    Promise.all([
+      fetch("/data/haorshield_sar_future_candidates.geojson", { signal: controller.signal }),
+      fetch("/data/haorshield_sar_future_summary.json", { signal: controller.signal })
+    ]).then(async ([mapResponse, summaryResponse]) => {
+      if (!mapResponse.ok || !summaryResponse.ok) throw new Error("Experimental map data unavailable.");
+      const [map, summary] = await Promise.all([mapResponse.json(), summaryResponse.json()]);
+      if (map?.type !== "FeatureCollection" || map.features?.length !== 306 ||
+          summary?.cells !== 306 || !Number.isFinite(Date.parse(summary.generated_at || "")) ||
+          summary.is_validated_flood_probability !== false ||
+          summary.is_validated_inundation_prediction !== false) {
+        throw new Error("Experimental map data could not be verified.");
+      }
+      setScenarioData({ map, summary });
+      setScenarioError("");
+    }).catch(err => {
+      if (err.name !== "AbortError") setScenarioError(err.message);
+    });
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -569,31 +585,9 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         weatherAgeHours < -1 || weatherAgeHours > 6;
       const rainRate24 = rainfall * 24 / selectedHours.length;
 
-      // Spatial exposure proxy uses only matching district cells.
-      // A forecast snapshot can be stale; never use it silently.
-      let spatial = null;
-
-      if (geo?.metadata?.generated_at) {
-        const age = Date.now() -
-          new Date(geo.metadata.generated_at).getTime();
-
-        const validSnapshot = age >= 0 && age <= 24 * 3600000;
-
-        if (validSnapshot && locationMode === "district") {
-          const features = geo.features.filter(f =>
-            f.properties.district.toLowerCase() ===
-            district.toLowerCase()
-          );
-
-          // The spatial file contains cumulative 24/48/72h
-          // windows, not daily forecasts. We therefore do not
-          // incorrectly use it to calculate selected-date area.
-          spatial = {
-            cells: features.length,
-            areaAvailable: false
-          };
-        }
-      }
+      // Research scenarios have an independent issue anchor, not the selected
+      // weather calendar day. Never present them as that day's flood prediction.
+      const spatial = null;
 
       setResult({
         district: selected.name,
@@ -994,6 +988,47 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
               upstream flows, terrain and drainage must also
               be assessed.
             </p>
+
+            <section className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 space-y-3">
+              <h4 className="font-semibold text-slate-900">Experimental geographic and cropland screening</h4>
+              <p className="text-sm text-slate-700">
+                These are separate 24/48/72-hour research scenarios for {result.supportedDistrict}.
+                They are <strong>not predictions for {result.date}</strong> and are not verified flooded areas.
+              </p>
+              {scenarioError && <p role="alert" className="text-sm text-amber-900">{scenarioError}</p>}
+              {!scenarioData && !scenarioError && <p className="text-sm">Loading experimental scenario information...</p>}
+              {scenarioData && (() => {
+                const { map, summary } = scenarioData;
+                const cells = map.features.filter(f => f.properties?.district === result.supportedDistrict);
+                const ageHours = (Date.now() - Date.parse(summary.generated_at)) / 3600000;
+                const stale = !Number.isFinite(ageHours) || ageHours < 0 || ageHours > 24;
+                if (!cells.length) return <p className="text-sm">No geographic cells available for this district.</p>;
+                return <>
+                  <p className="text-xs text-slate-700">Research data issue date: {summary.issue_anchor_date_utc || "Unknown"} (UTC). {stale ? "This research snapshot is outdated or its timestamp is uncertain. Do not use it for current decisions." : "This is a recent experimental snapshot, not an official flood warning."}</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[450px] text-left text-sm">
+                      <thead><tr className="border-b border-emerald-200"><th className="py-2 pr-3">Research horizon</th><th className="py-2 pr-3">Concern area (km²)</th><th className="py-2">Cropland in concern cells (ha)</th></tr></thead>
+                      <tbody>{[24,48,72].map(h => {
+                        const valid = cells.every(f => {
+                          const p = f.properties;
+                          const fraction = p[`sar_candidate_fraction_${h}h`];
+                          return Number.isFinite(fraction) && fraction >= 0 && fraction <= 1 &&
+                            Number.isFinite(p.cell_area_ha) && p.cell_area_ha > 0 &&
+                            Number.isFinite(p.cropland_ha) && p.cropland_ha >= 0 &&
+                            p.cropland_ha <= p.cell_area_ha;
+                        });
+                        if (!valid) return <tr key={h}><td className="py-2">{h}h</td><td colSpan={2}>Data unavailable</td></tr>;
+                        const flagged = cells.filter(f => f.properties[`sar_candidate_fraction_${h}h`] >= 0.10);
+                        const area = flagged.reduce((sum,f) => sum + f.properties.cell_area_ha / 100, 0);
+                        const crop = flagged.reduce((sum,f) => sum + f.properties.cropland_ha, 0);
+                        return <tr key={h} className="border-b border-emerald-100"><td className="py-2">{h} hours</td><td className="py-2">{area.toFixed(1)}</td><td className="py-2">{Math.round(crop).toLocaleString("en-BD")}</td></tr>;
+                      })}</tbody>
+                    </table>
+                  </div>
+                  <p className="text-xs text-slate-700">The full area of each cell passing an illustrative 10% SAR-candidate cutoff is counted. These figures do not measure inundation, confirmed crop damage or a calibrated risk level.</p>
+                </>;
+              })()}
+            </section>
           </div>
 
 
