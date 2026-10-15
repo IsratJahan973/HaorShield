@@ -1,44 +1,55 @@
-name: Update HaorShield Rainfall Forecast
+name: Update HaorShield Rainfall and Spatial Data
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 */6 * * *"
-  workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: haorshield-rainfall-update
+  group: haorshield-data-updates
   cancel-in-progress: false
 
 jobs:
   update:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 55
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
-        run: pip install requests shapely pyproj
+      - name: Install forecast and spatial dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "requests>=2.31,<3" "numpy>=1.26,<3" "pandas>=2,<3" "scikit-learn==1.6.1" "joblib>=1.3,<2" "geopandas>=0.14,<2" "shapely>=2,<3" "pyproj>=3,<4" "pyarrow>=15,<25"
 
-      - name: Refresh rainfall data
+      - name: Refresh 306-cell precipitation forecast
         run: python scripts/update_rainfall.py
 
-      - name: Generate spatial cropland screening
+      - name: Rebuild matched rainfall and cropland screening
         run: python scripts/update_cropland_screening.py
-      - name: Install hydrological model dependencies
-        run: python -m pip install pandas numpy geopandas requests
 
-      - name: Update GloFAS hydrological exposure
+      - name: Update modeled river exposure (optional external feed)
+        continue-on-error: true
         run: python scripts/update_glofas_exposure.py
-      - name: Commit updated forecasts
+
+      - name: Update experimental SAR candidate scenarios (optional external feeds)
+        continue-on-error: true
+        run: python scripts/update_sar_spatial_forecast.py
+
+      - name: Validate published datasets and scientific disclosures
+        run: python scripts/verify_public_data.py
+
+      - name: Commit complete successful updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -46,9 +57,15 @@ jobs:
           git add frontend/public/data/haorshield_rainfall_summary.json
           git add frontend/public/data/haorshield_flood_screening.geojson
           git add frontend/public/data/haorshield_flood_screening_summary.json
+          git add frontend/public/data/haorshield_cropland_rainfall_screening.geojson
           git add frontend/public/data/haorshield_cropland_rainfall_screening_summary.json
-          git add frontend/public/data/haorshield_glofas_forecast.json frontend/public/data/haorshield_future_exposure_screening.geojson frontend/public/data/haorshield_future_exposure_summary.json
+          git add frontend/public/data/haorshield_glofas_forecast.json
+          git add frontend/public/data/haorshield_future_exposure_screening.geojson
+          git add frontend/public/data/haorshield_future_exposure_summary.json
+          git add frontend/public/data/haorshield_sar_future_candidates.geojson
+          git add frontend/public/data/haorshield_sar_future_summary.json
           if ! git diff --cached --quiet; then
-            git commit -m "Auto-update HaorShield rainfall forecasts"
-            git push
+            git commit -m "Refresh HaorShield rainfall and experimental outlook"
+            git pull --rebase origin main
+            git push origin HEAD:main
           fi
