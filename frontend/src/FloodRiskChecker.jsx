@@ -28,6 +28,16 @@ function localDate(offset = 0) {
   return base.toISOString().slice(0, 10);
 }
 
+// After 11 PM in Bangladesh, the final hourly forecast for today has
+// normally passed. Start with tomorrow rather than a date with zero hours.
+function initialForecastDate() {
+  const hourParts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Dhaka", hour: "2-digit", hourCycle: "h23"
+  }).formatToParts(new Date());
+  const hour = Number(hourParts.find(part => part.type === "hour")?.value);
+  return localDate(hour >= 23 ? 1 : 0);
+}
+
 // Project-specific screening bands for 24-hour-equivalent rainfall.
 // They are NOT official BMD categories or flood-risk probabilities.
 export function category(mm, hours = 24) {
@@ -202,7 +212,7 @@ function HistoricalAgriculturalExposure({ district }) {
 
 export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   const [district, setDistrict] = useState("Sunamganj");
-  const [date, setDate] = useState(localDate());
+  const [date, setDate] = useState(initialForecastDate());
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
@@ -442,8 +452,21 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       );
 
       if (!selectedHours.length) {
+        const availableDates = [...new Set(futureHours
+          .filter(h => h.timestamp <= end && !Number.isNaN(h.timestamp.getTime()))
+          .map(h => h.time.slice(0, 10)))];
+        if (date === localDate() && availableDates.length && !availableDates.includes(date)) {
+          throw new Error(
+            `No forecast hours remain today. Please choose ${availableDates[0]} to see the next available rainfall forecast.`
+          );
+        }
+        if (availableDates.length) {
+          throw new Error(
+            `No usable forecast hours for ${date}. Available forecast dates within the next 72 hours: ${availableDates.join(", ")}.`
+          );
+        }
         throw new Error(
-          "No forecast hours available for this date within the next 72 hours."
+          "The weather service returned no usable future hourly forecasts. Please try again later."
         );
       }
 
