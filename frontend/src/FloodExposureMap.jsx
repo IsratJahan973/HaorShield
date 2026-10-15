@@ -1,3 +1,5 @@
+import FFWCStationExplorer from "./FFWCStationExplorer.jsx";
+import AgriculturalDecisionGuide from "./AgriculturalDecisionGuide.jsx";
 import HydrologicalExposure from "./HydrologicalExposure";
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -6,7 +8,7 @@ import {
   MapContainer, TileLayer, GeoJSON, useMap
 } from "react-leaflet";
 
-const MAP_URL = "/data/haorshield_flood_screening.geojson";
+const MAP_URL = "/data/haorshield_cropland_rainfall_screening.geojson";
 const SUMMARY_URL =
   "/data/haorshield_cropland_rainfall_screening_summary.json";
 
@@ -391,6 +393,8 @@ export default function FloodExposureWithHydrology(props) {
     <>
       <HydrologicalExposure />
       <OriginalFloodExposureMap {...props} />
+      <AgriculturalDecisionGuide />
+      <FFWCStationExplorer />
     </>
   );
 }

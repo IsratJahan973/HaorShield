@@ -1,3 +1,5 @@
+import ModelEvidence from "./ModelEvidence.jsx";
+import FutureSpatialOutlook from "./FutureSpatialOutlook.jsx";
 import ExperimentalFloodForecast from "./ExperimentalFloodForecast.jsx";
 import FloodRiskChecker from "./FloodRiskChecker.jsx";
 import RainfallRiskMap from "./RainfallRiskMap.jsx";
@@ -33,6 +35,8 @@ const NAV = [
   { id: "checker", label: "Check My Risk", icon: ShieldCheck },
   { id: "rainfall-risk", label: "Rainfall Risk Map", icon: CloudRain },
   { id: "flood-exposure", label: "Flood Exposure", icon: Map },
+  { id: "future-outlook", label: "24/48/72h Spatial Outlook", icon: Map },
+  { id: "model-evidence", label: "Model Evidence", icon: BrainCircuit },
   { id: "weather", label: "Live Weather", icon: CloudSun },
   { id: "model", label: "Classification", icon: BrainCircuit }
 ];
@@ -183,6 +187,8 @@ export default function App() {
           {page === "weather" && <LiveWeather />}
           {page === "rainfall-risk" && <RainfallRiskMap />}
           {page === "flood-exposure" && <FloodExposureMap />}
+          {page === "future-outlook" && <FutureSpatialOutlook />}
+          {page === "model-evidence" && <ModelEvidence />}
 
           {data && page === "overview" && (
             <>
@@ -304,7 +310,7 @@ export default function App() {
           <p className="text-xs text-slate-400 mt-8">
             HaorShield provides retrospective MODIS flood-detection
             classifications and estimated agricultural exposure.
-            It does not forecast future floods or verify crop damage.
+            Experimental future SAR scenarios are available, but they are not independently validated forecasts or verified crop damage.
           </p>
         </div>
       </main>
