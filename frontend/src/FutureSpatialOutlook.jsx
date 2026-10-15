@@ -5,6 +5,9 @@ import {
 } from "react-leaflet";
 
 const HORIZONS = [24, 48, 72];
+// Illustrative geographic concern rule for experimental SAR candidate fraction.
+// No calibrated probability or confirmed inundation is implied.
+const CONCERN_CUTOFF = 0.10;
 
 const MAP_URL =
   "/data/haorshield_sar_future_candidates.geojson";
@@ -37,12 +40,16 @@ function FitSelected({ features }) {
   return null;
 }
 
-export default function FutureSpatialOutlook() {
+export default function FutureSpatialOutlook({ initialDistrict = "All Districts" }) {
   const [geo, setGeo] = useState(null);
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState("");
   const [hours, setHours] = useState(24);
-  const [district, setDistrict] = useState("All Districts");
+  const [district, setDistrict] = useState(initialDistrict);
+
+  useEffect(() => {
+    setDistrict(initialDistrict);
+  }, [initialDistrict]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -111,9 +118,20 @@ export default function FutureSpatialOutlook() {
         ) || 0;
 
         total.cells++;
+        const frac = Number(p[`sar_candidate_fraction_${hours}h`]);
+        if (Number.isFinite(frac) && frac >= CONCERN_CUTOFF) {
+          total.concernCells++;
+          total.concernAreaKm2 += Number(p.cell_area_ha || 0) / 100;
+          total.concernCroplandHa += Number(p.cropland_ha || 0);
+        }
+        total.recent7Total += Number(p.past7_mm || 0);
+        total.futureRainTotal += Number(p[`future_rain_${hours}h_mm`] || 0);
+        total.pastFlowTotal += Number(p.past_flow_issue_ratio || 0);
         return total;
       },
-      { cells: 0, land: 0, crop: 0 }
+      { cells: 0, land: 0, crop: 0, concernCells: 0,
+        concernAreaKm2: 0, concernCroplandHa: 0,
+        recent7Total: 0, futureRainTotal: 0, pastFlowTotal: 0 }
     );
   }, [features, hours]);
 
@@ -141,7 +159,17 @@ export default function FutureSpatialOutlook() {
               f.properties[`research_cropland_proxy_ha_${hours}h`]
             ),
           0
-        )
+        ),
+        concernAreaKm2: cells.reduce((sum, f) => {
+          const p = f.properties;
+          return sum + (Number(p[`sar_candidate_fraction_${hours}h`]) >= CONCERN_CUTOFF
+            ? Number(p.cell_area_ha || 0) / 100 : 0);
+        }, 0),
+        concernCroplandHa: cells.reduce((sum, f) => {
+          const p = f.properties;
+          return sum + (Number(p[`sar_candidate_fraction_${hours}h`]) >= CONCERN_CUTOFF
+            ? Number(p.cropland_ha || 0) : 0);
+        }, 0)
       };
     }).sort((a, b) => b.crop - a.crop);
   }, [geo, districts, hours]);
@@ -187,6 +215,9 @@ export default function FutureSpatialOutlook() {
       Cropland scenario proxy: ${fmt(
         p[`research_cropland_proxy_ha_${hours}h`]
       )} ha<br/>
+      Forecast rainfall: ${Number(p[`future_rain_${hours}h_mm`] || 0).toFixed(1)} mm<br/>
+      Antecedent 7-day rainfall: ${Number(p.past7_mm || 0).toFixed(1)} mm<br/>
+      <em>Hydrological context is a proxy, not an official station forecast.</em><br/>
       <em>Not verified flooded area or probability.</em>
     `);
   };
@@ -279,6 +310,13 @@ export default function FutureSpatialOutlook() {
             ))}
           </div>
 
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+            <h3 className="font-semibold">Geographic area of concern (illustrative)</h3>
+            <p className="mt-1">{fmt(stats.concernCells)} cells meet the project-selected SAR-candidate threshold of 10% or greater.</p>
+            <p className="mt-2 font-semibold">Full area of those cells: {stats.concernAreaKm2.toFixed(1)} km² · Mapped cropland within those cells: {fmt(stats.concernCroplandHa)} ha</p>
+            <p className="mt-2">These are entire geographic grid-cell areas. They are NOT predicted inundated square kilometres, flooded cropland hectares, verified risk levels or field-level impact. The 10% threshold is illustrative and not calibrated.</p>
+          </div>
+
           <div className="rounded-xl border bg-white p-3">
             <div className="h-[460px] overflow-hidden rounded-lg">
               <MapContainer
@@ -323,6 +361,8 @@ export default function FutureSpatialOutlook() {
                   <th className="p-2">Cells</th>
                   <th className="p-2">Land proxy (ha)</th>
                   <th className="p-2">Cropland proxy (ha)</th>
+                  <th className="p-2">Concern cells (km²)</th>
+                  <th className="p-2">Cropland in concern cells (ha)</th>
                 </tr>
               </thead>
               <tbody>
@@ -332,6 +372,8 @@ export default function FutureSpatialOutlook() {
                     <td className="p-2">{r.cells}</td>
                     <td className="p-2">{fmt(r.land)}</td>
                     <td className="p-2">{fmt(r.crop)}</td>
+                    <td className="p-2">{r.concernAreaKm2.toFixed(1)}</td>
+                    <td className="p-2">{fmt(r.concernCroplandHa)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -356,6 +398,13 @@ export default function FutureSpatialOutlook() {
               local agricultural extension guidance.
             </p>
 
+            <div className="mt-3 rounded-lg bg-slate-50 p-3 text-slate-700">
+              <strong>What informs this scenario?</strong> Selected cells include a mean
+              forecast rainfall input of {stats.cells ? (stats.futureRainTotal / stats.cells).toFixed(1) : "—"} mm,
+              mean antecedent 7-day rainfall of {stats.cells ? (stats.recent7Total / stats.cells).toFixed(1) : "—"} mm,
+              and a modelled river-flow reference ratio of {stats.cells ? (stats.pastFlowTotal / stats.cells).toFixed(2) : "—"}.
+              These are input/context summaries, NOT measured feature importance or official river-water-level forecasts.
+            </div>
             <p className="mt-3 text-amber-900">
               {summary.area_warning}
               {" "}{summary.input_shift_warning}

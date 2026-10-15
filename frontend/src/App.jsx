@@ -58,6 +58,7 @@ function StatCard({ title, value, subtitle }) {
 
 export default function App() {
   const [page, setPage] = useState("checker");
+  const [forecastDistrict, setForecastDistrict] = useState("All Districts");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -180,6 +181,10 @@ export default function App() {
             <>
 <FloodRiskChecker
               onOpenMap={() => setPage("rainfall-risk")}
+              onOpenForecast={({ district }) => {
+                setForecastDistrict(district || "All Districts");
+                setPage("future-outlook");
+              }}
             />
 <ExperimentalFloodForecast />
 </>
@@ -187,7 +192,7 @@ export default function App() {
           {page === "weather" && <LiveWeather />}
           {page === "rainfall-risk" && <RainfallRiskMap />}
           {page === "flood-exposure" && <FloodExposureMap />}
-          {page === "future-outlook" && <FutureSpatialOutlook />}
+          {page === "future-outlook" && <FutureSpatialOutlook initialDistrict={forecastDistrict} />}
           {page === "model-evidence" && <ModelEvidence />}
 
           {data && page === "overview" && (

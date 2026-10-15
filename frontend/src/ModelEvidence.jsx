@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 
 const URL = "/data/haorshield_model_evidence.json";
+const BENCHMARK_URL = "/data/haorshield_model_benchmark.json";
 
 export default function ModelEvidence() {
   const [data, setData] = useState(null);
+  const [benchmark, setBenchmark] = useState(null);
+  const [benchmarkError, setBenchmarkError] = useState("");
   const [error, setError] = useState("");
   const [hours, setHours] = useState("all");
   const [year, setYear] = useState("all");
@@ -26,6 +29,25 @@ export default function ModelEvidence() {
         setData(result);
       })
       .catch((err) => setError(err.message));
+  }, []);
+
+  useEffect(() => {
+    fetch(BENCHMARK_URL)
+      .then(response => {
+        if (!response.ok) throw new Error("Comparable research metrics unavailable.");
+        return response.json();
+      })
+      .then(value => {
+        if (
+          value.fair_same_split_research_comparison !== true ||
+          value.independent_operational_test !== false ||
+          !Array.isArray(value.results) || value.results.length !== 24
+        ) {
+          throw new Error("Research benchmark failed validation.");
+        }
+        setBenchmark(value);
+      })
+      .catch(err => setBenchmarkError(err.message));
   }, []);
 
   const rows = useMemo(() => {
@@ -57,9 +79,50 @@ export default function ModelEvidence() {
           <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm">
             <strong>Independent accuracy not established.</strong>
             {" "}The evaluation years were reviewed during model
-            development. A fair, untouched same-split benchmark
-            across Random Forest, HaorShieldNet and XGBoost is
-            not verified by these saved records.
+            development. The same-split research comparison below
+            compares RF, XGBoost and a reconstructed HaorShieldNet-style
+            neural network, but it is NOT untouched independent testing
+            and does NOT establish actual future flood accuracy.
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-3">
+            <h3 className="text-lg font-bold">Reproducible research comparison — same time split</h3>
+            <p className="text-sm text-slate-700">
+              2016–2022 training, 2023 model selection, 2024 and 2025 diagnostic evaluation.
+              All four methods use the same date-based partitions and surrogate SAR candidate target.
+              A historical-cell baseline, Random Forest, XGBoost and a reconstructed
+              HaorShieldNet-style network are compared. Original HaorShieldNet weights were unavailable.
+              <strong> These are not operational flood-prediction accuracy scores.</strong>
+            </p>
+            {benchmarkError && <p role="status" className="text-amber-900">{benchmarkError}</p>}
+            {benchmark ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm">
+                  <thead><tr className="border-b bg-slate-50">
+                    <th className="p-2">Horizon</th><th className="p-2">Evaluation year</th>
+                    <th className="p-2">Research method</th><th className="p-2">MAE ↓</th>
+                    <th className="p-2">Records</th>
+                  </tr></thead>
+                  <tbody>
+                    {benchmark.results.map((r, i) => (
+                      <tr className="border-b" key={i}>
+                        <td className="p-2">{r.horizon_hours}h</td>
+                        <td className="p-2">{r.evaluation_year}</td>
+                        <td className="p-2">{r.model}</td>
+                        <td className="p-2">{r.mae.toFixed(4)}</td>
+                        <td className="p-2">{r.records}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : !benchmarkError && <p className="text-sm">Loading research benchmark…</p>}
+            <p className="text-xs text-amber-900">
+              Dataset labels are unverified SAR change candidates, not observed future inundation;
+              earlier research already examined these test years. Same-split research comparison
+              is not independent or calibrated validation. Reproduction files are stored under
+              <code>research/</code> and <code>scripts/reproduce_sar_proxy_benchmark.py</code>.
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-4">

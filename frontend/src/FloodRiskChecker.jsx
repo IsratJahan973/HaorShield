@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import CropEarlyAction from "./CropEarlyAction.jsx";
 import { MapPin, CalendarDays, CloudRain, ShieldCheck,
          AlertTriangle, Search, Loader2 } from "lucide-react";
 
@@ -27,22 +28,29 @@ function localDate(offset = 0) {
   return base.toISOString().slice(0, 10);
 }
 
-function category(mm) {
-  if (mm >= 100) return {
-    label: "Very Heavy Rainfall", color: "text-red-700",
-    background: "bg-red-50", level: "Very High Rainfall Alert"
+// Project-specific screening bands for 24-hour-equivalent rainfall.
+// They are NOT official BMD categories or flood-risk probabilities.
+export function category(mm, hours = 24) {
+  const rate = hours > 0 ? (Number(mm) * 24 / hours) : 0;
+  if (rate >= 100) return {
+    label: "Very Heavy", color: "text-red-700",
+    background: "bg-red-50", level: "Very Heavy Rainfall"
   };
-  if (mm >= 50) return {
-    label: "Heavy Rainfall", color: "text-orange-700",
-    background: "bg-orange-50", level: "High Rainfall Alert"
+  if (rate >= 50) return {
+    label: "Heavy", color: "text-orange-700",
+    background: "bg-orange-50", level: "Heavy Rainfall"
   };
-  if (mm >= 20) return {
-    label: "Moderate Rainfall", color: "text-amber-700",
-    background: "bg-amber-50", level: "Moderate Rainfall Alert"
+  if (rate >= 10) return {
+    label: "Moderate", color: "text-amber-700",
+    background: "bg-amber-50", level: "Moderate Rainfall"
+  };
+  if (rate > 0) return {
+    label: "Light", color: "text-sky-700",
+    background: "bg-sky-50", level: "Light Rainfall"
   };
   return {
-    label: "Low Forecast Rainfall", color: "text-slate-700",
-    background: "bg-slate-100", level: "Low Rainfall Alert"
+    label: "No Rain", color: "text-slate-700",
+    background: "bg-slate-100", level: "No Rain Forecast"
   };
 }
 
@@ -74,7 +82,7 @@ function rainfallGuidance(mm) {
     };
   }
 
-  if (mm >= 20) {
+  if (mm >= 10) {
     return {
       heading: "Moderate rainfall — stay informed",
       message: "Moderate forecast rainfall warrants attention to local drainage and changing conditions.",
@@ -192,7 +200,7 @@ function HistoricalAgriculturalExposure({ district }) {
   );
 }
 
-export default function FloodRiskChecker({ onOpenMap }) {
+export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   const [district, setDistrict] = useState("Sunamganj");
   const [date, setDate] = useState(localDate());
   const [loading, setLoading] = useState(false);
@@ -398,7 +406,7 @@ export default function FloodRiskChecker({ onOpenMap }) {
         "current",
         "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m"
       );
-      url.searchParams.set("hourly", "precipitation");
+      url.searchParams.set("hourly", "precipitation,precipitation_probability");
       url.searchParams.set("forecast_days", "5");
       url.searchParams.set("timezone", "Asia/Dhaka");
 
@@ -406,14 +414,22 @@ export default function FloodRiskChecker({ onOpenMap }) {
       if (!response.ok) throw new Error("Weather service unavailable.");
 
       const data = await response.json();
-      const times = data.hourly.time;
-      const rain = data.hourly.precipitation;
+      const times = data.hourly?.time;
+      const rain = data.hourly?.precipitation;
+      const rainProbabilities = data.hourly?.precipitation_probability;
+      if (!Array.isArray(times) || !Array.isArray(rain) || times.length !== rain.length) {
+        throw new Error("Incomplete hourly rainfall forecast from the weather source.");
+      }
 
       const now = new Date();
       const futureHours = times
         .map((t, i) => ({
           time: t,
           value: rain[i],
+          probability: Array.isArray(rainProbabilities) &&
+            Number.isFinite(Number(rainProbabilities[i])) &&
+            rainProbabilities[i] !== null
+              ? Number(rainProbabilities[i]) : null,
           timestamp: new Date(t + "+06:00")
         }))
         .filter(h => h.timestamp > now);
@@ -431,15 +447,28 @@ export default function FloodRiskChecker({ onOpenMap }) {
         );
       }
 
-      if (selectedHours.some(h => h.value === null)) {
+      if (selectedHours.some(h => h.value === null || !Number.isFinite(Number(h.value)) || Number(h.value) < 0)) {
         throw new Error("Some rainfall data is missing.");
       }
 
       const rainfall = selectedHours.reduce(
-        (sum, h) => sum + h.value, 0
+        (sum, h) => sum + Number(h.value), 0
       );
 
-      const status = category(rainfall);
+      const status = category(rainfall, selectedHours.length);
+      const availablePops = selectedHours
+        .map(h => h.probability)
+        .filter(p => Number.isFinite(p) && p >= 0 && p <= 100);
+      const maxHourlyPrecipChance = availablePops.length === selectedHours.length
+        ? Math.max(...availablePops) : null;
+      const retrievedAt = new Date().toISOString();
+      const observationTime = data.current?.time || null;
+      const weatherAgeHours = observationTime
+        ? (Date.now() - new Date(observationTime + "+06:00").getTime()) / 3600000
+        : Infinity;
+      const currentOutdated = !Number.isFinite(weatherAgeHours) ||
+        weatherAgeHours < -1 || weatherAgeHours > 6;
+      const rainRate24 = rainfall * 24 / selectedHours.length;
 
       // Spatial exposure proxy uses only matching district cells.
       // A forecast snapshot can be stale; never use it silently.
@@ -476,7 +505,12 @@ export default function FloodRiskChecker({ onOpenMap }) {
         },
         date,
         rainfall,
+        rainRate24,
+        maxHourlyPrecipChance,
         hours: selectedHours.length,
+        retrievedAt,
+        observationTime,
+        currentOutdated,
         status,
         current: data.current,
         spatial
@@ -680,7 +714,7 @@ export default function FloodRiskChecker({ onOpenMap }) {
         <div className="space-y-5">
           <div className={`rounded-2xl border p-6 ${result.status.background}`}>
             <div className="flex items-center gap-3">
-              {result.rainfall < 20
+              {result.rainRate24 < 10
                 ? <ShieldCheck size={32} className={result.status.color}/>
                 : <AlertTriangle size={32} className={result.status.color}/>
               }
@@ -692,8 +726,11 @@ export default function FloodRiskChecker({ onOpenMap }) {
               </div>
             </div>
             <p className="text-sm mt-3">
-              This is not a flood-safety clearance or
-              a measured flood probability.
+              Screening bands use a 24-hour-equivalent rainfall rate:
+              No Rain (0), Light (&gt;0–&lt;10), Moderate (10–&lt;50),
+              Heavy (50–&lt;100), Very Heavy (100+ mm/24h).
+              These are project-defined weather categories, not official flood-risk levels.
+              This is not a flood-safety clearance or a measured flood probability.
             </p>
           </div>
 
@@ -708,17 +745,17 @@ export default function FloodRiskChecker({ onOpenMap }) {
             </span>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="bg-white border rounded-xl p-5">
               <p className="text-slate-500 text-sm">Current temperature</p>
               <p className="text-2xl font-bold mt-2">
-                {result.current.temperature_2m}°C
+                {Number.isFinite(result.current?.temperature_2m) ? `${result.current.temperature_2m}°C` : "Unavailable"}
               </p>
             </div>
             <div className="bg-white border rounded-xl p-5">
               <p className="text-slate-500 text-sm">Current humidity</p>
               <p className="text-2xl font-bold mt-2">
-                {result.current.relative_humidity_2m}%
+                {Number.isFinite(result.current?.relative_humidity_2m) ? `${result.current.relative_humidity_2m}%` : "Unavailable"}
               </p>
             </div>
             <div className="bg-white border rounded-xl p-5">
@@ -732,21 +769,56 @@ export default function FloodRiskChecker({ onOpenMap }) {
                 {result.hours} forecast hours within the next 72h
               </p>
             </div>
+            <div className="bg-white border rounded-xl p-5">
+              <p className="text-slate-500 text-sm">Current precipitation</p>
+              <p className="text-2xl font-bold mt-2">
+                {Number.isFinite(result.current?.precipitation) ? `${result.current.precipitation} mm` : "Unavailable"}
+              </p>
+            </div>
+            <div className="bg-white border rounded-xl p-5">
+              <p className="text-slate-500 text-sm">Current wind speed</p>
+              <p className="text-2xl font-bold mt-2">
+                {Number.isFinite(result.current?.wind_speed_10m) ? `${result.current.wind_speed_10m} km/h` : "Unavailable"}
+              </p>
+            </div>
+            <div className="bg-white border rounded-xl p-5">
+              <p className="text-slate-500 text-sm">Chance of precipitation</p>
+              <p className="text-2xl font-bold mt-2">
+                {result.maxHourlyPrecipChance === null ? "Unavailable" : `${result.maxHourlyPrecipChance.toFixed(0)}%`}
+              </p>
+              <p className="text-xs text-slate-500 mt-2">
+                Highest hourly rain chance among {result.hours} forecast hours, not a flood probability.
+              </p>
+            </div>
           </div>
 
-          
+          <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+            <p><strong>Weather observation time:</strong> {result.observationTime || "Unavailable"} (Asia/Dhaka local time)</p>
+            <p className="mt-1"><strong>Forecast retrieved:</strong> {new Date(result.retrievedAt).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>
+            <p className="mt-1">Rainfall total covers {result.hours} available hours on {result.date}; intensity category uses the equivalent {result.rainRate24.toFixed(1)} mm/24h rate, not a full-day observed total.</p>
+            {result.currentOutdated && <p role="alert" className="mt-2 font-semibold text-amber-800">Weather observation time is missing or outdated. Check an updated forecast.</p>}
+          </div>
+
+          <CropEarlyAction
+            district={result.supportedDistrict}
+            date={result.date}
+            rainfallMm={result.rainfall}
+            forecastHours={result.hours}
+            isOutdated={result.currentOutdated}
+          />
+
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
               <h3 className="text-lg font-bold text-slate-900 mb-2">
-                {rainfallGuidance(result.rainfall).heading}
+                {rainfallGuidance(result.rainRate24).heading}
               </h3>
               <p className="text-sm text-slate-700 mb-3">
-                {rainfallGuidance(result.rainfall).message}
+                {rainfallGuidance(result.rainRate24).message}
               </p>
               <p className="font-semibold text-slate-900 mb-2">
                 Recommended precautions
               </p>
               <ul className="list-disc pl-5 space-y-1 text-sm text-slate-700">
-                {rainfallGuidance(result.rainfall).actions.map((action, i) => (
+                {rainfallGuidance(result.rainRate24).actions.map((action, i) => (
                   <li key={i}>{action}</li>
                 ))}
               </ul>
@@ -783,6 +855,18 @@ export default function FloodRiskChecker({ onOpenMap }) {
 
           
 
+          {onOpenForecast && (
+            <button
+              type="button"
+              onClick={() => onOpenForecast({ district: result.supportedDistrict })}
+              className="mr-3 mb-3 rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white"
+            >
+              View {result.supportedDistrict} experimental 24/48/72-hour spatial scenarios →
+            </button>
+          )}
+          <p className="mb-3 text-xs text-slate-600">
+            The separate SAR spatial scenario is anchored to its own issue time; it is not a forecast uniquely produced for the selected calendar date.
+          </p>
           <button
             onClick={onOpenMap}
             className="bg-slate-900 text-white rounded-xl px-5 py-3 font-semibold"
