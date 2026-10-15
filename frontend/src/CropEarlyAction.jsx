@@ -45,7 +45,6 @@ const MESSAGES = {
     caveat: "This is general preparedness information, not a verified flood probability, field-level inundation forecast, crop-loss estimate or official instruction.",
     official: "Bangladesh FFWC — official flood information",
     bmd: "Bangladesh Meteorological Department"
-  }
 };
 
 export default function CropEarlyAction({ district, date, rainfallMm, forecastHours, isOutdated = false }) {
