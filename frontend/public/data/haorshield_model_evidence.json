@@ -1,0 +1,234 @@
+{
+  "title": "Saved SAR Research Model Evaluation",
+  "source_file": "ml/sar_spatial_corrected_heldout_validation.csv",
+  "rows": [
+    {
+      "horizon": 24,
+      "test_year": 2024,
+      "variant": "historical_baseline",
+      "mae": 0.124646,
+      "ap": 0.417176,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 24,
+      "test_year": 2024,
+      "variant": "core",
+      "mae": 0.05962,
+      "ap": 0.723391,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 24,
+      "test_year": 2024,
+      "variant": "antecedent",
+      "mae": 0.053745,
+      "ap": 0.780832,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 24,
+      "test_year": 2024,
+      "variant": "antecedent_flow",
+      "mae": 0.045852,
+      "ap": 0.87432,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 24,
+      "test_year": 2025,
+      "variant": "historical_baseline",
+      "mae": 0.09747,
+      "ap": 0.883658,
+      "test_records": 552,
+      "test_dates": 4
+    },
+    {
+      "horizon": 24,
+      "test_year": 2025,
+      "variant": "core",
+      "mae": 0.097075,
+      "ap": 0.906205,
+      "test_records": 552,
+      "test_dates": 4
+    },
+    {
+      "horizon": 24,
+      "test_year": 2025,
+      "variant": "antecedent",
+      "mae": 0.093027,
+      "ap": 0.902854,
+      "test_records": 552,
+      "test_dates": 4
+    },
+    {
+      "horizon": 24,
+      "test_year": 2025,
+      "variant": "antecedent_flow",
+      "mae": 0.095747,
+      "ap": 0.906408,
+      "test_records": 552,
+      "test_dates": 4
+    },
+    {
+      "horizon": 48,
+      "test_year": 2024,
+      "variant": "historical_baseline",
+      "mae": 0.124646,
+      "ap": 0.417176,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 48,
+      "test_year": 2024,
+      "variant": "core",
+      "mae": 0.0632,
+      "ap": 0.605454,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 48,
+      "test_year": 2024,
+      "variant": "antecedent",
+      "mae": 0.065164,
+      "ap": 0.608275,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 48,
+      "test_year": 2024,
+      "variant": "antecedent_flow",
+      "mae": 0.051742,
+      "ap": 0.794571,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 48,
+      "test_year": 2025,
+      "variant": "historical_baseline",
+      "mae": 0.09747,
+      "ap": 0.883658,
+      "test_records": 552,
+      "test_dates": 4
+    },
+    {
+      "horizon": 48,
+      "test_year": 2025,
+      "variant": "core",
+      "mae": 0.100279,
+      "ap": 0.914346,
+      "test_records": 552,
+      "test_dates": 4
+    },
+    {
+      "horizon": 48,
+      "test_year": 2025,
+      "variant": "antecedent",
+      "mae": 0.093665,
+      "ap": 0.901908,
+      "test_records": 552,
+      "test_dates": 4
+    },
+    {
+      "horizon": 48,
+      "test_year": 2025,
+      "variant": "antecedent_flow",
+      "mae": 0.092923,
+      "ap": 0.905587,
+      "test_records": 552,
+      "test_dates": 4
+    },
+    {
+      "horizon": 72,
+      "test_year": 2024,
+      "variant": "historical_baseline",
+      "mae": 0.124646,
+      "ap": 0.417176,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 72,
+      "test_year": 2024,
+      "variant": "core",
+      "mae": 0.0626,
+      "ap": 0.652454,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 72,
+      "test_year": 2024,
+      "variant": "antecedent",
+      "mae": 0.061757,
+      "ap": 0.571003,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 72,
+      "test_year": 2024,
+      "variant": "antecedent_flow",
+      "mae": 0.05154,
+      "ap": 0.86947,
+      "test_records": 785,
+      "test_dates": 4
+    },
+    {
+      "horizon": 72,
+      "test_year": 2025,
+      "variant": "historical_baseline",
+      "mae": 0.09747,
+      "ap": 0.883658,
+      "test_records": 552,
+      "test_dates": 4
+    },
+    {
+      "horizon": 72,
+      "test_year": 2025,
+      "variant": "core",
+      "mae": 0.103674,
+      "ap": 0.910113,
+      "test_records": 552,
+      "test_dates": 4
+    },
+    {
+      "horizon": 72,
+      "test_year": 2025,
+      "variant": "antecedent",
+      "mae": 0.109481,
+      "ap": 0.870366,
+      "test_records": 552,
+      "test_dates": 4
+    },
+    {
+      "horizon": 72,
+      "test_year": 2025,
+      "variant": "antecedent_flow",
+      "mae": 0.094216,
+      "ap": 0.895254,
+      "test_records": 552,
+      "test_dates": 4
+    }
+  ],
+  "protocol": {
+    "independent_operational_test": false,
+    "same_split_RF_XGBoost_HaorShieldNet_benchmark": false,
+    "test_years_reused_during_research": true,
+    "target": "SAR candidate fraction, not verified future inundation"
+  },
+  "warnings": [
+    "2024 and 2025 results were reviewed during model research.",
+    "They are not an untouched independent operational test.",
+    "RF, XGBoost and HaorShieldNet have not been established as a fair, same-split benchmark in this saved dataset.",
+    "No independently verified future flood accuracy is claimed."
+  ]
+}
