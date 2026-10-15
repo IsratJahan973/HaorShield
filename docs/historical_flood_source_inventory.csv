@@ -1,0 +1,4 @@
+event_id,event_label,source,geometry_features,has_exact_observation_time,has_forward_non_flood_controls,usable_as_verified_24_48_72h_outcome
+4382,2016 Jul-Aug,GLOBAL_FLOOD_DB/MODIS_EVENTS/V1,1,False,False,False
+4459,2017 Mar-Apr,GLOBAL_FLOOD_DB/MODIS_EVENTS/V1,1,False,False,False
+4508,2017 Aug,GLOBAL_FLOOD_DB/MODIS_EVENTS/V1,1,False,False,False
