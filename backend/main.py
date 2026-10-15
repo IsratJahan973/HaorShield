@@ -42,12 +42,17 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Restrict this to the deployed frontend origin later.
+# Deployed Cloudflare Pages, Cloudflare preview subdomains, and local Vite.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://haorshield.pages.dev",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_origin_regex=r"^https://[a-zA-Z0-9-]+\.haorshield\.pages\.dev$",
     allow_methods=["GET", "POST"],
-    allow_headers=["*"]
+    allow_headers=["Content-Type"],
 )
 
 class PredictionRequest(BaseModel):
