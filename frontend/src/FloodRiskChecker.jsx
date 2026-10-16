@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import FarmerCropAdvice from "./FarmerCropAdvice.jsx";
 import SimpleRainMap from "./SimpleRainMap.jsx";
+import LandAttentionMap from "./LandAttentionMap.jsx";
 import { summarizeCurrentWeather } from "./weatherNow.js";
 import { farmerHorizon, farmerSummary } from "./farmerOutlookView.js";
 import { rollingRainfallWindows } from "./rainfallWindows.js";
@@ -897,6 +898,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                 </div>;
               })}
             </div>
+            <LandAttentionMap district={result.supportedDistrict} forecastDate={result.date} scenarioData={scenarioData} scenarioError={scenarioError} outlooks={result.combinedFloodOutlooks} />
             <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4 space-y-2">
               <h4 className="text-lg font-bold">Why does HaorShield show this?</h4>
               {farmerSummary(result.combinedFloodOutlooks, result.riverForecast).lines.map((line, i) => <p className="text-sm text-slate-700" key={i}>{line}</p>)}
