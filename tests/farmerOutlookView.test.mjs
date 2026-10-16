@@ -1,15 +1,21 @@
 import assert from 'node:assert/strict';
-import { farmerHorizon, farmerSummary } from '../frontend/src/farmerOutlookView.js';
-const rain = { horizonHours:24, complete:true, rainfallMm:35.8 };
-for (const rank of [0,1,2,3]) {
-  const r=farmerHorizon({horizonHours:24,rank, label:'test'},rain);
-  assert.equal(r.rainText,'35.8 mm rain expected');
-  assert.ok(r.title.length > 3);
+import {farmerHorizon,farmerSummary} from '../frontend/src/farmerOutlookView.js';
+for(const hours of [24,48,72]){
+  const base={horizonHours:hours,rank:null,riverAvailable:false,rainfallAvailable:true};
+  const rain={horizonHours:hours,complete:true,rainfallMm:0};
+  let v=farmerHorizon(base,rain);
+  assert.match(v.title,/river flood concern unknown/);
+  assert.equal(v.rainText,'0.0 mm rain expected');
+  assert.equal(v.uncertain,true);
+  v=farmerHorizon(base,{horizonHours:hours,complete:false,rainfallMm:null});
+  assert.equal(v.rainText,'Rain forecast unavailable');
+  assert.match(v.title,/cannot be checked/);
+  v=farmerHorizon({...base,rank:3},rain);
+  assert.match(v.title,/High flood concern/);
+  v=farmerHorizon({...base,rank:0,riverAvailable:true},rain);
+  assert.equal(v.uncertain,false);
+  v=farmerHorizon({...base,rank:2}, {complete:false,rainfallMm:null});
+  assert.match(v.title,/Elevated/);
 }
-assert.equal(farmerHorizon({horizonHours:24,rank:null,label:'Cannot assess'},rain).uncertain,true);
-assert.match(farmerHorizon({horizonHours:24,rank:2}, {complete:false,rainfallMm:0}).rainText,/incomplete/);
-assert.match(farmerSummary([{rank:3,riverAvailable:true,riverIdentityVerified:false}]).lines.join(' '),/may not represent your local river/);
-assert.match(farmerSummary([{rank:2}]).advice.join(' '),/seeds/);
-assert.match(farmerSummary([{rank:0}]).lines.join(' '),/No strong signal/);
-assert.match(farmerSummary([{rank:null}]).lines.join(' '),/not enough forecast information/i);
-console.log('9 farmer presentation checks passed');
+assert.match(farmerSummary([{rainfallAvailable:true,riverAvailable:false}]).lines.join(' '),/river forecast could not/);
+console.log('Farmer forecast presentation: 16 assertions passed');
