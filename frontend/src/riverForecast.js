@@ -23,6 +23,16 @@ function parseDaily(data) {
   return data.daily.time.map((date, i) => ({date, flow: data.daily.river_discharge[i]}))
     .filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x.date) && finiteNonNegative(x.flow));
 }
+export function distanceKm(aLat, aLon, bLat, bLon) {
+  const values = [aLat, aLon, bLat, bLon].map(Number);
+  if (!values.every(Number.isFinite)) return Infinity;
+  const [lat1, lon1, lat2, lon2] = values;
+  const rad = Math.PI / 180;
+  const a = Math.sin((lat2 - lat1) * rad / 2) ** 2 +
+    Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
+    Math.sin((lon2 - lon1) * rad / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(Math.min(1, a)));
+}
 function forecastLevel(q, p90, p95) {
   if (!finiteNonNegative(q) || !finiteNonNegative(p90) || !finiteNonNegative(p95)) return 'Unavailable';
   if (q >= p95) return 'Unusually high river flow';
@@ -32,10 +42,14 @@ function forecastLevel(q, p90, p95) {
 export function evaluateRiverForecast(forecast, historical, requested, now = new Date()) {
   const h = parseDaily(historical);
   const f = parseDaily(forecast);
-  // Avoid falsely mapping a village to a distant / unrelated river cell.
-  const distance = Math.hypot(Number(forecast.latitude)-requested.lat,
-                              (Number(forecast.longitude)-requested.lon)*Math.cos(requested.lat*Math.PI/180));
-  if (!Number.isFinite(distance) || distance > 0.12) throw new Error('No sufficiently nearby modeled river cell.');
+  // Model-cell proximity is NOT proof that the sampled watercourse is
+  // the local river. Fail closed for distant cells or inconsistent grid data.
+  const distance = distanceKm(requested.lat, requested.lon,
+    forecast.latitude, forecast.longitude);
+  if (distance > 8) throw new Error('No nearby modeled river cell (within 8 km); river-flow outlook unavailable.');
+  const historyDistance = distanceKm(forecast.latitude, forecast.longitude,
+    historical.latitude, historical.longitude);
+  if (historyDistance > 1) throw new Error('Historical and forecast river-flow grid cells differ; cannot compare their flows.');
   if (h.length < 365*8) throw new Error('Insufficient historical river-flow reference data.');
   const p90 = quantile(h.map(v => v.flow), .9);
   const p95 = quantile(h.map(v => v.flow), .95);
@@ -47,6 +61,8 @@ export function evaluateRiverForecast(forecast, historical, requested, now = new
     source: 'Copernicus GloFAS v4 / Open-Meteo Flood API',
     sourceKind: 'modeled river discharge',
     nearestModelCell: { latitude: forecast.latitude, longitude: forecast.longitude },
+    modelCellDistanceKm: Math.round(distance * 10) / 10,
+    localRiverIdentityVerified: false,
     referenceYears: `${h[0].date} to ${h[h.length-1].date}`,
     p90, p95,
     forecasts: upcoming.map((x,i) => ({
@@ -58,7 +74,7 @@ export function evaluateRiverForecast(forecast, historical, requested, now = new
     })),
     validatedFloodProbability: false,
     verifiedInundationPrediction: false,
-    warning: 'Daily modeled flow at the nearest ~5 km GloFAS river cell; may not correspond to the local river. Thresholds are statistical model-flow percentiles, NOT BWDB danger levels or confirmed flood events.'
+    warning: 'GloFAS daily modeled river discharge for a nearby grid cell, not a confirmed local river match. Dates use UTC model days, not rolling 24/48/72-hour forecasts. Historical model-flow percentiles are NOT BWDB danger levels or observed flood events.'
   };
 }
 async function requestFlood(params, timeout = 12000) {
@@ -74,7 +90,7 @@ async function requestFlood(params, timeout = 12000) {
 }
 export async function fetchRiverForecast(lat, lon) {
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error('Invalid coordinates.');
-  const coordinates = { latitude:lat, longitude:lon, daily:'river_discharge', timezone:'GMT' };
+  const coordinates = { latitude:lat, longitude:lon, daily:'river_discharge', timezone:'GMT', cell_selection:'nearest' };
   const key = `${lat.toFixed(2)},${lon.toFixed(2)}`;
   let history = historicalCache.get(key);
   if (!history) {
