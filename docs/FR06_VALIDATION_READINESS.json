@@ -1,0 +1,19 @@
+{
+  "independent_24_48_72_validation_ready": false,
+  "reason": "No independently verified issue-time forecast/observation pairs found",
+  "historical_event_rows": 3,
+  "eligible_historical_event_rows": 0,
+  "sar_candidate_rows": 3497,
+  "sar_candidate_dates": 26,
+  "data_sources": {
+    "modis_events": "Event maximum flood extent; not verified 24\u201372h forecast outcomes",
+    "sar_candidates": "Research candidates only; no independent observed-flood labels"
+  },
+  "next_data_requirements": [
+    "Independently documented timestamped flooded AND observed non-flood cases with coordinates/cell IDs",
+    "Exact observed period matching (forecast issue, issue+24/48/72h]",
+    "Archived forecast issued at each chosen timestamp, never observed future rainfall",
+    "Source ID and reviewer checks for both flood and non-flood labels",
+    "Separate chronological held-out evaluation by issue date, season and event"
+  ]
+}
