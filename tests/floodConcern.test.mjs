@@ -7,4 +7,3 @@ assert.deepEqual(result.map(r=>r.level),[
 ]);
 assert.ok(result.every(r => !('probability' in r)));
 console.log('PASS floodConcern: complete horizon handling and rainfall concern classes');
-
