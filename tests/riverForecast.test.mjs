@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { evaluateRiverForecast, quantile, distanceKm, verifySunamganjNeighbor } from '../src/riverForecast.js';
+import { evaluateRiverForecast, quantile, distanceKm, verifySunamganjNeighbor } from '../frontend/src/riverForecast.js';
 assert.equal(quantile([0,10,20],.5),10);
 const histTimes=[], histFlows=[];
 for (let year=2000;year<=2021;year++) {
