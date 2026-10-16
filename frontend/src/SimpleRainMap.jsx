@@ -19,7 +19,7 @@ function Fit({features}) {
   useEffect(()=>{
     if (!features.length) return;
     const bounds=L.geoJSON({type:"FeatureCollection", features}).getBounds();
-    if(bounds.isValid()) map.fitBounds(bounds,{padding:[12,12]});
+    if(bounds.isValid()) map.fitBounds(bounds,{padding:[12,12], maxZoom:10, animate:false});
   },[features,map]);
   return null;
 }
@@ -32,7 +32,7 @@ export default function SimpleRainMap({district, hours=24}) {
       .then(data=>{if(data?.type!=="FeatureCollection" || !Array.isArray(data.features)) throw new Error("Rain map is not available right now.");setGeo(data);})
       .catch(e=>setError(e.message));
   },[]);
-  const features=useMemo(()=>geo?.features?.filter(f=>f.properties?.district===district) || [],[geo,district]);
+  const features=useMemo(()=>geo?.features?.filter(f=>String(f.properties?.district || "").toLowerCase()===String(district).toLowerCase()) || [],[geo,district]);
   const data=useMemo(()=>({type:"FeatureCollection",features}),[features]);
   return <section className="bg-white rounded-2xl border p-4 space-y-3" aria-label="Rain forecast map">
     <h3 className="text-lg font-bold">Rain map — {district}</h3>
@@ -41,7 +41,7 @@ export default function SimpleRainMap({district, hours=24}) {
       {LEGEND.map(([color,label])=><span className="flex items-center gap-2" key={label}><span style={{backgroundColor:color}} className="w-4 h-4 rounded-sm border"/>{label}</span>)}
     </div>
     {error ? <p role="status">{error}</p> : !geo ? <p>Loading rain map…</p> : !features.length ? <p>No rain map is available for this district.</p> :
-      <div className="h-[290px] sm:h-[380px] rounded-xl overflow-hidden"><MapContainer center={[24.65,91.05]} zoom={8} style={{height:"100%",width:"100%"}}>
+      <div className="h-[290px] sm:h-[380px] rounded-xl overflow-hidden"><MapContainer key={district} center={[24.65,91.05]} zoom={8} minZoom={6} maxZoom={12} maxBounds={[[20,87],[27,95]]} maxBoundsViscosity={1} style={{height:"100%",width:"100%"}}>
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <GeoJSON key={`${district}-${hours}`} data={data} style={feature=>({color:"#475569", weight:.5,fillColor:COLORS[feature.properties?.[`alert${hours}`]]||"#93c5fd",fillOpacity:.6})} onEachFeature={(feature,layer)=>{
           const mm=Number(feature.properties?.[`rain${hours}_mm`]);
