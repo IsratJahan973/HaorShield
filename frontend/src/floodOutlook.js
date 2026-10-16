@@ -1,62 +1,67 @@
 /**
- * Experimental, physically motivated hydrometeorological flood CONCERN SCREENING.
- * This must never be relabelled as a calibrated flood-event prediction or
- * flood probability. Open-Meteo GloFAS daily UTC model-day flows are NOT
- * observed station danger-level exceedances or local inundation outcomes.
+ * Experimental, location-requested hydrometeorological flood-concern screening.
+ * NOT a validated flood occurrence probability or official flood warning.
+ * River forecasts cover UTC calendar days, not exact rolling 24/48/72h.
  */
-const LEVELS = Object.freeze({
-  unknown: {label:'Flood concern cannot be assessed', rank:null, color:'text-slate-700'},
-  routine: {label:'No elevated signal detected', rank:0, color:'text-sky-800'},
-  watch: {label:'Watch: possible rising flood concern', rank:1, color:'text-amber-800'},
-  elevated: {label:'Elevated flood concern', rank:2, color:'text-orange-700'},
-  high: {label:'High flood concern', rank:3, color:'text-red-700'},
-});
-function classifyRain(item) {
-  if (!item?.usable) return null;
-  const txt = String(item.level || '').toLowerCase();
-  if (txt.includes('high rainfall')) return 3;
-  if (txt.includes('elevated rainfall')) return 2;
-  if (txt.includes('watch')) return 1;
-  if (txt.includes('low local rainfall')) return 0;
-  return null;
+const LABELS = {
+  unknown: ['Flood concern cannot be assessed', null, 'text-slate-700'],
+  routine: ['No elevated forecast signal detected', 0, 'text-sky-800'],
+  watch: ['Watch — possible flood concern', 1, 'text-amber-800'],
+  elevated: ['Elevated flood concern signal', 2, 'text-orange-700'],
+  high: ['High flood concern signal', 3, 'text-red-700']
+};
+const LIMITATION = 'Experimental forecast screening, NOT verified local flood occurrence, inundation, calibrated probability or official warning. Forecast river flow is a nearby modeled grid-cell signal with unverified river-network relevance, not a measured BWDB danger level. UTC river model days and rolling local rainfall windows differ; upstream rainfall and existing flooding may be missed.';
+function rankRain(x) {
+  if (!x?.usable) return null;
+  return ({
+    'Low local rainfall signal': 0, 'Rainfall watch': 1,
+    'Elevated rainfall concern': 2, 'High rainfall concern': 3
+  })[x.level] ?? null;
 }
-function classifyRiver(item) {
-  if (!item || !Number.isFinite(item.modeledDischargeM3s)) return null;
-  if (item.level === 'Unusually high river flow') return 3;
-  if (item.level === 'Elevated river flow') return 2;
-  if (item.level === 'Within historical flow range') return 0;
-  return null;
+function rankRiver(x) {
+  if (!x || !Number.isFinite(x.modeledDischargeM3s) || x.modeledDischargeM3s < 0 ||
+      typeof x.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(x.date) ||
+      new Date(x.date + 'T00:00:00Z').toISOString().slice(0, 10) !== x.date) return null;
+  return ({
+    'Within historical flow range': 0, 'Elevated river flow': 2,
+    'Unusually high river flow': 3
+  })[x.level] ?? null;
 }
-/** The first 1/2/3 UTC GloFAS model days are combined with rolling 24/48/72h rain.
- * They are NOT exact rolling river forecast horizons; dates are made explicit.
- */
-export function combinedFloodOutlooks(rainfallConcerns, riverForecast) {
-  return [24,48,72].map((hours, index) => {
-    const rain = rainfallConcerns?.find(v => v.horizonHours === hours);
-    const rainRank = classifyRain(rain);
-    const coveredRiverDays = riverForecast?.forecasts?.slice(0, index + 1) || [];
-    const riverRanks = coveredRiverDays.map(classifyRiver);
-    const riverValid = coveredRiverDays.length === index+1 && riverRanks.every(Number.isInteger);
-    const riverRank = riverValid ? Math.max(...riverRanks) : null;
-    // Do not declare a low-risk result from one benign factor if the other is unknown.
-    let key = 'unknown';
-    if (rainRank !== null || riverRank !== null) {
-      const highest = Math.max(rainRank ?? -1, riverRank ?? -1);
-      if (highest === 3) key='high';
-      else if (highest === 2) key='elevated';
-      else if (highest === 1) key='watch';
-      else if (rainRank !== null && riverRank !== null) key='routine';
-    }
-    const row = LEVELS[key];
+function consecutiveDates(days) {
+  return days.every((d, i) => i === 0 ||
+    Date.parse(d.date + 'T00:00:00Z') - Date.parse(days[i-1].date + 'T00:00:00Z') === 86400000);
+}
+export function combinedFloodOutlooks(rainfallConcerns, riverForecast, now = new Date()) {
+  const todayUTC = now instanceof Date && Number.isFinite(now.getTime()) ? now.toISOString().slice(0, 10) : null;
+  return [24, 48, 72].map((horizonHours, index) => {
+    const rain = Array.isArray(rainfallConcerns) ? rainfallConcerns.find(x => x.horizonHours === horizonHours) : null;
+    const localRain = rankRain(rain);
+    const days = Array.isArray(riverForecast?.forecasts) ? riverForecast.forecasts.slice(0, index + 1) : [];
+    const riverRanks = days.map(rankRiver);
+    // Never shift the first available model day forward, or accept gaps / duplicate days.
+    const usableRiver = Boolean(todayUTC && days.length === index + 1 &&
+      days[0]?.date === todayUTC && riverRanks.every(Number.isInteger) && consecutiveDates(days));
+    const river = usableRiver ? Math.max(...riverRanks) : null;
+    const complete = localRain !== null && river !== null;
+    const peak = Math.max(localRain ?? -1, river ?? -1);
+    // An absent low signal cannot be treated as safety; a present elevated signal can still be reported.
+    const category = peak >= 3 ? 'high' : peak === 2 ? 'elevated' : peak === 1 ? 'watch' : complete ? 'routine' : 'unknown';
+    const [label, rank, className] = LABELS[category];
+    const identityVerified = usableRiver && riverForecast?.localRiverIdentityVerified === true;
+    const factors = [localRain === null ? 'Local rolling rainfall unavailable' : `Rolling ${horizonHours}h rainfall: ${rain.level}`];
+    if (usableRiver) {
+      factors.push(`Regional modeled river context (${days.map(x => x.date).join(', ')}): ${days.map(x => x.level).join(' / ')}`);
+      if (!identityVerified) factors.push('Modeled river-to-local river connection not verified');
+    } else factors.push('Comparable UTC model-day river forecasts unavailable or date-misaligned');
     return {
-      horizonHours:hours,
-      label:row.label,
-      rank:row.rank,
-      className:row.color,
-      rainfallAvailable:rainRank !== null,
-      riverAvailable:riverRank !== null,
-      modeledDays:riverValid ? coveredRiverDays.map(v=>v.date) : [],
-      limitation: 'Experimental flood-concern screening, NOT predicted local inundation or verified flood-event probability. River discharge is by UTC model day; rainfall is a rolling hour window. Upstream flooding can occur without local rain.'
+      horizonHours, label, rank, className,
+      rainfallAvailable: localRain !== null, riverAvailable: usableRiver,
+      riverIdentityVerified: identityVerified,
+      evidenceQuality: !complete ? 'Partial evidence — not a flood-safety clearance' :
+        identityVerified ? 'Both model signals available; local river match independently verified' :
+        'Both signals available; river context not locally verified',
+      factors, modeledDays: usableRiver ? days.map(x => x.date) : [],
+      isValidatedFloodPrediction: false, limitation: LIMITATION
     };
   });
 }
