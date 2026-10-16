@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import FarmerCropAdvice from "./FarmerCropAdvice.jsx";
 import SimpleRainMap from "./SimpleRainMap.jsx";
 import { summarizeCurrentWeather } from "./weatherNow.js";
+import { farmerHorizon, farmerSummary } from "./farmerOutlookView.js";
 import { rollingRainfallWindows } from "./rainfallWindows.js";
 import { floodConcernOutlooks } from "./floodConcern.js";
 import { combinedFloodOutlooks } from "./floodOutlook.js";
@@ -856,41 +857,47 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
           <section aria-label="Your flood outlook" className="rounded-2xl bg-white border border-sky-200 p-5 md:p-7 space-y-4">
             <h3 className="text-2xl font-bold">Your area: {result.supportedDistrict}</h3>
             <p className="text-sm text-slate-600">Checked {new Date(result.retrievedAt).toLocaleString("en-BD", {timeZone:"Asia/Dhaka"})}</p>
-            <div className="rounded-xl border border-sky-200 bg-sky-50 p-4" aria-label="Current weather">
-              <h4 className="font-bold text-lg">Weather now</h4>
-              {result.weatherNow.fresh ? (
-                <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  <div><p className="text-xs text-slate-600">Conditions</p><p className="font-semibold">{result.weatherNow.description}</p></div>
-                  <div><p className="text-xs text-slate-600">Temperature</p><p className="font-semibold">{result.weatherNow.temperatureC === null ? "Not available" : `${result.weatherNow.temperatureC.toFixed(1)} °C`}</p></div>
-                  <div><p className="text-xs text-slate-600">Rain in latest weather report</p><p className="font-semibold">{result.weatherNow.rainMm === null ? "Not available" : `${result.weatherNow.rainMm.toFixed(1)} mm`}</p></div>
-                </div>
-              ) : <p className="mt-1">Current weather is temporarily unavailable.</p>}
-              
+            <div className="rounded-2xl bg-gradient-to-r from-sky-50 to-white border border-sky-200 p-4 md:p-5" aria-label="Current weather">
+              <div className="flex gap-3 items-center mb-3">
+                <span className="text-3xl" aria-hidden="true">{result.weatherNow.description === "Clear sky" ? "☀️" : /rain|drizzle|storm/i.test(result.weatherNow.description) ? "🌧️" : "⛅"}</span>
+                <div><h4 className="text-lg font-bold">Weather right now</h4><p className="text-sm text-slate-600">{result.weatherNow.fresh ? result.weatherNow.description : "Latest weather unavailable"}</p></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Temperature</p><p className="text-xl font-bold">{result.weatherNow.temperatureC === null ? "—" : `${result.weatherNow.temperatureC.toFixed(1)}°C`}</p></div>
+                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Rain in latest report</p><p className="text-xl font-bold">{result.weatherNow.rainMm === null ? "—" : `${result.weatherNow.rainMm.toFixed(1)} mm`}</p></div>
+                <div className="bg-white rounded-xl p-3 border border-sky-100 col-span-2 sm:col-span-1"><p className="text-xs text-slate-600">Chance of rain today*</p><p className="text-xl font-bold">{result.maxHourlyPrecipChance === null ? "—" : `${Math.round(result.maxHourlyPrecipChance)}%`}</p></div>
+              </div>
+              <p className="text-xs text-slate-500 mt-2">*Highest forecast chance in the remaining hours of the selected day, not a full-day average. Weather service estimates.</p>
             </div>
-            <h4 className="text-xl font-semibold">Flood concern over the next three days</h4>
+            <div>
+              <h4 className="text-xl font-bold">What may happen in the next 3 days?</h4>
+              <p className="text-sm text-slate-600 mt-1">Look at each period to see the rain and flood concern for your area.</p>
+            </div>
             <div className="grid gap-3 sm:grid-cols-3">
               {result.combinedFloodOutlooks.map(outlook => {
-                const uncertain = !Number.isFinite(outlook.rank) || outlook.rank < 0 || /unavailable|insufficient|cannot assess|unknown/i.test(outlook.label || "");
-                const tone = uncertain ? "bg-slate-100 border-slate-400" : outlook.rank >= 3 ? "bg-red-100 border-red-500" : outlook.rank >= 2 ? "bg-orange-100 border-orange-400" : outlook.rank === 1 ? "bg-yellow-100 border-yellow-400" : "bg-sky-100 border-sky-300";
-                const name = uncertain ? "Not enough information" : outlook.rank >= 3 ? "Very high concern" : outlook.rank >= 2 ? "High concern" : outlook.rank === 1 ? "Watch closely" : "No strong warning sign";
-                return <div key={outlook.horizonHours} className={`rounded-xl border-2 p-4 ${tone}`}>
-                  <p className="font-semibold">Next {outlook.horizonHours} hours</p>
-                  <p className="text-xl font-bold mt-2">{name}</p>
-                  <p className="text-sm mt-2">{uncertain ? "Please check official local updates." : "Early warning signs only."}</p>
+                const rainfall = result.rollingOutlooks.find(x => x.horizonHours === outlook.horizonHours);
+                const item = farmerHorizon(outlook, rainfall);
+                const tones = { sky: "bg-sky-50 border-sky-300", amber: "bg-yellow-50 border-yellow-400", orange: "bg-orange-50 border-orange-400", red: "bg-red-50 border-red-500", slate: "bg-slate-100 border-slate-300" };
+                return <div key={outlook.horizonHours} className={`rounded-2xl border-2 p-4 ${tones[item.tone]}`}>
+                  <div className="flex items-center justify-between gap-2"><p className="font-semibold">Next {outlook.horizonHours} hours</p><span className="text-2xl" aria-hidden="true">{item.icon}</span></div>
+                  <p className="text-xl font-extrabold mt-2">{item.title}</p>
+                  <p className="mt-2 font-semibold text-sm">🌧️ {item.rainText}</p>
+                  <p className="text-sm mt-2 text-slate-700">{item.detail}</p>
                 </div>;
               })}
             </div>
-            <div className="bg-emerald-50 rounded-xl p-4">
-              <h4 className="font-bold text-lg">What should I do?</h4>
-              <p className="mt-1 text-base">{result.combinedFloodOutlooks.some(x=>x.rank >= 2)
-                ? "Keep seeds, feed and tools in a dry, higher place. Watch river conditions and follow local official warnings."
-                : result.combinedFloodOutlooks.some(x=>x.rank === 1)
-                  ? "Check field drains and prepare to protect crops if water rises. Keep following official updates."
-                  : "Keep checking local river and weather news. Low rainfall does not mean flooding is impossible."}</p>
+            <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4 space-y-2">
+              <h4 className="text-lg font-bold">Why does HaorShield show this?</h4>
+              {farmerSummary(result.combinedFloodOutlooks, result.riverForecast).lines.map((line, i) => <p className="text-sm text-slate-700" key={i}>{line}</p>)}
             </div>
-            <p className="text-sm text-slate-700">Rain expected: {result.rollingOutlooks.map(x=>`${x.horizonHours}h: ${x.complete && Number.isFinite(x.rainfallMm) ? `${x.rainfallMm.toFixed(1)} mm` : "data incomplete"}`).join(" · ")}</p>
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
+              <h4 className="font-bold text-lg">What should I do?</h4>
+              <ul className="mt-2 space-y-2 list-disc ml-5 text-sm md:text-base">
+                {farmerSummary(result.combinedFloodOutlooks, result.riverForecast).advice.map((line, i) => <li key={i}>{line}</li>)}
+              </ul>
+            </div>
             {result.currentOutdated && <p role="alert" className="font-semibold text-amber-800">Weather information may be old. Check official updates.</p>}
-            <p className="text-xs text-slate-600">These are early signs, not a confirmed flood prediction. Follow official flood warnings for safety decisions.</p>
+            <p className="text-xs text-slate-600">These are early signs, not a confirmed flood prediction. Follow official Bangladesh flood warnings.</p>
           </section>
           <SimpleRainMap district={result.supportedDistrict} hours={24}/>
           <FarmerCropAdvice concerns={result.combinedFloodOutlooks} />
