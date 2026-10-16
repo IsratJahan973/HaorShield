@@ -22,6 +22,11 @@ export function exposureForDistrict(data, district, hours, forecastDate, nowMs=D
   const features=[];
   for (const f of map.features) {
     const p=f?.properties;
+    // Reject invalid or missing polygons before they become target cells.
+    const geom=f?.geometry;
+    if(!geom || !['Polygon','MultiPolygon'].includes(geom.type) ||
+       !Array.isArray(geom.coordinates) || geom.coordinates.length===0 ||
+       !Array.isArray(geom.coordinates[0]) || geom.coordinates[0].length===0) return unavailable("The land map could not be checked.");
     if(!p || !DISTRICTS.has(p.district) || p.cell_id===undefined || seen.has(String(p.cell_id))) return unavailable("The land map could not be checked.");
     seen.add(String(p.cell_id));
     if((p.cell_area_ha == null || !Number.isFinite(Number(p.cell_area_ha))) || Number(p.cell_area_ha)<=0 || (p.cropland_ha == null || !Number.isFinite(Number(p.cropland_ha))) || Number(p.cropland_ha)<0 || Number(p.cropland_ha)>Number(p.cell_area_ha)) return unavailable("The land map could not be checked.");
