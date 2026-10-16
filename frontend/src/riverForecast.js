@@ -54,6 +54,7 @@ export function evaluateRiverForecast(forecast, historical, requested, now = new
   const p90 = quantile(h.map(v => v.flow), .9);
   const p95 = quantile(h.map(v => v.flow), .95);
   if (p95 < 2) throw new Error('Modeled river discharge too small for a dependable river assessment here.');
+  if (!(now instanceof Date) || !Number.isFinite(now.getTime())) throw new Error('Invalid forecast reference time.');
   const today = now.toISOString().slice(0, 10);
   const upcoming = f.filter(v=>v.date >= today).slice(0,3);
   if (upcoming.length < 3) throw new Error('A complete three-day river forecast is unavailable.');
@@ -94,7 +95,7 @@ async function requestFlood(params, timeout = 12000) {
  * Cross-checking them only guards against a wrongly sampled small channel;
  * it cannot establish flood occurrence or station-level connectivity.
  */
-export function verifySunamganjNeighbor(primary, adjacent) {
+export function verifySunamganjNeighbor(primary, adjacent, requiredDates = null) {
   const primaryCells = parseDaily(primary);
   const adjacentCells = parseDaily(adjacent);
   const west = { latitude: 25.075005, longitude: 91.375 };
@@ -105,18 +106,26 @@ export function verifySunamganjNeighbor(primary, adjacent) {
   if (!expected) throw new Error('Sunamganj river model cell is not one of the investigated candidates.');
   if (distanceKm(adjacent.latitude, adjacent.longitude, expected.latitude, expected.longitude) >= 1)
     throw new Error('Sunamganj neighboring model cell could not be confirmed.');
-  const byDate = new Map(adjacentCells.map(v => [v.date, v.flow]));
-  for (const point of primaryCells) {
-    const q = byDate.get(point.date);
-    if (q === undefined) continue;
-    if (point.flow < 2 || q < 2 || Math.abs(point.flow - q) / Math.max(point.flow, q) > 0.30)
-      throw new Error('Nearby modeled channels disagree; local river outlook is unavailable.');
+
+  const mainByDate = new Map(primaryCells.map(v => [v.date, v.flow]));
+  const nearByDate = new Map(adjacentCells.map(v => [v.date, v.flow]));
+  // The dates being cross-checked MUST be the exact days actually shown to
+  // the user. Three unrelated overlapping days are not sufficient evidence.
+  const dates = requiredDates ?? primaryCells.slice(0, 3).map(v => v.date);
+  if (!Array.isArray(dates) || dates.length !== 3 || new Set(dates).size !== 3 ||
+      dates.some(date => !mainByDate.has(date) || !nearByDate.has(date))) {
+    throw new Error('Insufficient adjacent-cell forecast coverage for the displayed days.');
   }
-  const matching = primaryCells.filter(v => byDate.has(v.date));
-  if (matching.length < 3) throw new Error('Insufficient adjacent-cell forecast coverage.');
-  return { check: 'adjacent_GloFAS_cell_agreement', maxRelativeDifference: Math.max(
-    ...matching.map(v => Math.abs(v.flow - byDate.get(v.date)) / Math.max(v.flow, byDate.get(v.date), 1))
-  ), riverIdentityVerified: false };
+  const differences = dates.map(date => {
+    const flow = mainByDate.get(date), nearbyFlow = nearByDate.get(date);
+    if (flow < 2 || nearbyFlow < 2) throw new Error('Nearby modeled channels disagree; local river outlook is unavailable.');
+    return Math.abs(flow - nearbyFlow) / Math.max(flow, nearbyFlow);
+  });
+  const maxRelativeDifference = Math.max(...differences);
+  if (maxRelativeDifference > 0.30)
+    throw new Error('Nearby modeled channels disagree; local river outlook is unavailable.');
+  return { check: 'adjacent_GloFAS_cell_agreement', checkedDates: dates,
+    maxRelativeDifference, riverIdentityVerified: false };
 }
 
 export async function fetchRiverForecast(lat, lon) {
@@ -143,7 +152,7 @@ export async function fetchRiverForecast(lat, lon) {
       latitude:25.07,longitude:alternateLongitude,daily:'river_discharge',
       timezone:'GMT',cell_selection:'nearest',models:'forecast_v4',forecast_days:5
     });
-    result.adjacentCellCheck = verifySunamganjNeighbor(forecast,neighbor);
+    result.adjacentCellCheck = verifySunamganjNeighbor(forecast,neighbor, result.forecasts.map(day => day.date));
     result.warning += ' Adjacent high-flow modeled cell checked for consistency; Surma River identity remains unverified.';
   }
   return result;
