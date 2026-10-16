@@ -1,63 +1,39 @@
-import React, { useMemo, useState } from "react";
-import L from "leaflet";
-import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
-import { exposureForDistrict } from "./landAttention.js";
-
-const HOURS = [24, 48, 72];
-// Screening values are research indicators, not flood probabilities.
-// The threshold determines which cells are counted; shade shows how the
-// underlying indicator changes by horizon even when flagged cells are identical.
-export function mapScreeningStyle(feature, hours) {
-  const value = Number(feature?.properties?.[`sar_candidate_fraction_${hours}h`]);
-  const v = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
-  if (v < 0.10) {
-    return { color: "#64748b", weight: 0.5, fillColor: "#93c5fd", fillOpacity: 0.10 + 0.4 * Math.min(v / 0.10, 1) };
+const DISTRICTS = new Set(["Brahmanbaria","Habiganj","Kishoreganj","Moulvibazar","Netrakona","Sunamganj","Sylhet"]);
+export function exposureForDistrict(data, district, hours, forecastDate, nowMs=Date.now()) {
+  const unavailable = message => ({ok:false,message});
+  if (![24,48,72].includes(hours) || !DISTRICTS.has(district)) return unavailable("This area or period is not supported.");
+  if (!data?.map || !data?.summary) return unavailable("The land map is not ready yet.");
+  const {map,summary}=data;
+  if(map.type!=="FeatureCollection" || map.features?.length!==306 || summary.cells!==306 || summary.is_validated_flood_probability!==false || summary.is_validated_inundation_prediction!==false) return unavailable("The land map could not be checked.");
+  const issue=Date.parse(summary.generated_at || "");
+  if(!Number.isFinite(issue) || issue>nowMs+3600000 || nowMs-issue>12*3600000) return unavailable("The land map is out of date. Wait for an updated map.");
+  // A generated spatial issue is anchored to a UTC day, whereas the farmer's
+  // selected weather date is in Asia/Dhaka. Around midnight Bangladesh time,
+  // those dates can correctly differ. Verify each against its own clock.
+  const utcIssueDate = new Date(nowMs).toISOString().slice(0, 10);
+  const localDateParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka", year: "numeric", month: "2-digit", day: "2-digit"
+  }).formatToParts(new Date(nowMs));
+  const part = type => localDateParts.find(x => x.type === type)?.value;
+  const bangladeshDate = `${part("year")}-${part("month")}-${part("day")}`;
+  if(summary.issue_anchor_date_utc !== utcIssueDate) return unavailable("The land map is for an older forecast issue. Wait for the next update.");
+  if(forecastDate !== bangladeshDate) return unavailable("The land map is only available for today's outlook. Choose today to see it.");
+  const seen=new Set();
+  const features=[];
+  for (const f of map.features) {
+    const p=f?.properties;
+    if(!p || !DISTRICTS.has(p.district) || p.cell_id===undefined || seen.has(String(p.cell_id))) return unavailable("The land map could not be checked.");
+    seen.add(String(p.cell_id));
+    if(!Number.isFinite(Number(p.cell_area_ha)) || Number(p.cell_area_ha)<=0 || !Number.isFinite(Number(p.cropland_ha)) || Number(p.cropland_ha)<0 || Number(p.cropland_ha)>Number(p.cell_area_ha)) return unavailable("The land map could not be checked.");
+    for(const h of [24,48,72]) {
+      const frac=Number(p[`sar_candidate_fraction_${h}h`]);
+      if(!Number.isFinite(frac) || frac<0 || frac>1) return unavailable("The land map could not be checked.");
+    }
+    if(p.district===district) features.push(f);
   }
-  // Darker orange marks a stronger *relative research screening indicator*,
-  // not a measured level of flood severity or probability.
-  const intensity = Math.min(1, Math.max(0, (v - 0.10) / 0.15));
-  return {
-    color: "#9a3412", weight: 1.5 + intensity,
-    fillColor: intensity >= 0.67 ? "#c2410c" : intensity >= 0.33 ? "#ea580c" : "#fb923c",
-    fillOpacity: 0.40 + 0.35 * intensity
-  };
-}
-
-function FitArea({ features }) {
-  const map = useMap();
-  React.useEffect(() => {
-    if (!features.length) return;
-    const bounds = L.geoJSON({ type: "FeatureCollection", features }).getBounds();
-    if (bounds.isValid()) map.fitBounds(bounds, { padding: [16, 16], maxZoom: 10 });
-  }, [features, map]);
-  return null;
-}
-export default function LandAttentionMap({ district, forecastDate, scenarioData, scenarioError, outlooks = [] }) {
-  const [hours, setHours] = useState(24);
-  const check = useMemo(() => exposureForDistrict(scenarioData, district, hours, forecastDate), [scenarioData, district, hours, forecastDate]);
-  const selectedForecast = outlooks.find(o => o.horizonHours === hours);
-  const fmt = n => Math.round(n).toLocaleString("en-BD");
-  return <section className="rounded-2xl border border-slate-200 p-4 space-y-3" aria-label="Land needing attention">
-    <h4 className="text-lg font-bold">Land that may need attention</h4>
-    <p className="text-sm text-slate-700">Choose a day to see areas highlighted by the experimental land map.</p>
-    <div className="flex flex-wrap gap-2" role="group" aria-label="Map forecast period">
-      {HOURS.map(h => <button key={h} type="button" aria-pressed={hours === h} onClick={() => setHours(h)} className={`rounded-lg border px-4 py-2 font-semibold ${hours === h ? "bg-sky-800 text-white" : "bg-white text-slate-900"}`}>{h} hours</button>)}
-    </div>
-    {check.ok ? <>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-amber-50 p-3"><p className="text-sm">Area to monitor</p><p className="text-xl font-bold">{fmt(check.landKm2)} km²</p></div>
-        <div className="rounded-xl bg-emerald-50 p-3"><p className="text-sm">Cropland to monitor</p><p className="text-xl font-bold">{fmt(check.cropHa)} hectares</p></div>
-      </div>
-      <p className="text-sm text-slate-700">{selectedForecast?.rank >= 2 ? "Available signals show increased flood concern. The highlighted land is a separate estimate, not a prediction of flooded fields." : selectedForecast?.rank === 0 ? "No elevated signal was found in the available forecasts. Highlighted land is still a separate estimate." : "Flood concern cannot be fully checked now. Highlighted land is a separate research estimate, not a flood prediction."}</p>
-      <div style={{height:300}} className="overflow-hidden rounded-xl border" aria-label="Map showing land to monitor">
-        <MapContainer center={[24.8,91.3]} zoom={8} scrollWheelZoom={false} style={{height:"100%",width:"100%"}}>
-          <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <FitArea features={check.features} />
-          <GeoJSON key={`${district}-${hours}`} data={{type:"FeatureCollection",features:check.features}} style={feature => mapScreeningStyle(feature, hours)}/>
-        </MapContainer>
-      </div>
-      <p className="text-xs text-slate-600">Orange: area to monitor (darker orange means a stronger research screening signal). Blue: other mapped land. The same cells may stay orange over several periods. These are not predicted flooded areas.</p>
-    </> : <p className="rounded-xl bg-slate-100 p-3 text-sm" role="status">{scenarioError ? "Land map is unavailable right now." : check.message}</p>}
-    <p className="text-xs text-slate-500">Not a prediction of flooded land or crop damage. Follow official flood warnings.</p>
-  </section>;
+  if(seen.size!==306 || !features.length) return unavailable("There is no checked map for this district.");
+  const flagged=features.filter(f=>Number(f.properties[`sar_candidate_fraction_${hours}h`])>=0.10);
+  const landKm2=flagged.reduce((s,f)=>s+Number(f.properties.cell_area_ha)/100,0);
+  const cropHa=flagged.reduce((s,f)=>s+Number(f.properties.cropland_ha),0);
+  return {ok:true,features,flaggedCount:flagged.length,landKm2,cropHa};
 }
