@@ -9,18 +9,10 @@ const HOURS = [24, 48, 72];
 // underlying indicator changes by horizon even when flagged cells are identical.
 export function mapScreeningStyle(feature, hours) {
   const value = Number(feature?.properties?.[`sar_candidate_fraction_${hours}h`]);
-  const v = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
-  if (v < 0.10) {
-    return { color: "#64748b", weight: 0.5, fillColor: "#93c5fd", fillOpacity: 0.10 + 0.4 * Math.min(v / 0.10, 1) };
-  }
-  // Darker orange marks a stronger *relative research screening indicator*,
-  // not a measured level of flood severity or probability.
-  const intensity = Math.min(1, Math.max(0, (v - 0.10) / 0.15));
-  return {
-    color: "#9a3412", weight: 1.5 + intensity,
-    fillColor: intensity >= 0.67 ? "#c2410c" : intensity >= 0.33 ? "#ea580c" : "#fb923c",
-    fillOpacity: 0.40 + 0.35 * intensity
-  };
+  const targeted = Number.isFinite(value) && value >= 0.10 && value <= 1;
+  return targeted
+    ? { color: "#9a3412", weight: 2, fillColor: "#fb923c", fillOpacity: 0.60 }
+    : { color: "#94a3b8", weight: 0.45, fillColor: "#ffffff", fillOpacity: 0 };
 }
 
 function FitArea({ features }) {
@@ -47,30 +39,42 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
     <div className="flex flex-wrap gap-2" role="group" aria-label="Map forecast period">
       {HOURS.map(h => <button key={h} type="button" aria-pressed={hours === h} onClick={() => setHours(h)} className={`rounded-lg border px-4 py-2 font-semibold ${hours === h ? "bg-sky-800 text-white" : "bg-white text-slate-900"}`}>{h} hours</button>)}
     </div>
-    {check.ok ? <>
-      <p className="rounded-lg bg-sky-50 p-3 text-sm font-medium text-slate-900" role="status">{elevated ? "The latest forecasts show signs to watch. The shaded areas are separate research estimates, not places predicted to flood." : low ? "No increased flood concern was detected in the checked forecasts. The shaded areas show where flooding may have greater impact if conditions worsen — not where flooding is expected now." : "There is not enough forecast information to assess flood concern. Shaded areas are research estimates only, not an active flood warning."}</p>
+    {level === 0 ? (
+      <p className="rounded-xl bg-sky-50 p-4 text-sm text-slate-900" role="status">
+        No increased flood concern was detected for the selected period. No land is being highlighted as a current forecast target. Keep checking local water levels and official warnings.
+      </p>
+    ) : level === undefined || level === null || !Number.isFinite(level) ? (
+      <p className="rounded-xl bg-slate-100 p-4 text-sm" role="status">
+        The flood outlook is unavailable for this period, so HaorShield cannot identify areas needing attention from a current flood forecast.
+      </p>
+    ) : !check.ok ? (
+      <p className="rounded-xl bg-slate-100 p-4 text-sm" role="status">{scenarioError ? "The land map is unavailable right now." : check.message}</p>
+    ) : check.flaggedCount === 0 ? (
+      <p className="rounded-xl bg-sky-50 p-4 text-sm" role="status">The available forecast indicates increased concern, but the geographic screening did not identify particular mapped cells for this period. Check official local warnings.</p>
+    ) : <>
+      <p className="rounded-xl bg-amber-50 p-3 text-sm font-medium text-slate-900" role="status">
+        Increased flood concern was detected for this period. Orange cells show separate research areas to check more closely, NOT land predicted to flood.
+      </p>
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-amber-50 p-3"><p className="text-sm">Mapped land to keep in mind</p><p className="text-xl font-bold">{fmt(check.landKm2)} km²</p></div>
-        <div className="rounded-xl bg-emerald-50 p-3"><p className="text-sm">Cropland in mapped areas</p><p className="text-xl font-bold">{fmt(check.cropHa)} hectares</p></div>
+        <div className="rounded-xl bg-amber-50 p-3"><p className="text-sm">Screened land to monitor</p><p className="text-xl font-bold">{fmt(check.landKm2)} km²</p></div>
+        <div className="rounded-xl bg-emerald-50 p-3"><p className="text-sm">Cropland in those cells</p><p className="text-xl font-bold">{fmt(check.cropHa)} hectares</p></div>
       </div>
       <div className="rounded-xl border border-slate-200 p-3 space-y-2" aria-label="Land map color key">
-        <p className="text-sm font-bold text-slate-900">What do the map colors mean?</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm text-slate-800">
-          <div className="flex items-center gap-2"><span aria-hidden="true" className="h-5 w-7 shrink-0 rounded border border-blue-400 bg-blue-200" />Blue: other mapped areas</div>
-          <div className="flex items-center gap-2"><span aria-hidden="true" className="h-5 w-7 shrink-0 rounded border border-orange-500 bg-orange-300" />Light orange: lower attention area</div>
-          <div className="flex items-center gap-2"><span aria-hidden="true" className="h-5 w-7 shrink-0 rounded border border-orange-800 bg-orange-700" />Dark orange: higher attention area</div>
+        <p className="text-sm font-bold">Map key</p>
+        <div className="flex flex-wrap gap-4 text-sm">
+          <span className="flex items-center gap-2"><span aria-hidden="true" className="h-5 w-7 rounded border border-orange-700 bg-orange-400" />Orange: research areas to check</span>
+          <span className="flex items-center gap-2"><span aria-hidden="true" className="h-5 w-7 rounded border border-slate-300 bg-slate-100" />Unshaded: other areas</span>
         </div>
-        <p className="text-xs text-slate-700">Attention colors compare a research indicator, not actual flood risk. They do not predict flood depth, flood chance or flooded land. Blue does not mean safe.</p>
       </div>
-      <div style={{height:300}} className="overflow-hidden rounded-xl border" aria-label="Map showing land to monitor">
+      <div style={{height:300}} className="overflow-hidden rounded-xl border" aria-label="Map showing research areas to check">
         <MapContainer center={[24.8,91.3]} zoom={8} scrollWheelZoom={false} style={{height:"100%",width:"100%"}}>
           <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <FitArea features={check.features} />
           <GeoJSON key={`${district}-${hours}`} data={{type:"FeatureCollection",features:check.features}} style={feature => mapScreeningStyle(feature, hours)}/>
         </MapContainer>
       </div>
-      <p className="text-xs text-slate-600">The same areas may appear at 24, 48 and 72 hours. Darker shading means a stronger research indicator, not a forecast of deeper flooding.</p>
-    </> : <p className="rounded-xl bg-slate-100 p-3 text-sm" role="status">{scenarioError ? "Land map is unavailable right now." : check.message}</p>}
+      <p className="text-xs text-slate-600">Orange cells are selected separately for each period using the research screening data. Their locations may stay the same when the data do not change enough to cross the threshold. These are not forecast flood boundaries.</p>
+    </>}
     <p className="text-xs text-slate-500">This research map is separate from the live flood-concern check. For safety, follow official flood warnings.</p>
   </section>;
 }
