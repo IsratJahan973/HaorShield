@@ -275,6 +275,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   const [date, setDate] = useState(initialForecastDate());
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [freshnessClock, setFreshnessClock] = useState(Date.now());
   const [error, setError] = useState("");
   const [scenarioData, setScenarioData] = useState(null);
   const [scenarioError, setScenarioError] = useState("");
@@ -471,6 +472,15 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       }
     );
   }
+
+  // Refresh active forecast results every 15 minutes; update age indicator each minute.
+  // Do not claim old data are current while browser tab remains open.
+  useEffect(() => {
+    if (!result) return undefined;
+    const clock = setInterval(() => setFreshnessClock(Date.now()), 60_000);
+    const refresh = setInterval(() => { if (!document.hidden) checkRisk(); }, 15 * 60_000);
+    return () => { clearInterval(clock); clearInterval(refresh); };
+  }, [result?.retrievedAt]);
 
   function getLocation() {
     if (locationMode === "search") {
@@ -880,7 +890,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         <div className="space-y-5">
           <section aria-label="Your flood outlook" className="rounded-2xl bg-white border border-sky-200 p-5 md:p-7 space-y-4">
             <h3 className="text-2xl font-bold">Your area: {result.supportedDistrict}</h3>
-            <p className="text-sm text-slate-600">Checked {new Date(result.retrievedAt).toLocaleString("en-BD", {timeZone:"Asia/Dhaka"})}</p>
+            <p className="text-sm text-slate-600">Checked {new Date(result.retrievedAt).toLocaleString("en-BD", {timeZone:"Asia/Dhaka"})} · Refreshes every 15 minutes</p>
+            {freshnessClock - Date.parse(result.retrievedAt) > 30*60_000 && <p role="alert" className="rounded-lg bg-amber-50 p-3 text-amber-900 font-semibold">Forecast is over 30 minutes old. Press Check My Location for new results.</p>}
             <div>
               <h4 className="text-xl font-bold">What may happen in the next 3 days?</h4>
               <p className="text-sm text-slate-600 mt-1">Look at each period to see the rain and flood concern for your area.</p>
