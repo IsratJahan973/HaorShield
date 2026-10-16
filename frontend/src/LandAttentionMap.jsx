@@ -7,9 +7,9 @@ const HOURS = [24, 48, 72];
 // Screening values are research indicators, not flood probabilities.
 // The threshold determines which cells are counted; shade shows how the
 // underlying indicator changes by horizon even when flagged cells are identical.
-export function mapScreeningStyle(feature, hours) {
+export function mapScreeningStyle(feature, hours, highlight = true) {
   const value = Number(feature?.properties?.[`sar_candidate_fraction_${hours}h`]);
-  const targeted = Number.isFinite(value) && value >= 0.10 && value <= 1;
+  const targeted = highlight && Number.isFinite(value) && value >= 0.10 && value <= 1;
   return targeted
     ? { color: "#9a3412", weight: 2, fillColor: "#fb923c", fillOpacity: 0.60 }
     : { color: "#94a3b8", weight: 0.45, fillColor: "#ffffff", fillOpacity: 0 };
@@ -35,14 +35,28 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
   const heading = low ? "Areas that may be vulnerable if flooding develops" : elevated ? "Areas that may need attention if flooding develops" : "Areas to know about if flooding develops";
   return <section className="rounded-2xl border border-slate-200 p-4 space-y-3" aria-label="Land needing attention">
     <h4 className="text-lg font-bold">{heading}</h4>
-    <p className="text-sm text-slate-700">This map shows areas identified through geographic research. It does not predict which fields will flood. Choose a period to see the research map.</p>
+    <p className="text-sm text-slate-700">Select 24, 48 or 72 hours to view your district. The map always stays visible; shaded research areas appear only when the experimental forecast shows increased concern. This is not a map of predicted flooding.</p>
     <div className="flex flex-wrap gap-2" role="group" aria-label="Map forecast period">
       {HOURS.map(h => <button key={h} type="button" aria-pressed={hours === h} onClick={() => setHours(h)} className={`rounded-lg border px-4 py-2 font-semibold ${hours === h ? "bg-sky-800 text-white" : "bg-white text-slate-900"}`}>{h} hours</button>)}
     </div>
     {level === 0 ? (
-      <p className="rounded-xl bg-sky-50 p-4 text-sm text-slate-900" role="status">
-        No increased flood concern was detected for the selected period. No land is being highlighted as a current forecast target. Keep checking local water levels and official warnings.
-      </p>
+      !check.ok ? <p className="rounded-xl bg-slate-100 p-4 text-sm" role="status">{check.message}</p> : <>
+        <p className="rounded-xl bg-sky-50 p-4 text-sm text-slate-900" role="status">
+          No elevated flood concern was detected in the available forecast for this period. The map stays visible for location reference, but no land is identified as a current forecast target.
+        </p>
+        <div className="rounded-xl border border-slate-200 p-3 space-y-1" aria-label="Land map color key">
+          <p className="text-sm font-bold">Map key</p>
+          <p className="text-sm"><span aria-hidden="true" className="inline-block align-middle mr-2 h-4 w-6 border border-slate-400 bg-slate-100" />Outlined cells: mapped area only; no current target highlighted.</p>
+        </div>
+        <div style={{height:300}} className="overflow-hidden rounded-xl border" aria-label="Location reference map with no forecast targets highlighted">
+          <MapContainer center={[24.8,91.3]} zoom={8} scrollWheelZoom={false} style={{height:"100%",width:"100%"}}>
+            <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <FitArea features={check.features} />
+            <GeoJSON key={`${district}-${hours}-reference`} data={{type:"FeatureCollection",features:check.features}} style={feature => mapScreeningStyle(feature, hours, false)}/>
+          </MapContainer>
+        </div>
+        <p className="text-xs text-slate-600">This does not mean flooding is impossible. No flood-affected land area can be estimated from this result.</p>
+      </>
     ) : level === undefined || level === null || !Number.isFinite(level) ? (
       <p className="rounded-xl bg-slate-100 p-4 text-sm" role="status">
         The flood outlook is unavailable for this period, so HaorShield cannot identify areas needing attention from a current flood forecast.
