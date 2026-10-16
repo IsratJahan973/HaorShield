@@ -42,10 +42,6 @@ jobs:
         continue-on-error: true
         run: python scripts/update_glofas_exposure.py
 
-      - name: Update experimental SAR candidate scenarios (optional external feeds)
-        continue-on-error: true
-        run: python scripts/update_sar_spatial_forecast.py
-
       - name: Validate published datasets and scientific disclosures
         run: python scripts/verify_public_data.py
 
@@ -62,8 +58,6 @@ jobs:
           git add frontend/public/data/haorshield_glofas_forecast.json
           git add frontend/public/data/haorshield_future_exposure_screening.geojson
           git add frontend/public/data/haorshield_future_exposure_summary.json
-          git add frontend/public/data/haorshield_sar_future_candidates.geojson
-          git add frontend/public/data/haorshield_sar_future_summary.json
           if ! git diff --cached --quiet; then
             git commit -m "Refresh HaorShield rainfall and experimental outlook"
             git pull --rebase origin main
