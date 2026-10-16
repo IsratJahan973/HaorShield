@@ -20,3 +20,11 @@ assert.equal(exposureForDistrict(data,"unknown",24,"2026-10-16",now).ok,false);
 assert.equal(exposureForDistrict(data,"Sunamganj",17,"2026-10-16",now).ok,false);
 const damaged=structuredClone(data);damaged.map.features[0].properties.cell_area_ha=-1;assert.equal(exposureForDistrict(damaged,"Sunamganj",24,"2026-10-16",now).ok,false);
 console.log("8 land-map checks passed");
+
+// Null screening / area values are missing evidence, not legitimate zeros.
+for (const property of ['sar_candidate_fraction_24h','cell_area_ha','cropland_ha']) {
+  const broken=structuredClone(data);
+  broken.map.features[0].properties[property]=null;
+  assert.equal(exposureForDistrict(broken,'Sunamganj',24,'2026-10-16',now).ok,false,property);
+}
+console.log('PASS missing spatial fraction and area validation');
