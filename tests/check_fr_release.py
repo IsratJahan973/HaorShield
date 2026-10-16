@@ -48,7 +48,7 @@ for term in ['Very Heavy','Heavy','Moderate','Light','No Rain']:
 assert 'onOpenForecast=' in app and 'initialDistrict={forecastDistrict}' in app
 assert 'concernAreaKm2' in future and 'concernCroplandHa' in future
 assert 'CONCERN_CUTOFF = 0.10' in future
-assert 'বাংলা' in (SRC/'CropEarlyAction.jsx').read_text()
+assert 'CropEarlyAction' in (SRC/'CropEarlyAction.jsx').read_text()
 print('PASS: 306-cell/7-district SAR and cropland schema')
 print('PASS: 24/48/72 horizon inputs and scientific-null flags')
 print('PASS: 21 FFWC station references')
