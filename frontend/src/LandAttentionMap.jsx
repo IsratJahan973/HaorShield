@@ -4,6 +4,25 @@ import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import { exposureForDistrict } from "./landAttention.js";
 
 const HOURS = [24, 48, 72];
+// Screening values are research indicators, not flood probabilities.
+// The threshold determines which cells are counted; shade shows how the
+// underlying indicator changes by horizon even when flagged cells are identical.
+export function mapScreeningStyle(feature, hours) {
+  const value = Number(feature?.properties?.[`sar_candidate_fraction_${hours}h`]);
+  const v = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
+  if (v < 0.10) {
+    return { color: "#64748b", weight: 0.5, fillColor: "#93c5fd", fillOpacity: 0.10 + 0.4 * Math.min(v / 0.10, 1) };
+  }
+  // Darker orange marks a stronger *relative research screening indicator*,
+  // not a measured level of flood severity or probability.
+  const intensity = Math.min(1, Math.max(0, (v - 0.10) / 0.15));
+  return {
+    color: "#9a3412", weight: 1.5 + intensity,
+    fillColor: intensity >= 0.67 ? "#c2410c" : intensity >= 0.33 ? "#ea580c" : "#fb923c",
+    fillOpacity: 0.40 + 0.35 * intensity
+  };
+}
+
 function FitArea({ features }) {
   const map = useMap();
   React.useEffect(() => {
@@ -34,13 +53,10 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
         <MapContainer center={[24.8,91.3]} zoom={8} scrollWheelZoom={false} style={{height:"100%",width:"100%"}}>
           <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <FitArea features={check.features} />
-          <GeoJSON key={`${district}-${hours}`} data={{type:"FeatureCollection",features:check.features}} style={feature => {
-            const flagged = Number(feature.properties[`sar_candidate_fraction_${hours}h`]) >= 0.10;
-            return {color:flagged?"#c2410c":"#64748b",weight:flagged?2:0.5,fillColor:flagged?"#fb923c":"#93c5fd",fillOpacity:flagged?0.45:0.10};
-          }}/>
+          <GeoJSON key={`${district}-${hours}`} data={{type:"FeatureCollection",features:check.features}} style={feature => mapScreeningStyle(feature, hours)}/>
         </MapContainer>
       </div>
-      <p className="text-xs text-slate-600">Orange: area to monitor. Blue: other mapped land. These are complete map cells, not land predicted to be underwater.</p>
+      <p className="text-xs text-slate-600">Orange: area to monitor (darker orange means a stronger research screening signal). Blue: other mapped land. The same cells may stay orange over several periods. These are not predicted flooded areas.</p>
     </> : <p className="rounded-xl bg-slate-100 p-3 text-sm" role="status">{scenarioError ? "Land map is unavailable right now." : check.message}</p>}
     <p className="text-xs text-slate-500">Not a prediction of flooded land or crop damage. Follow official flood warnings.</p>
   </section>;
