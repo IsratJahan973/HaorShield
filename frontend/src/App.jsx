@@ -33,12 +33,10 @@ import {
 
 const NAV = [
   { id: "checker", label: "Check My Risk", icon: ShieldCheck },
-  { id: "rainfall-risk", label: "Rainfall Risk Map", icon: CloudRain },
-  { id: "flood-exposure", label: "Flood Exposure", icon: Map },
-  { id: "future-outlook", label: "24/48/72h Spatial Outlook", icon: Map },
-  { id: "model-evidence", label: "Model Evidence", icon: BrainCircuit },
-  { id: "weather", label: "Live Weather", icon: CloudSun },
-  { id: "model", label: "Classification", icon: BrainCircuit }
+  { id: "rainfall-risk", label: "Rainfall Map", icon: CloudRain },
+  { id: "flood-exposure", label: "Cropland Exposure", icon: Sprout },
+  { id: "future-outlook", label: "Next 3 Days: Area Outlook", icon: Map },
+  { id: "weather", label: "Weather Forecast", icon: CloudSun },
 ];
 
 const formatHa = (value) =>
@@ -58,6 +56,7 @@ function StatCard({ title, value, subtitle }) {
 
 export default function App() {
   const [page, setPage] = useState("checker");
+  const [showResearchNote, setShowResearchNote] = useState(false);
   const [forecastDistrict, setForecastDistrict] = useState("All Districts");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [data, setData] = useState(null);
@@ -158,10 +157,10 @@ export default function App() {
             </button>
             <div>
               <h2 className="font-bold text-xl text-slate-900">
-                {NAV.find((item) => item.id === page)?.label}
+                {NAV.find((item) => item.id === page)?.label || (page === "model-evidence" ? "Research Methods" : "Historical Classification")}
               </h2>
               <p className="text-xs text-slate-500">
-                Live rainfall outlook and experimental agricultural flood screening
+                Rainfall outlook, cropland screening and practical guidance
               </p>
             </div>
           </div>
@@ -170,7 +169,7 @@ export default function App() {
 
         <div className="p-5 lg:p-9 max-w-7xl mx-auto">
           <div role="note" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-slate-800">
-            <strong>Research demonstration:</strong> Rainfall forecasts are weather forecasts. Future flood maps show experimental screening scenarios, not verified inundation or calibrated flood probabilities. For safety-critical decisions, consult official FFWC warnings.
+            <strong>Know before you act:</strong> HaorShield highlights areas that may need attention based on forecast rainfall and experimental map screening. It cannot confirm where flooding will happen. Follow <a href="https://ffwc.gov.bd/" target="_blank" rel="noreferrer" className="font-semibold underline">official flood warnings</a> for safety decisions.
           </div>
           {error && (
             <div className="bg-red-50 text-red-700 p-4 rounded-xl">
@@ -182,6 +181,10 @@ export default function App() {
 
           {page === "checker" && (
             <>
+              <section className="mb-5 rounded-2xl border border-cyan-100 bg-white p-5 shadow-sm" aria-label="How to use HaorShield">
+                <h3 className="text-lg font-bold text-slate-900">Check your area's rainfall and cropland outlook</h3>
+                <p className="mt-1 text-sm text-slate-600">Choose your location, review the next 24, 48 or 72 hours, and check practical crop precautions. Maps show areas to monitor, not confirmed flooding.</p>
+              </section>
 <FloodRiskChecker
               onOpenMap={() => setPage("rainfall-risk")}
               onOpenForecast={({ district }) => {
@@ -315,11 +318,19 @@ export default function App() {
             <Classification />
           )}
 
-          <p className="text-xs text-slate-400 mt-8">
-            HaorShield provides retrospective MODIS flood-detection
-            classifications and estimated agricultural exposure.
-            Experimental future SAR scenarios are available, but they are not independently validated forecasts or verified crop damage.
-          </p>
+          <footer className="mt-8 border-t border-slate-200 pt-5 text-xs text-slate-600 space-y-3">
+            <p>HaorShield is a research-based early-awareness tool. Area and cropland figures are screening estimates, not measured flood damage.</p>
+            <div className="flex flex-wrap gap-4 items-center">
+              <button type="button" className="underline hover:text-cyan-800" onClick={() => setShowResearchNote((open) => !open)} aria-expanded={showResearchNote}>
+                {showResearchNote ? "Hide" : "About"} data and limitations
+              </button>
+              <button type="button" className="underline hover:text-cyan-800" onClick={() => {setPage("model-evidence"); window.scrollTo?.({ top: 0, behavior: "smooth" });}}>Research methods and evidence</button>
+              <a className="underline hover:text-cyan-800" href="https://ffwc.gov.bd/" target="_blank" rel="noreferrer">Official FFWC warnings</a>
+            </div>
+            {showResearchNote && <div className="rounded-xl bg-slate-100 p-4 text-sm text-slate-700">
+              <p><strong>Rainfall:</strong> weather forecast, which may change. <strong>Area and cropland outlook:</strong> experimental screening, not measured inundation or loss. <strong>Flood probability:</strong> not independently validated. Check official warnings before important safety decisions.</p>
+            </div>}
+          </footer>
         </div>
       </main>
     </div>
