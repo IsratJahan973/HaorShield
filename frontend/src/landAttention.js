@@ -7,8 +7,17 @@ export function exposureForDistrict(data, district, hours, forecastDate, nowMs=D
   if(map.type!=="FeatureCollection" || map.features?.length!==306 || summary.cells!==306 || summary.is_validated_flood_probability!==false || summary.is_validated_inundation_prediction!==false) return unavailable("The land map could not be checked.");
   const issue=Date.parse(summary.generated_at || "");
   if(!Number.isFinite(issue) || issue>nowMs+3600000 || nowMs-issue>12*3600000) return unavailable("The land map is out of date. Wait for an updated map.");
-  // Scenario is tied to a UTC issue date. Do not attach a different date's rainfall outlook.
-  if(summary.issue_anchor_date_utc !== forecastDate) return unavailable("The land map is for another date, so no area estimate is shown.");
+  // A generated spatial issue is anchored to a UTC day, whereas the farmer's
+  // selected weather date is in Asia/Dhaka. Around midnight Bangladesh time,
+  // those dates can correctly differ. Verify each against its own clock.
+  const utcIssueDate = new Date(nowMs).toISOString().slice(0, 10);
+  const localDateParts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Dhaka", year: "numeric", month: "2-digit", day: "2-digit"
+  }).formatToParts(new Date(nowMs));
+  const part = type => localDateParts.find(x => x.type === type)?.value;
+  const bangladeshDate = `${part("year")}-${part("month")}-${part("day")}`;
+  if(summary.issue_anchor_date_utc !== utcIssueDate) return unavailable("The land map is for an older forecast issue. Wait for the next update.");
+  if(forecastDate !== bangladeshDate) return unavailable("The land map is only available for today's outlook. Choose today to see it.");
   const seen=new Set();
   const features=[];
   for (const f of map.features) {
