@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { evaluateRiverForecast, quantile, distanceKm } from '../src/riverForecast.js';
+import { evaluateRiverForecast, quantile, distanceKm, verifySunamganjNeighbor } from '../src/riverForecast.js';
 assert.equal(quantile([0,10,20],.5),10);
 const histTimes=[], histFlows=[];
 for (let year=2000;year<=2021;year++) {
@@ -24,3 +24,11 @@ assert.throws(()=>evaluateRiverForecast({...forecast, latitude:24.99},historical
 assert.throws(()=>evaluateRiverForecast(forecast,{...historical,latitude:24.95}, {lat:24.89,lon:91.87},new Date('2026-10-16T04:00:00Z')), /grid cells differ/);
 assert.equal(v.localRiverIdentityVerified,false);
 assert.equal(v.modelCellDistanceKm,0);
+
+// Station-specific adjacent-channel guard. Geometry/identity remains unverified.
+const west = {latitude:25.075005,longitude:91.375,daily:{time:['2026-10-16','2026-10-17','2026-10-18'],river_discharge:[543.5,533.56,525.02]}};
+const east = {latitude:25.075005,longitude:91.42502,daily:{time:['2026-10-16','2026-10-17','2026-10-18'],river_discharge:[539.75,531.11,522.6]}};
+assert.equal(verifySunamganjNeighbor(west,east).riverIdentityVerified,false);
+assert.throws(()=>verifySunamganjNeighbor(west,{...east,daily:{...east.daily,river_discharge:[3,3,3]}}),/disagree/);
+assert.throws(()=>verifySunamganjNeighbor(west,{...east,longitude:92}),/could not be confirmed/);
+console.log('Sunamganj adjacent-cell safety checks passed');
