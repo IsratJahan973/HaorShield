@@ -32,3 +32,20 @@ assert.equal(verifySunamganjNeighbor(west,east).riverIdentityVerified,false);
 assert.throws(()=>verifySunamganjNeighbor(west,{...east,daily:{...east.daily,river_discharge:[3,3,3]}}),/disagree/);
 assert.throws(()=>verifySunamganjNeighbor(west,{...east,longitude:92}),/could not be confirmed/);
 console.log('Sunamganj adjacent-cell safety checks passed');
+
+// High-flow scenario: must indicate unusually high discharge, not flood occurrence.
+const high = {...forecast, daily: {...forecast.daily, river_discharge:[400, 370, 360]}};
+const highResult = evaluateRiverForecast(high,historical,{lat:24.89,lon:91.87},new Date('2026-10-16T01:00:00Z'));
+assert.equal(highResult.forecasts[0].level, 'Unusually high river flow');
+assert.equal(highResult.validatedFloodProbability, false);
+assert.equal(highResult.verifiedInundationPrediction, false);
+
+// Critical guard: unrelated overlapping past dates cannot validate displayed days.
+const wrongDays = {...east, daily:{time:['2026-10-13','2026-10-14','2026-10-15'],river_discharge:[539,531,522]}};
+assert.throws(()=>verifySunamganjNeighbor(west,wrongDays,['2026-10-16','2026-10-17','2026-10-18']), /coverage/);
+assert.deepEqual(verifySunamganjNeighbor(west,east,['2026-10-16','2026-10-17','2026-10-18']).checkedDates,
+  ['2026-10-16','2026-10-17','2026-10-18']);
+const missingDay = {...east, daily:{time:['2026-10-16','2026-10-18','2026-10-19'],river_discharge:[539,522,516]}};
+assert.throws(()=>verifySunamganjNeighbor(west,missingDay,['2026-10-16','2026-10-17','2026-10-18']), /coverage/);
+assert.throws(()=>evaluateRiverForecast({...forecast, daily:{time:forecast.daily.time,river_discharge:[210,null,120]}},historical,{lat:24.89,lon:91.87},new Date('2026-10-16T01:00:00Z')), /complete three-day/);
+console.log('Displayed-date alignment, high-flow, and missing-data tests passed');
