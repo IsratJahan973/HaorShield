@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {combinedFloodOutlooks} from '../frontend/src/floodOutlook.js';
+const rain=(levels)=>[24,48,72].map((h,i)=>({horizonHours:h,level:levels[i],usable:true}));
+const river=(levels)=>({forecasts:levels.map((level,i)=>({date:`2026-10-${16+i}`,modeledDischargeM3s:100,level}))});
+let r=combinedFloodOutlooks(rain(['Low local rainfall signal','Low local rainfall signal','Low local rainfall signal']),river(['Within historical flow range','Unusually high river flow','Within historical flow range']));
+assert.deepEqual(r.map(x=>x.rank),[0,3,3]);
+r=combinedFloodOutlooks(rain(['High rainfall concern','Low local rainfall signal','Low local rainfall signal']),null);
+assert.equal(r[0].rank,3); assert.equal(r[1].rank,null); assert.equal(r[1].riverAvailable,false);
+r=combinedFloodOutlooks(rain(['Low local rainfall signal','Low local rainfall signal','Low local rainfall signal']),null);
+assert.deepEqual(r.map(x=>x.rank),[null,null,null]);
+r=combinedFloodOutlooks(null,river(['Unusually high river flow','Within historical flow range','Within historical flow range']));
+assert.deepEqual(r.map(x=>x.rank),[3,3,3]);
+r=combinedFloodOutlooks(rain(['Rainfall watch','Elevated rainfall concern','Low local rainfall signal']),river(['Within historical flow range','Within historical flow range','Within historical flow range']));
+assert.deepEqual(r.map(x=>x.rank),[1,2,0]);
+console.log('PASS: five flood-concern screening scenarios');
