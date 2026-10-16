@@ -1,6 +1,9 @@
 
 import React, { useEffect, useState } from "react";
 import CropEarlyAction from "./CropEarlyAction.jsx";
+import { rollingRainfallWindows } from "./rainfallWindows.js";
+import { floodConcernOutlooks } from "./floodConcern.js";
+import { fetchRiverForecast } from "./riverForecast.js";
 import { MapPin, CalendarDays, CloudRain, ShieldCheck,
          AlertTriangle, Search, Loader2 } from "lucide-react";
 
@@ -536,6 +539,17 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         }))
         .filter(h => h.timestamp > now);
 
+      const rollingOutlooks = rollingRainfallWindows(futureHours, now);
+      const floodConcern = floodConcernOutlooks(rollingOutlooks);
+      // A genuine hydrological river-flow forecast, not rainfall relabeled as flood probability.
+      // Do not suppress weather results if the separate river service is unavailable.
+      let riverForecast = null;
+      let riverForecastError = null;
+      try {
+        riverForecast = await fetchRiverForecast(selected.lat, selected.lon);
+      } catch (hydrologyError) {
+        riverForecastError = hydrologyError.message || 'River-flow forecast unavailable';
+      }
       const end = new Date(now.getTime() + 72 * 3600000);
 
       const selectedHours = futureHours.filter(h =>
@@ -604,6 +618,10 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         retrievedAt,
         observationTime,
         currentOutdated,
+        rollingOutlooks,
+        floodConcern,
+        riverForecast,
+        riverForecastError,
         status,
         current: data.current,
         spatial
@@ -860,12 +878,41 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                 <p className="text-sm text-slate-600">{result.status.label} rainfall · {result.maxHourlyPrecipChance === null ? "Rain chance unavailable" : `${result.maxHourlyPrecipChance.toFixed(0)}% highest hourly rain chance`}</p>
               </div>
               <div className="rounded-xl bg-amber-50 p-4">
-                <p className="text-sm font-semibold text-slate-700">Will flooding happen?</p>
-                <p className="text-lg font-bold text-amber-950">Not yet possible to predict reliably</p>
-                <p className="text-sm text-slate-700">Little local rain does not rule out river or upstream flooding. Follow official warnings.</p>
+                <p className="text-sm font-semibold text-slate-700">Tomorrow's modeled river flow</p>
+                <p className="text-lg font-bold text-amber-950">{result.riverForecast?.forecasts?.[0]?.level || 'River forecast unavailable'}</p>
+                <p className="text-sm text-slate-700">{result.riverForecast ? 'Actual GloFAS river-discharge forecast, NOT verified flood occurrence or inundation.' : result.riverForecastError || 'No hydrological forecast available.'}</p>
               </div>
             </div>
-            <p className="text-sm text-slate-700">Below you can check your weather, choose your crop for practical precautions, and view separately labelled experimental map screening. The map is not a prediction of flooded land.</p>
+            <div className="rounded-xl border border-sky-200 p-4" aria-label="Three-day modeled river-discharge prediction">
+              <h4 className="font-bold text-slate-900">River-flow prediction — next 3 days</h4>
+              {result.riverForecast ? <>
+                <div className="overflow-x-auto mt-2"><table className="w-full text-sm text-left min-w-[350px]">
+                  <thead><tr><th className="py-2">Day</th><th>Modeled river flow</th><th>Compared with historical flow</th></tr></thead>
+                  <tbody>{result.riverForecast.forecasts.map(f => <tr className="border-t" key={f.date}>
+                    <td className="py-2">{f.date}</td><td>{f.modeledDischargeM3s.toFixed(0)} m³/s</td>
+                    <td className="font-semibold">{f.level}</td>
+                  </tr>)}</tbody>
+                </table></div>
+                <p className="text-xs text-slate-600 mt-2">Copernicus GloFAS v4 simulated river flow; historical 90th and 95th percentiles calculated from {result.riverForecast.referenceYears}. The nearest modeled river may not match your location. This cannot confirm whether land will flood and is not an official FFWC/BWDB danger-level warning.</p>
+              </> : <p className="text-sm text-amber-800 mt-2">{result.riverForecastError || 'Hydrological forecast unavailable'}. No river-risk category is assigned without model data. Check official FFWC warnings.</p>}
+            </div>
+            <div className="overflow-x-auto" aria-label="Live 24, 48 and 72-hour rainfall outlook">
+              <p className="font-semibold text-slate-900 mb-2">Rainfall expected from now</p>
+              <table className="w-full text-left text-sm min-w-[410px]">
+                <thead><tr className="border-b"><th className="py-2">Next</th><th className="py-2">Rain</th><th className="py-2">Rainfall intensity</th><th className="py-2">Flood concern screening</th><th className="py-2">Forecast coverage</th></tr></thead>
+                <tbody>{result.rollingOutlooks.map(outlook => (
+                  <tr key={outlook.horizonHours} className="border-b">
+                    <td className="py-2 font-semibold">{outlook.horizonHours}h</td>
+                    <td className="py-2">{outlook.hoursAvailable ? `${outlook.rainfallMm.toFixed(1)} mm` : 'Unavailable'}</td>
+                    <td className="py-2">{outlook.category}</td>
+                    <td className={`py-2 font-semibold ${result.floodConcern.find(x => x.horizonHours === outlook.horizonHours)?.className || ''}`}>{result.floodConcern.find(x => x.horizonHours === outlook.horizonHours)?.level || 'Unavailable'}</td>
+                    <td className="py-2">{outlook.complete ? 'Available' : `${outlook.hoursAvailable}/${outlook.horizonHours}h — partial`}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+              <p className="mt-2 text-xs text-slate-600">Rolling Open-Meteo rainfall forecasts for this location, updated when you select Check My Location. Rainfall intensity is based on the average mm per 24 hours; the three windows overlap. The flood-concern categories are nonvalidated rainfall indicators, not predicted flood events, probabilities, or official warnings. Low local rain does not mean flood safety.</p>
+            </div>
+            <p className="text-sm text-slate-700">Choose your crop for practical precautions. The experimental spatial map is separate and does not predict flooded land.</p>
             {result.currentOutdated && <p className="text-sm font-semibold text-amber-900" role="alert">Current weather observations may be outdated.</p>}
           </section>
           <div className={`rounded-2xl border p-6 ${result.status.background}`}>
