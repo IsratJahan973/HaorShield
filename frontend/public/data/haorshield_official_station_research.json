@@ -1,0 +1,106 @@
+{
+  "title": "Official 2017 station-level evidence and 2026 experimental model research",
+  "status": "RESEARCH_ONLY_NOT_VALIDATED",
+  "source_note": "2017 danger-level and annual peak figures transcribed from FFWC Annual Flood Report 2017 Table 3.3 (printed page 43), per research evidence file. Verify with report before publication as authoritative.",
+  "station_evidence": [
+    {
+      "station_id": "KU01",
+      "station_name": "Sherpur",
+      "danger_level_2017_mPWD": 9,
+      "peak_level_2017_mPWD": 9.45,
+      "days_above_danger_2017": 76,
+      "candidate_proxy_positive_24h_2017": 37,
+      "original_stor_measurements_2017": 0
+    },
+    {
+      "station_id": "KU02",
+      "station_name": "Amalshid",
+      "danger_level_2017_mPWD": 15.85,
+      "peak_level_2017_mPWD": 17.34,
+      "days_above_danger_2017": 76,
+      "candidate_proxy_positive_24h_2017": 120,
+      "original_stor_measurements_2017": 0
+    },
+    {
+      "station_id": "ME02",
+      "station_name": "Bhairab Bazar",
+      "danger_level_2017_mPWD": 6.25,
+      "peak_level_2017_mPWD": 6.05,
+      "days_above_danger_2017": null,
+      "candidate_proxy_positive_24h_2017": 0,
+      "original_stor_measurements_2017": 0
+    },
+    {
+      "station_id": "NM01",
+      "station_name": "Durgapur",
+      "danger_level_2017_mPWD": 13,
+      "peak_level_2017_mPWD": 14.45,
+      "days_above_danger_2017": 5,
+      "candidate_proxy_positive_24h_2017": 0,
+      "original_stor_measurements_2017": 0
+    },
+    {
+      "station_id": "SW174",
+      "station_name": "Sylhet",
+      "danger_level_2017_mPWD": 11.25,
+      "peak_level_2017_mPWD": 11.7,
+      "days_above_danger_2017": 11,
+      "candidate_proxy_positive_24h_2017": 12,
+      "original_stor_measurements_2017": 0
+    },
+    {
+      "station_id": "SW267",
+      "station_name": "Sunamganj",
+      "danger_level_2017_mPWD": 8.25,
+      "peak_level_2017_mPWD": 9.19,
+      "days_above_danger_2017": 15,
+      "candidate_proxy_positive_24h_2017": 3,
+      "original_stor_measurements_2017": 0
+    }
+  ],
+  "station_warning": "Annual danger-level exceedance evidence cannot label individual days, 24/48/72-hour predictions, or cropland inundation. mPWD requires datum consistency checking.",
+  "benchmark_note": "Results from user's Kaggle Cell 3: six-station retrospective research candidate labels, 2013\u20132025 subset, chronological 80/20 split around May 2024. Observed regime in candidate data does not establish verified observed non-flood outcomes. Historical issue-time availability is unverified. These models are NOT used for public forecasting.",
+  "benchmarks": [
+    {
+      "horizon_hours": 24,
+      "roc_auc_proxy": 0.871813,
+      "average_precision_proxy": 0.268555,
+      "brier_proxy": 0.104548,
+      "baseline_brier": 0.025272,
+      "precision_at_05_proxy": 0.091176,
+      "recall_at_05_proxy": 0.704545,
+      "TP_proxy": 62,
+      "FP_proxy": 618,
+      "TN_proxy": 2912,
+      "FN_proxy": 26
+    },
+    {
+      "horizon_hours": 48,
+      "roc_auc_proxy": 0.832085,
+      "average_precision_proxy": 0.217049,
+      "brier_proxy": 0.140711,
+      "baseline_brier": 0.04153,
+      "precision_at_05_proxy": 0.105314,
+      "recall_at_05_proxy": 0.762238,
+      "TP_proxy": 109,
+      "FP_proxy": 926,
+      "TN_proxy": 2549,
+      "FN_proxy": 34
+    },
+    {
+      "horizon_hours": 72,
+      "roc_auc_proxy": 0.814775,
+      "average_precision_proxy": 0.199128,
+      "brier_proxy": 0.160476,
+      "baseline_brier": 0.056512,
+      "precision_at_05_proxy": 0.133389,
+      "recall_at_05_proxy": 0.823834,
+      "TP_proxy": 159,
+      "FP_proxy": 1033,
+      "TN_proxy": 2386,
+      "FN_proxy": 34
+    }
+  ],
+  "training_features": "37 rainfall, soil moisture, discharge and terrain candidate features; some discharge fields missing up to 83.3% of test rows.",
+  "deployment_approved": false
+}
