@@ -290,11 +290,12 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestions = selectedPlace ? [] : districtSuggestions(searchText);
 
+  const mapRefreshCycle = Math.floor(freshnessClock / (15 * 60_000));
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([
-      fetch("/data/haorshield_sar_future_candidates.geojson", { signal: controller.signal }),
-      fetch("/data/haorshield_sar_future_summary.json", { signal: controller.signal })
+      fetch("/data/haorshield_sar_future_candidates.geojson", { signal: controller.signal, cache: "no-store" }),
+      fetch("/data/haorshield_sar_future_summary.json", { signal: controller.signal, cache: "no-store" })
     ]).then(async ([mapResponse, summaryResponse]) => {
       if (!mapResponse.ok || !summaryResponse.ok) throw new Error("Experimental map data unavailable.");
       const [map, summary] = await Promise.all([mapResponse.json(), summaryResponse.json()]);
@@ -310,7 +311,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       if (err.name !== "AbortError") setScenarioError(err.message);
     });
     return () => controller.abort();
-  }, []);
+  }, [mapRefreshCycle]);
 
   useEffect(() => {
     fetch("/data/haorshield_districts.geojson")
