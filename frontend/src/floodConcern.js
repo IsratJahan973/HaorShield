@@ -7,9 +7,13 @@ export function floodConcernOutlooks(rollingOutlooks) {
   if (!Array.isArray(rollingOutlooks)) return [];
   return rollingOutlooks.map(w => {
     const h = Number(w.horizonHours);
-    const total = Number(w.rainfallMm);
-    const rate = Number(w.rainfallPer24h);
-    if (![24,48,72].includes(h) || !w.complete || !Number.isFinite(total) || !Number.isFinite(rate) || total < 0 || rate < 0) {
+    const total = w.rainfallMm == null ? NaN : Number(w.rainfallMm);
+    const rate = w.rainfallPer24h == null ? NaN : Number(w.rainfallPer24h);
+    // Reject contradictory upstream data instead of accepting whichever signal is higher.
+    const expectedRate = total * 24 / h;
+    const consistent = Number.isFinite(expectedRate) && Number.isFinite(rate) &&
+      Math.abs(rate - expectedRate) <= Math.max(0.01, expectedRate * 0.001);
+    if (![24,48,72].includes(h) || !w.complete || !Number.isFinite(total) || !Number.isFinite(rate) || total < 0 || rate < 0 || !consistent) {
       return { horizonHours: h, level: 'Unavailable', detail: 'Complete rainfall forecast unavailable', className: 'text-slate-700', usable: false };
     }
     // Cumulative totals capture persistent multi-day rainfall; rates capture bursts.
