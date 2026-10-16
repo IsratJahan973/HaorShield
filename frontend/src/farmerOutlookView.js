@@ -5,10 +5,10 @@ export function farmerHorizon(outlook, rainfall) {
   const completeRain = rainfall?.complete === true && Number.isFinite(rainfall?.rainfallMm) && rainfall.rainfallMm >= 0;
   const rainText = completeRain ? `${rainfall.rainfallMm.toFixed(1)} mm rain expected` : 'Rain forecast incomplete';
   const levels = [
-    { title: 'No strong warning sign', detail: 'No strong signal detected in available forecasts.', tone: 'sky', icon: '☁️' },
-    { title: 'Keep watch', detail: 'Conditions need closer attention.', tone: 'amber', icon: '👀' },
-    { title: 'Prepare now', detail: 'Forecast conditions suggest increased concern.', tone: 'orange', icon: '⚠️' },
-    { title: 'High concern', detail: 'Take precautions and check official warnings.', tone: 'red', icon: '🚨' }
+    { title: 'No elevated flood signal', detail: 'No strong signal detected in available forecasts.', tone: 'sky', icon: '☁️' },
+    { title: 'Flood concern: Watch', detail: 'Conditions need closer attention.', tone: 'amber', icon: '👀' },
+    { title: 'Flood concern: Elevated', detail: 'Forecast conditions suggest increased concern.', tone: 'orange', icon: '⚠️' },
+    { title: 'Flood concern: High', detail: 'Take precautions and check official warnings.', tone: 'red', icon: '🚨' }
   ];
   return {
     ...(unknown ? {title: 'Not enough information', detail: 'Check official updates; the forecast is incomplete.', tone: 'slate', icon: '❔'} : levels[outlook.rank]),
