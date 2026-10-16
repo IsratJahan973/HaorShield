@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import CropEarlyAction from "./CropEarlyAction.jsx";
+import FarmerCropAdvice from "./FarmerCropAdvice.jsx";
 import SimpleRainMap from "./SimpleRainMap.jsx";
 import { summarizeCurrentWeather } from "./weatherNow.js";
 import { rollingRainfallWindows } from "./rainfallWindows.js";
@@ -865,7 +865,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                   <div><p className="text-xs text-slate-600">Rain in latest weather report</p><p className="font-semibold">{result.weatherNow.rainMm === null ? "Not available" : `${result.weatherNow.rainMm.toFixed(1)} mm`}</p></div>
                 </div>
               ) : <p className="mt-1">Current weather is temporarily unavailable.</p>}
-              <p className="mt-2 text-xs text-slate-600">Weather service estimate, not a local rain-gauge measurement. Forecast rain for coming days is shown below.</p>
+              
             </div>
             <h4 className="text-xl font-semibold">Flood concern over the next three days</h4>
             <div className="grid gap-3 sm:grid-cols-3">
@@ -893,13 +893,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
             <p className="text-xs text-slate-600">These are early signs, not a confirmed flood prediction. Follow official flood warnings for safety decisions.</p>
           </section>
           <SimpleRainMap district={result.supportedDistrict} hours={24}/>
-          <CropEarlyAction
-            district={result.supportedDistrict}
-            date={result.date}
-            rainfallMm={result.rainfall}
-            forecastHours={result.hours}
-            isOutdated={result.currentOutdated}
-          />
+          <FarmerCropAdvice concerns={result.combinedFloodOutlooks} />
         </div>
       )}
     </div>
