@@ -29,3 +29,15 @@ for (const district of ['Brahmanbaria','Habiganj','Kishoreganj','Moulvibazar','N
   assert.equal(C(R(low),F(normal)).length,3,district);
 }
 console.log('PASS: 14 hydrometeorological behavior assertions + seven-district schema checks');
+
+// Malformed upstream dates must fail closed without crashing the website.
+for (const badDate of ['2026-13-40', '2026-02-30', 'not-a-date', null]) {
+  const invalid = F(normal);
+  invalid.forecasts[0].date = badDate;
+  assert.doesNotThrow(() => C(R(low), invalid));
+  assert.deepEqual(C(R(low), invalid).map(x => x.rank), [null, null, null]);
+}
+const invalidLater = F(normal);
+invalidLater.forecasts[1].date = '2026-15-99';
+assert.deepEqual(C(R(low), invalidLater).map(x => x.rank), [0, null, null]);
+console.log('PASS malformed date handling for river forecast');
