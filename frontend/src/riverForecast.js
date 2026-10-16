@@ -56,8 +56,19 @@ export function evaluateRiverForecast(forecast, historical, requested, now = new
   if (p95 < 2) throw new Error('Modeled river discharge too small for a dependable river assessment here.');
   if (!(now instanceof Date) || !Number.isFinite(now.getTime())) throw new Error('Invalid forecast reference time.');
   const today = now.toISOString().slice(0, 10);
-  const upcoming = f.filter(v=>v.date >= today).slice(0,3);
-  if (upcoming.length < 3) throw new Error('A complete three-day river forecast is unavailable.');
+  // Require exactly the current UTC day and next two UTC days. Never shift
+  // a missing first day forward and mislabel its lead time.
+  const expectedDates = [0, 1, 2].map(offset => {
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + offset));
+    return d.toISOString().slice(0, 10);
+  });
+  const byDate = new Map();
+  for (const row of f) {
+    if (byDate.has(row.date)) throw new Error('Duplicate river forecast date; forecast unavailable.');
+    byDate.set(row.date, row);
+  }
+  const upcoming = expectedDates.map(date => byDate.get(date));
+  if (upcoming.some(row => !row)) throw new Error('A complete three-day river forecast for today and the next two days is unavailable.');
   return {
     source: 'Copernicus GloFAS v4 / Open-Meteo Flood API',
     sourceKind: 'modeled river discharge',
