@@ -1,7 +1,7 @@
 // Plain-language presentation of existing experimental signals; no new forecast model.
 export function farmerHorizon(outlook, rainfall) {
   const validRank = Number.isInteger(outlook?.rank) && outlook.rank >= 0 && outlook.rank <= 3;
-  const unknown = !validRank || /unavailable|insufficient|cannot assess|unknown/i.test(outlook?.label || '');
+  const unknown = !validRank || /unavailable|insufficient|cannot assess|unknown/i.test(outlook?.label || '') || (rainfall?.complete !== true && outlook?.riverAvailable !== true);
   const completeRain = rainfall?.complete === true && Number.isFinite(rainfall?.rainfallMm) && rainfall.rainfallMm >= 0;
   const rainText = completeRain ? `${rainfall.rainfallMm.toFixed(1)} mm rain expected` : 'Rain forecast incomplete';
   const levels = [
