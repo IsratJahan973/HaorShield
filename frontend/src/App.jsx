@@ -161,7 +161,7 @@ export default function App() {
                 {NAV.find((item) => item.id === page)?.label}
               </h2>
               <p className="text-xs text-slate-500">
-                Live weather and flood intelligence for northeastern Bangladesh
+                Live rainfall outlook and experimental agricultural flood screening
               </p>
             </div>
           </div>
@@ -169,6 +169,9 @@ export default function App() {
         </header>
 
         <div className="p-5 lg:p-9 max-w-7xl mx-auto">
+          <div role="note" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-slate-800">
+            <strong>Research demonstration:</strong> Rainfall forecasts are weather forecasts. Future flood maps show experimental screening scenarios, not verified inundation or calibrated flood probabilities. For safety-critical decisions, consult official FFWC warnings.
+          </div>
           {error && (
             <div className="bg-red-50 text-red-700 p-4 rounded-xl">
               {error}
