@@ -88,6 +88,37 @@ async function requestFlood(params, timeout = 12000) {
     return await res.json();
   } finally { clearTimeout(timer); }
 }
+/**
+ * Sunamganj's two nearby high-discharge GloFAS cells were identified in a
+ * 2026-10-16 diagnostic. Neither has a VERIFIED Surma-network identity.
+ * Cross-checking them only guards against a wrongly sampled small channel;
+ * it cannot establish flood occurrence or station-level connectivity.
+ */
+export function verifySunamganjNeighbor(primary, adjacent) {
+  const primaryCells = parseDaily(primary);
+  const adjacentCells = parseDaily(adjacent);
+  const west = { latitude: 25.075005, longitude: 91.375 };
+  const east = { latitude: 25.075005, longitude: 91.42502 };
+  const primaryIsWest = distanceKm(primary.latitude, primary.longitude, west.latitude, west.longitude) < 1;
+  const primaryIsEast = distanceKm(primary.latitude, primary.longitude, east.latitude, east.longitude) < 1;
+  const expected = primaryIsWest ? east : primaryIsEast ? west : null;
+  if (!expected) throw new Error('Sunamganj river model cell is not one of the investigated candidates.');
+  if (distanceKm(adjacent.latitude, adjacent.longitude, expected.latitude, expected.longitude) >= 1)
+    throw new Error('Sunamganj neighboring model cell could not be confirmed.');
+  const byDate = new Map(adjacentCells.map(v => [v.date, v.flow]));
+  for (const point of primaryCells) {
+    const q = byDate.get(point.date);
+    if (q === undefined) continue;
+    if (point.flow < 2 || q < 2 || Math.abs(point.flow - q) / Math.max(point.flow, q) > 0.30)
+      throw new Error('Nearby modeled channels disagree; local river outlook is unavailable.');
+  }
+  const matching = primaryCells.filter(v => byDate.has(v.date));
+  if (matching.length < 3) throw new Error('Insufficient adjacent-cell forecast coverage.');
+  return { check: 'adjacent_GloFAS_cell_agreement', maxRelativeDifference: Math.max(
+    ...matching.map(v => Math.abs(v.flow - byDate.get(v.date)) / Math.max(v.flow, byDate.get(v.date), 1))
+  ), riverIdentityVerified: false };
+}
+
 export async function fetchRiverForecast(lat, lon) {
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error('Invalid coordinates.');
   const coordinates = { latitude:lat, longitude:lon, daily:'river_discharge', timezone:'GMT', cell_selection:'nearest' };
@@ -102,5 +133,18 @@ export async function fetchRiverForecast(lat, lon) {
   const [forecast, historical] = await Promise.all([
     requestFlood({...coordinates, models:'forecast_v4', forecast_days:5}), history
   ]);
-  return evaluateRiverForecast(forecast,historical,{lat,lon});
+  const result = evaluateRiverForecast(forecast,historical,{lat,lon});
+  // This condition targets the Sunamganj district reference point, NOT all
+  // arbitrary GPS locations in the district.
+  if (distanceKm(lat, lon, 25.07, 91.40) <= 1) {
+    const isWest = distanceKm(forecast.latitude, forecast.longitude, 25.075005, 91.375) < 1;
+    const alternateLongitude = isWest ? 91.45 : 91.40;
+    const neighbor = await requestFlood({
+      latitude:25.07,longitude:alternateLongitude,daily:'river_discharge',
+      timezone:'GMT',cell_selection:'nearest',models:'forecast_v4',forecast_days:5
+    });
+    result.adjacentCellCheck = verifySunamganjNeighbor(forecast,neighbor);
+    result.warning += ' Adjacent high-flow modeled cell checked for consistency; Surma River identity remains unverified.';
+  }
+  return result;
 }
