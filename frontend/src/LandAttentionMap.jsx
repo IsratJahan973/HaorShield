@@ -29,7 +29,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
         <div className="rounded-xl bg-amber-50 p-3"><p className="text-sm">Area to monitor</p><p className="text-xl font-bold">{fmt(check.landKm2)} km²</p></div>
         <div className="rounded-xl bg-emerald-50 p-3"><p className="text-sm">Cropland to monitor</p><p className="text-xl font-bold">{fmt(check.cropHa)} hectares</p></div>
       </div>
-      <p className="text-sm text-slate-700">{selectedForecast?.rank >= 2 ? "Flood concern is elevated in the weather and river screening. This land map is a separate, unverified guide." : "The weather and river forecast does not currently show an elevated signal. These map areas are separate research estimates."}</p>
+      <p className="text-sm text-slate-700">{selectedForecast?.rank >= 2 ? "Available signals show increased flood concern. The highlighted land is a separate estimate, not a prediction of flooded fields." : selectedForecast?.rank === 0 ? "No elevated signal was found in the available forecasts. Highlighted land is still a separate estimate." : "Flood concern cannot be fully checked now. Highlighted land is a separate research estimate, not a flood prediction."}</p>
       <div style={{height:300}} className="overflow-hidden rounded-xl border" aria-label="Map showing land to monitor">
         <MapContainer center={[24.8,91.3]} zoom={8} scrollWheelZoom={false} style={{height:"100%",width:"100%"}}>
           <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
