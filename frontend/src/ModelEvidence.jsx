@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import CompetitionEvidence from "./CompetitionEvidence.jsx";
 
 const URL = "/data/haorshield_model_evidence.json";
 const BENCHMARK_URL = "/data/haorshield_model_benchmark.json";
@@ -60,6 +61,7 @@ export default function ModelEvidence() {
 
   return (
     <section className="space-y-5">
+      <CompetitionEvidence />
       <div className="rounded-xl border bg-white p-5">
         <h2 className="text-2xl font-bold">
           Model Evidence and Limitations
