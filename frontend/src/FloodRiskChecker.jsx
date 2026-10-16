@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import CropEarlyAction from "./CropEarlyAction.jsx";
 import { rollingRainfallWindows } from "./rainfallWindows.js";
 import { floodConcernOutlooks } from "./floodConcern.js";
+import { combinedFloodOutlooks } from "./floodOutlook.js";
 import { fetchRiverForecast } from "./riverForecast.js";
 import { MapPin, CalendarDays, CloudRain, ShieldCheck,
          AlertTriangle, Search, Loader2 } from "lucide-react";
@@ -620,6 +621,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         currentOutdated,
         rollingOutlooks,
         floodConcern,
+        combinedFloodOutlooks: combinedFloodOutlooks(floodConcern, riverForecast),
         riverForecast,
         riverForecastError,
         status,
@@ -882,6 +884,18 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                 <p className="text-lg font-bold text-amber-950">{result.riverForecast?.forecasts?.[0]?.level || 'River forecast unavailable'}</p>
                 <p className="text-sm text-slate-700">{result.riverForecast ? 'Actual GloFAS river-discharge forecast, NOT verified flood occurrence or inundation.' : result.riverForecastError || 'No hydrological forecast available.'}</p>
               </div>
+            </div>
+            <div className="rounded-xl border border-amber-200 p-4" aria-label="Experimental flood concern over three outlook horizons">
+              <h4 className="font-bold text-slate-900">Flood concern — next 24, 48 and 72 hours</h4>
+              <div className="overflow-x-auto mt-2"><table className="w-full text-sm text-left">
+                <thead><tr><th className="py-2">Period</th><th>Combined flood-concern screening</th><th>Signals available</th></tr></thead>
+                <tbody>{result.combinedFloodOutlooks.map(x => <tr key={x.horizonHours} className="border-t">
+                  <td className="py-2 font-semibold">{x.horizonHours}h</td>
+                  <td className={`font-semibold ${x.className}`}>{x.label}</td>
+                  <td>{x.rainfallAvailable ? 'Rain' : 'Rain unavailable'}; {x.riverAvailable ? 'Modeled river flow' : 'River unavailable'}</td>
+                </tr>)}</tbody>
+              </table></div>
+              <p className="mt-2 text-xs text-slate-600">Experimental screening using forecast rainfall and nearby modeled river flow. River days are UTC calendar days, not exact rolling 24/48/72-hour river forecasts. This is NOT a verified flood-occurrence prediction, probability, or forecast of flooded cropland. Normal river flow does not mean flood safety; always consult official FFWC warnings.</p>
             </div>
             <div className="rounded-xl border border-sky-200 p-4" aria-label="Three-day modeled river-discharge prediction">
               <h4 className="font-bold text-slate-900">River-flow prediction — next 3 days</h4>
