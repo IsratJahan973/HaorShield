@@ -878,7 +878,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                 <p className="text-sm text-slate-600">{result.status.label} rainfall · {result.maxHourlyPrecipChance === null ? "Rain chance unavailable" : `${result.maxHourlyPrecipChance.toFixed(0)}% highest hourly rain chance`}</p>
               </div>
               <div className="rounded-xl bg-amber-50 p-4">
-                <p className="text-sm font-semibold text-slate-700">Tomorrow's modeled river flow</p>
+                <p className="text-sm font-semibold text-slate-700">Today's modeled river flow</p>
                 <p className="text-lg font-bold text-amber-950">{result.riverForecast?.forecasts?.[0]?.level || 'River forecast unavailable'}</p>
                 <p className="text-sm text-slate-700">{result.riverForecast ? 'Actual GloFAS river-discharge forecast, NOT verified flood occurrence or inundation.' : result.riverForecastError || 'No hydrological forecast available.'}</p>
               </div>
@@ -893,7 +893,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                     <td className="font-semibold">{f.level}</td>
                   </tr>)}</tbody>
                 </table></div>
-                <p className="text-xs text-slate-600 mt-2">Copernicus GloFAS v4 simulated river flow; historical 90th and 95th percentiles calculated from {result.riverForecast.referenceYears}. The nearest modeled river may not match your location. This cannot confirm whether land will flood and is not an official FFWC/BWDB danger-level warning.</p>
+                <p className="text-xs text-slate-600 mt-2">Copernicus GloFAS v4 simulated river flow; historical 90th and 95th percentiles calculated from {result.riverForecast.referenceYears}. Model cell {result.riverForecast.modelCellDistanceKm} km from selected location; river identity unverified. Dates are UTC calendar days, not rolling 24/48/72-hour periods. This cannot confirm whether land will flood and is not an official FFWC/BWDB danger-level warning.</p>
               </> : <p className="text-sm text-amber-800 mt-2">{result.riverForecastError || 'Hydrological forecast unavailable'}. No river-risk category is assigned without model data. Check official FFWC warnings.</p>}
             </div>
             <div className="overflow-x-auto" aria-label="Live 24, 48 and 72-hour rainfall outlook">
