@@ -24,10 +24,10 @@ export function exposureForDistrict(data, district, hours, forecastDate, nowMs=D
     const p=f?.properties;
     if(!p || !DISTRICTS.has(p.district) || p.cell_id===undefined || seen.has(String(p.cell_id))) return unavailable("The land map could not be checked.");
     seen.add(String(p.cell_id));
-    if(!Number.isFinite(Number(p.cell_area_ha)) || Number(p.cell_area_ha)<=0 || !Number.isFinite(Number(p.cropland_ha)) || Number(p.cropland_ha)<0 || Number(p.cropland_ha)>Number(p.cell_area_ha)) return unavailable("The land map could not be checked.");
+    if((p.cell_area_ha == null || !Number.isFinite(Number(p.cell_area_ha))) || Number(p.cell_area_ha)<=0 || (p.cropland_ha == null || !Number.isFinite(Number(p.cropland_ha))) || Number(p.cropland_ha)<0 || Number(p.cropland_ha)>Number(p.cell_area_ha)) return unavailable("The land map could not be checked.");
     for(const h of [24,48,72]) {
       const frac=Number(p[`sar_candidate_fraction_${h}h`]);
-      if(!Number.isFinite(frac) || frac<0 || frac>1) return unavailable("The land map could not be checked.");
+      if(p[`sar_candidate_fraction_${h}h`] == null || !Number.isFinite(frac) || frac<0 || frac>1) return unavailable("The land map could not be checked.");
     }
     if(p.district===district) features.push(f);
   }
