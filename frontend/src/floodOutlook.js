@@ -18,10 +18,14 @@ function rankRain(x) {
     'Elevated rainfall concern': 2, 'High rainfall concern': 3
   })[x.level] ?? null;
 }
+function validUtcDate(date) {
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  const timestamp = Date.parse(date + 'T00:00:00Z');
+  return Number.isFinite(timestamp) && new Date(timestamp).toISOString().slice(0, 10) === date;
+}
 function rankRiver(x) {
   if (!x || !Number.isFinite(x.modeledDischargeM3s) || x.modeledDischargeM3s < 0 ||
-      typeof x.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(x.date) ||
-      new Date(x.date + 'T00:00:00Z').toISOString().slice(0, 10) !== x.date) return null;
+      !validUtcDate(x.date)) return null;
   return ({
     'Within historical flow range': 0, 'Elevated river flow': 2,
     'Unusually high river flow': 3
