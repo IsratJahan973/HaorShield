@@ -12,5 +12,7 @@ for r in data['benchmarks']:
     assert 0 <= r['precision_at_05_proxy'] <= 1
     assert r['brier_proxy'] > r['baseline_brier']
 assert 'CompetitionEvidence' in (p/'frontend/src/ModelEvidence.jsx').read_text()
-assert 'Research demonstration:' in (p/'frontend/src/App.jsx').read_text()
+assert 'Know before you act:' in (p/'frontend/src/App.jsx').read_text()
+assert 'Research methods and evidence' in (p/'frontend/src/App.jsx').read_text()
+assert '{ id: "model-evidence"' not in (p/'frontend/src/App.jsx').read_text()
 print('PASS: 2026 research evidence remains visibly experimental')
