@@ -270,6 +270,7 @@ function HistoricalAgriculturalExposure({ district }) {
 
 export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   const [district, setDistrict] = useState("Sunamganj");
+  const [activeSection, setActiveSection] = useState("flood");
   const [date, setDate] = useState(initialForecastDate());
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -494,6 +495,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
     setLoading(true);
     setError("");
     setResult(null);
+    setActiveSection("flood");
 
     try {
       const selected = getLocation();
@@ -641,13 +643,27 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-2xl p-5 md:p-7 border">
+    <div className="space-y-5">
+      <nav aria-label="HaorShield sections" className="grid grid-cols-2 md:grid-cols-4 gap-2 rounded-2xl border bg-white p-2 sticky top-0 z-20 shadow-sm">
+        {[
+          ["flood", "🌊 Flood Check"],
+          ["weather", "☀️ Weather"],
+          ["map", "🗺️ Rain Map"],
+          ["crops", "🌾 Crop Advice"]
+        ].map(([key, title]) => (
+          <button key={key} type="button" aria-current={activeSection === key ? "page" : undefined}
+            onClick={() => setActiveSection(key)}
+            className={`rounded-xl px-3 py-3 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-700 ${activeSection === key ? "bg-sky-800 text-white" : "text-slate-800 bg-slate-50 hover:bg-sky-100"}`}>
+            {title}
+          </button>
+        ))}
+      </nav>
+      {activeSection === "flood" && <div className="bg-white rounded-2xl p-5 md:p-7 border">
         <h2 className="text-2xl md:text-3xl font-bold">Will rain or rising rivers affect my area?</h2>
         <p className="text-slate-700 mt-2">Choose your area. Check what the next three days may bring.</p>
-      </div>
+      </div>}
 
-      <div className="bg-white border rounded-2xl p-6 space-y-5">
+      {activeSection === "flood" && <div className="bg-white border rounded-2xl p-6 space-y-5">
         <div className="space-y-3">
           <label className="font-semibold text-sm block">
             Location selection method
@@ -844,31 +860,26 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
             <><Search size={19}/> Check My Location</>
           )}
         </button>
-      </div>
+      </div>}
 
-      {error && (
+      {activeSection === "flood" && error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-800">
           {error}
         </div>
       )}
 
-      {result && (
+      {!result && activeSection !== "flood" && (
+        <div className="bg-white rounded-2xl border p-6 space-y-3">
+          <h2 className="text-xl font-bold">Check your area first</h2>
+          <p>Choose a district or use your location to see updated information here.</p>
+          <button type="button" onClick={() => setActiveSection("flood")} className="bg-sky-800 text-white rounded-lg px-5 py-3 font-semibold">Go to Flood Check</button>
+        </div>
+      )}
+      {result && activeSection === "flood" && (
         <div className="space-y-5">
           <section aria-label="Your flood outlook" className="rounded-2xl bg-white border border-sky-200 p-5 md:p-7 space-y-4">
             <h3 className="text-2xl font-bold">Your area: {result.supportedDistrict}</h3>
             <p className="text-sm text-slate-600">Checked {new Date(result.retrievedAt).toLocaleString("en-BD", {timeZone:"Asia/Dhaka"})}</p>
-            <div className="rounded-2xl bg-gradient-to-r from-sky-50 to-white border border-sky-200 p-4 md:p-5" aria-label="Current weather">
-              <div className="flex gap-3 items-center mb-3">
-                <span className="text-3xl" aria-hidden="true">{result.weatherNow.description === "Clear sky" ? "☀️" : /rain|drizzle|storm/i.test(result.weatherNow.description) ? "🌧️" : "⛅"}</span>
-                <div><h4 className="text-lg font-bold">Weather right now</h4><p className="text-sm text-slate-600">{result.weatherNow.fresh ? result.weatherNow.description : "Latest weather unavailable"}</p></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Temperature</p><p className="text-xl font-bold">{result.weatherNow.temperatureC === null ? "—" : `${result.weatherNow.temperatureC.toFixed(1)}°C`}</p></div>
-                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Rain in latest report</p><p className="text-xl font-bold">{result.weatherNow.rainMm === null ? "—" : `${result.weatherNow.rainMm.toFixed(1)} mm`}</p></div>
-                <div className="bg-white rounded-xl p-3 border border-sky-100 col-span-2 sm:col-span-1"><p className="text-xs text-slate-600">Chance of rain today*</p><p className="text-xl font-bold">{result.maxHourlyPrecipChance === null ? "—" : `${Math.round(result.maxHourlyPrecipChance)}%`}</p></div>
-              </div>
-              <p className="text-xs text-slate-500 mt-2">*Highest forecast chance in the remaining hours of the selected day, not a full-day average. Weather service estimates.</p>
-            </div>
             <div>
               <h4 className="text-xl font-bold">What may happen in the next 3 days?</h4>
               <p className="text-sm text-slate-600 mt-1">Look at each period to see the rain and flood concern for your area.</p>
@@ -899,9 +910,43 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
             {result.currentOutdated && <p role="alert" className="font-semibold text-amber-800">Weather information may be old. Check official updates.</p>}
             <p className="text-xs text-slate-600">These are early signs, not a confirmed flood prediction. Follow official Bangladesh flood warnings.</p>
           </section>
-          <SimpleRainMap district={result.supportedDistrict} hours={24}/>
-          <FarmerCropAdvice concerns={result.combinedFloodOutlooks} />
         </div>
+      )}
+      {result && activeSection === "weather" && (
+        <section className="bg-white rounded-2xl border p-5 md:p-7 space-y-4" aria-label="Local weather">
+          <h2 className="text-2xl font-bold">Weather in {result.supportedDistrict}</h2>
+                      <div className="rounded-2xl bg-gradient-to-r from-sky-50 to-white border border-sky-200 p-4 md:p-5" aria-label="Current weather">
+              <div className="flex gap-3 items-center mb-3">
+                <span className="text-3xl" aria-hidden="true">{result.weatherNow.description === "Clear sky" ? "☀️" : /rain|drizzle|storm/i.test(result.weatherNow.description) ? "🌧️" : "⛅"}</span>
+                <div><h4 className="text-lg font-bold">Weather right now</h4><p className="text-sm text-slate-600">{result.weatherNow.fresh ? result.weatherNow.description : "Latest weather unavailable"}</p></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Temperature</p><p className="text-xl font-bold">{result.weatherNow.temperatureC === null ? "—" : `${result.weatherNow.temperatureC.toFixed(1)}°C`}</p></div>
+                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Rain in latest report</p><p className="text-xl font-bold">{result.weatherNow.rainMm === null ? "—" : `${result.weatherNow.rainMm.toFixed(1)} mm`}</p></div>
+                <div className="bg-white rounded-xl p-3 border border-sky-100 col-span-2 sm:col-span-1"><p className="text-xs text-slate-600">Chance of rain today*</p><p className="text-xl font-bold">{result.maxHourlyPrecipChance === null ? "—" : `${Math.round(result.maxHourlyPrecipChance)}%`}</p></div>
+              </div>
+              <p className="text-xs text-slate-500 mt-2">*Highest forecast chance in the remaining hours of the selected day, not a full-day average. Weather service estimates.</p>
+            </div>
+
+          <h3 className="text-lg font-semibold">Rain expected</h3>
+          <div className="grid grid-cols-3 gap-2">
+            {result.rollingOutlooks.map(item => <div key={item.horizonHours} className="rounded-xl bg-sky-50 border p-3">
+              <p className="text-sm font-semibold">Next {item.horizonHours} hours</p>
+              <p className="text-lg font-bold">{Number.isFinite(item.rainfallMm) ? `${item.rainfallMm.toFixed(1)} mm` : "Not available"}</p>
+            </div>)}
+          </div>
+        </section>
+      )}
+      {result && activeSection === "map" && (
+        <section aria-label="Rain map" className="space-y-3">
+          <h2 className="text-2xl font-bold">Rain map for {result.supportedDistrict}</h2>
+          <SimpleRainMap district={result.supportedDistrict} hours={24}/>
+        </section>
+      )}
+      {result && activeSection === "crops" && (
+        <section aria-label="Crop advice">
+          <FarmerCropAdvice concerns={result.combinedFloodOutlooks} />
+        </section>
       )}
     </div>
   );
