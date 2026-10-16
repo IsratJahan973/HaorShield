@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import CropEarlyAction from "./CropEarlyAction.jsx";
+import SimpleRainMap from "./SimpleRainMap.jsx";
 import { rollingRainfallWindows } from "./rainfallWindows.js";
 import { floodConcernOutlooks } from "./floodConcern.js";
 import { combinedFloodOutlooks } from "./floodOutlook.js";
@@ -638,19 +639,9 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl bg-gradient-to-r from-sky-900 to-teal-800 p-7 md:p-10 text-white">
-        <div className="flex items-center gap-2 text-sky-100 mb-3">
-          <CloudRain size={20}/>
-          HaorShield V2
-        </div>
-        <h2 className="text-3xl md:text-4xl font-bold">
-          Check Weather & Flood-Risk Indicators
-        </h2>
-        <p className="mt-3 text-sky-100 max-w-2xl">
-          Select your district and forecast date to check
-          current weather and upcoming rainfall conditions.
-          Flood probability is not yet available.
-        </p>
+      <div className="bg-white rounded-2xl p-5 md:p-7 border">
+        <h2 className="text-2xl md:text-3xl font-bold">Will rain or rising rivers affect my area?</h2>
+        <p className="text-slate-700 mt-2">Choose your area. Check what the next three days may bring.</p>
       </div>
 
       <div className="bg-white border rounded-2xl p-6 space-y-5">
@@ -858,162 +849,37 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         </div>
       )}
 
-      {!result && (
-        <CropEarlyAction
-          district={district}
-          date={date}
-          rainfallMm={null}
-          forecastHours={0}
-          isOutdated={true}
-        />
-      )}
-
       {result && (
         <div className="space-y-5">
-          <section aria-label="Your flood awareness summary" className="rounded-2xl bg-white border border-sky-200 p-5 md:p-7 space-y-3">
-            <h3 className="text-xl md:text-2xl font-bold text-slate-900">Your area's outlook — {result.supportedDistrict}</h3>
-            <p className="text-sm text-slate-600">Weather for {result.date} · {result.hours} forecast hours available</p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl bg-sky-50 p-4">
-                <p className="text-sm font-semibold text-slate-700">Rain expected</p>
-                <p className="text-2xl font-bold text-slate-900">{result.rainfall.toFixed(1)} mm</p>
-                <p className="text-sm text-slate-600">{result.status.label} rainfall · {result.maxHourlyPrecipChance === null ? "Rain chance unavailable" : `${result.maxHourlyPrecipChance.toFixed(0)}% highest hourly rain chance`}</p>
-              </div>
-              <div className="rounded-xl bg-amber-50 p-4">
-                <p className="text-sm font-semibold text-slate-700">Today's modeled river flow</p>
-                <p className="text-lg font-bold text-amber-950">{result.riverForecast?.forecasts?.[0]?.level || 'River forecast unavailable'}</p>
-                <p className="text-sm text-slate-700">{result.riverForecast ? 'Actual GloFAS river-discharge forecast, NOT verified flood occurrence or inundation.' : result.riverForecastError || 'No hydrological forecast available.'}</p>
-              </div>
+          <section aria-label="Your flood outlook" className="rounded-2xl bg-white border border-sky-200 p-5 md:p-7 space-y-4">
+            <h3 className="text-2xl font-bold">Your area: {result.supportedDistrict}</h3>
+            <p className="text-sm text-slate-600">Checked {new Date(result.retrievedAt).toLocaleString("en-BD", {timeZone:"Asia/Dhaka"})}</p>
+            <h4 className="text-xl font-semibold">Flood concern over the next three days</h4>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {result.combinedFloodOutlooks.map(outlook => {
+                const uncertain = !Number.isFinite(outlook.rank) || outlook.rank < 0 || /unavailable|insufficient|cannot assess|unknown/i.test(outlook.label || "");
+                const tone = uncertain ? "bg-slate-100 border-slate-400" : outlook.rank >= 3 ? "bg-red-100 border-red-500" : outlook.rank >= 2 ? "bg-orange-100 border-orange-400" : outlook.rank === 1 ? "bg-yellow-100 border-yellow-400" : "bg-sky-100 border-sky-300";
+                const name = uncertain ? "Not enough information" : outlook.rank >= 3 ? "Very high concern" : outlook.rank >= 2 ? "High concern" : outlook.rank === 1 ? "Watch closely" : "No strong warning sign";
+                return <div key={outlook.horizonHours} className={`rounded-xl border-2 p-4 ${tone}`}>
+                  <p className="font-semibold">Next {outlook.horizonHours} hours</p>
+                  <p className="text-xl font-bold mt-2">{name}</p>
+                  <p className="text-sm mt-2">{uncertain ? "Please check official local updates." : "Early warning signs only."}</p>
+                </div>;
+              })}
             </div>
-            <div className="rounded-xl border border-amber-200 p-4" aria-label="Experimental flood concern over three outlook horizons">
-              <h4 className="font-bold text-slate-900">Flood concern — next 24, 48 and 72 hours</h4>
-              <div className="overflow-x-auto mt-2"><table className="w-full text-sm text-left">
-                <thead><tr><th className="py-2">Period</th><th>Combined flood-concern screening</th><th>Signals available</th></tr></thead>
-                <tbody>{result.combinedFloodOutlooks.map(x => <tr key={x.horizonHours} className="border-t">
-                  <td className="py-2 font-semibold">{x.horizonHours}h</td>
-                  <td className={`font-semibold ${x.className}`}>{x.label}</td>
-                  <td>{x.rainfallAvailable ? 'Rain' : 'Rain unavailable'}; {x.riverAvailable ? 'Modeled river flow' : 'River unavailable'}</td>
-                </tr>)}</tbody>
-              </table></div>
-              <p className="mt-2 text-xs text-slate-600">Experimental screening using forecast rainfall and nearby modeled river flow. River days are UTC calendar days, not exact rolling 24/48/72-hour river forecasts. This is NOT a verified flood-occurrence prediction, probability, or forecast of flooded cropland. Normal river flow does not mean flood safety; always consult official FFWC warnings.</p>
+            <div className="bg-emerald-50 rounded-xl p-4">
+              <h4 className="font-bold text-lg">What should I do?</h4>
+              <p className="mt-1 text-base">{result.combinedFloodOutlooks.some(x=>x.rank >= 2)
+                ? "Keep seeds, feed and tools in a dry, higher place. Watch river conditions and follow local official warnings."
+                : result.combinedFloodOutlooks.some(x=>x.rank === 1)
+                  ? "Check field drains and prepare to protect crops if water rises. Keep following official updates."
+                  : "Keep checking local river and weather news. Low rainfall does not mean flooding is impossible."}</p>
             </div>
-            <div className="rounded-xl border border-sky-200 p-4" aria-label="Three-day modeled river-discharge prediction">
-              <h4 className="font-bold text-slate-900">River-flow prediction — next 3 days</h4>
-              {result.riverForecast ? <>
-                <div className="overflow-x-auto mt-2"><table className="w-full text-sm text-left min-w-[350px]">
-                  <thead><tr><th className="py-2">Day</th><th>Modeled river flow</th><th>Compared with historical flow</th></tr></thead>
-                  <tbody>{result.riverForecast.forecasts.map(f => <tr className="border-t" key={f.date}>
-                    <td className="py-2">{f.date}</td><td>{f.modeledDischargeM3s.toFixed(0)} m³/s</td>
-                    <td className="font-semibold">{f.level}</td>
-                  </tr>)}</tbody>
-                </table></div>
-                <p className="text-xs text-slate-600 mt-2">Copernicus GloFAS v4 simulated river flow; historical 90th and 95th percentiles calculated from {result.riverForecast.referenceYears}. Model cell {result.riverForecast.modelCellDistanceKm} km from selected location; river identity unverified. Dates are UTC calendar days, not rolling 24/48/72-hour periods. This cannot confirm whether land will flood and is not an official FFWC/BWDB danger-level warning.</p>
-              </> : <p className="text-sm text-amber-800 mt-2">{result.riverForecastError || 'Hydrological forecast unavailable'}. No river-risk category is assigned without model data. Check official FFWC warnings.</p>}
-            </div>
-            <div className="overflow-x-auto" aria-label="Live 24, 48 and 72-hour rainfall outlook">
-              <p className="font-semibold text-slate-900 mb-2">Rainfall expected from now</p>
-              <table className="w-full text-left text-sm min-w-[410px]">
-                <thead><tr className="border-b"><th className="py-2">Next</th><th className="py-2">Rain</th><th className="py-2">Rainfall intensity</th><th className="py-2">Flood concern screening</th><th className="py-2">Forecast coverage</th></tr></thead>
-                <tbody>{result.rollingOutlooks.map(outlook => (
-                  <tr key={outlook.horizonHours} className="border-b">
-                    <td className="py-2 font-semibold">{outlook.horizonHours}h</td>
-                    <td className="py-2">{outlook.hoursAvailable ? `${outlook.rainfallMm.toFixed(1)} mm` : 'Unavailable'}</td>
-                    <td className="py-2">{outlook.category}</td>
-                    <td className={`py-2 font-semibold ${result.floodConcern.find(x => x.horizonHours === outlook.horizonHours)?.className || ''}`}>{result.floodConcern.find(x => x.horizonHours === outlook.horizonHours)?.level || 'Unavailable'}</td>
-                    <td className="py-2">{outlook.complete ? 'Available' : `${outlook.hoursAvailable}/${outlook.horizonHours}h — partial`}</td>
-                  </tr>
-                ))}</tbody>
-              </table>
-              <p className="mt-2 text-xs text-slate-600">Rolling Open-Meteo rainfall forecasts for this location, updated when you select Check My Location. Rainfall intensity is based on the average mm per 24 hours; the three windows overlap. The flood-concern categories are nonvalidated rainfall indicators, not predicted flood events, probabilities, or official warnings. Low local rain does not mean flood safety.</p>
-            </div>
-            <p className="text-sm text-slate-700">Choose your crop for practical precautions. The experimental spatial map is separate and does not predict flooded land.</p>
-            {result.currentOutdated && <p className="text-sm font-semibold text-amber-900" role="alert">Current weather observations may be outdated.</p>}
+            <p className="text-sm text-slate-700">Rain expected: {result.rollingOutlooks.map(x=>`${x.horizonHours}h: ${x.complete && Number.isFinite(x.rainfallMm) ? `${x.rainfallMm.toFixed(1)} mm` : "data incomplete"}`).join(" · ")}</p>
+            {result.currentOutdated && <p role="alert" className="font-semibold text-amber-800">Weather information may be old. Check official updates.</p>}
+            <p className="text-xs text-slate-600">These are early signs, not a confirmed flood prediction. Follow official flood warnings for safety decisions.</p>
           </section>
-          <div className={`rounded-2xl border p-6 ${result.status.background}`}>
-            <div className="flex items-center gap-3">
-              {result.rainRate24 < 10
-                ? <ShieldCheck size={32} className={result.status.color}/>
-                : <AlertTriangle size={32} className={result.status.color}/>
-              }
-              <div>
-                <p className="text-sm">Rainfall screening result</p>
-                <h3 className={`text-2xl font-bold ${result.status.color}`}>
-                  {result.status.level}
-                </h3>
-              </div>
-            </div>
-            <p className="text-sm mt-3">This describes forecast rain, not flood safety or flood probability.</p>
-            <details className="mt-3 text-sm text-slate-700">
-              <summary className="cursor-pointer font-semibold">How is rainfall classified?</summary>
-              <p className="mt-2">Our project uses 24-hour-equivalent rainfall bands: No Rain (0 mm), Light (above 0 and below 10 mm), Moderate (10–49.9 mm), Heavy (50–99.9 mm), and Very Heavy (100 mm or more). These are not official flood-risk categories.</p>
-            </details>
-          </div>
-
-          <div className="bg-white border rounded-xl p-4 text-sm">
-            <strong>Forecast location:</strong> {result.district}
-            <span className="text-slate-500">
-              {" "}— {result.supportedDistrict} District
-            </span>
-            <span className="text-slate-500">
-              {" "}({result.coordinates.lat.toFixed(4)},
-              {" "}{result.coordinates.lon.toFixed(4)})
-            </span>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="bg-white border rounded-xl p-5">
-              <p className="text-slate-500 text-sm">Current temperature</p>
-              <p className="text-2xl font-bold mt-2">
-                {Number.isFinite(result.current?.temperature_2m) ? `${result.current.temperature_2m}°C` : "Unavailable"}
-              </p>
-            </div>
-            <div className="bg-white border rounded-xl p-5">
-              <p className="text-slate-500 text-sm">Current humidity</p>
-              <p className="text-2xl font-bold mt-2">
-                {Number.isFinite(result.current?.relative_humidity_2m) ? `${result.current.relative_humidity_2m}%` : "Unavailable"}
-              </p>
-            </div>
-            <div className="bg-white border rounded-xl p-5">
-              <p className="text-slate-500 text-sm">
-                Forecast rainfall on selected date
-              </p>
-              <p className="text-2xl font-bold mt-2">
-                {result.rainfall.toFixed(1)} mm
-              </p>
-              <p className="text-xs text-slate-500 mt-2">
-                {result.hours} forecast hours within the next 72h
-              </p>
-            </div>
-            <div className="bg-white border rounded-xl p-5">
-              <p className="text-slate-500 text-sm">Current precipitation</p>
-              <p className="text-2xl font-bold mt-2">
-                {Number.isFinite(result.current?.precipitation) ? `${result.current.precipitation} mm` : "Unavailable"}
-              </p>
-            </div>
-            <div className="bg-white border rounded-xl p-5">
-              <p className="text-slate-500 text-sm">Current wind speed</p>
-              <p className="text-2xl font-bold mt-2">
-                {Number.isFinite(result.current?.wind_speed_10m) ? `${result.current.wind_speed_10m} km/h` : "Unavailable"}
-              </p>
-            </div>
-            <div className="bg-white border rounded-xl p-5">
-              <p className="text-slate-500 text-sm">Highest hourly chance of rain</p>
-              <p className="text-2xl font-bold mt-2">
-                {result.maxHourlyPrecipChance === null ? "Unavailable" : `${result.maxHourlyPrecipChance.toFixed(0)}%`}
-              </p>
-              <p className="text-xs text-slate-500 mt-2">
-                Highest hourly rain chance among {result.hours} forecast hours, not a flood probability.
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
-            <p><strong>Weather observation time:</strong> {result.observationTime || "Unavailable"} (Asia/Dhaka local time)</p>
-            <p className="mt-1"><strong>Forecast retrieved:</strong> {new Date(result.retrievedAt).toLocaleString("en-BD", { timeZone: "Asia/Dhaka" })}</p>
-            <p className="mt-1">Rainfall total covers {result.hours} available hours on {result.date}; intensity category uses the equivalent {result.rainRate24.toFixed(1)} mm/24h rate, not a full-day observed total.</p>
-            {result.currentOutdated && <p role="alert" className="mt-2 font-semibold text-amber-800">Weather observation time is missing or outdated. Check an updated forecast.</p>}
-          </div>
-
+          <SimpleRainMap district={result.supportedDistrict} hours={24}/>
           <CropEarlyAction
             district={result.supportedDistrict}
             date={result.date}
@@ -1021,121 +887,6 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
             forecastHours={result.hours}
             isOutdated={result.currentOutdated}
           />
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-2">
-                {rainfallGuidance(result.rainRate24).heading}
-              </h3>
-              <p className="text-sm text-slate-700 mb-3">
-                {rainfallGuidance(result.rainRate24).message}
-              </p>
-              <p className="font-semibold text-slate-900 mb-2">
-                Recommended precautions
-              </p>
-              <ul className="list-disc pl-5 space-y-1 text-sm text-slate-700">
-                {rainfallGuidance(result.rainRate24).actions.map((action, i) => (
-                  <li key={i}>{action}</li>
-                ))}
-              </ul>
-              <p className="mt-4 text-xs text-slate-500">
-                General preparedness guidance only. Follow official
-                Bangladesh Meteorological Department and Flood
-                Forecasting and Warning Centre advisories.
-              </p>
-            </div>
-
-<div className="bg-white border rounded-2xl p-6 space-y-3">
-            <h3 className="text-lg font-bold">
-              Flooding and agricultural land — what we know
-            </h3>
-            <p className="text-sm">
-              <strong>Flood probability:</strong> Not available —
-              requires a validated forecast model.
-            </p>
-            <p className="text-sm">
-              <strong>Predicted flooded area:</strong> Not available —
-              rainfall alone cannot establish inundation boundaries.
-            </p>
-            <p className="text-sm">
-              <strong>Expected flooded cropland:</strong>
-              Not known for this date. The research screening below only shows mapped cropland within flagged grid cells.
-            </p>
-            <p className="text-sm text-slate-600">
-              Local rain is only one factor. Upstream rainfall, river conditions,
-              saturated land and drainage may also affect flooding. A low local
-              rainfall forecast does not mean that flooding is impossible.
-            </p>
-
-            <section className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 space-y-3">
-              <h4 className="font-semibold text-slate-900">Experimental map screening — not a flood warning</h4>
-              <p className="text-sm text-slate-700">
-                This separate research map highlights grid cells to investigate, not areas expected to flood. Your selected date's rainfall result and this experimental map are different assessments.
-                The rainfall result describes local forecast rain on {result.date}. The map flags grid cells
-                for additional research attention using separate 24/48/72-hour model scenarios for {result.supportedDistrict}.
-                <strong> Flagged cells are not predicted flooded areas or verified flood-risk zones.</strong>
-              </p>
-              <p className="text-sm text-slate-700">
-                Little or no local forecast rain does not rule out flooding caused by upstream rainfall,
-                rivers or drainage. However, a flagged experimental grid cell does not establish that
-                flooding is likely, either. Check official FFWC/BMD warnings for current decisions.
-              </p>
-              {scenarioError && <p role="alert" className="text-sm text-amber-900">{scenarioError}</p>}
-              {!scenarioData && !scenarioError && <p className="text-sm">Loading experimental scenario information...</p>}
-              {scenarioData && (() => {
-                const { map, summary } = scenarioData;
-                const cells = map.features.filter(f => f.properties?.district === result.supportedDistrict);
-                const ageHours = (Date.now() - Date.parse(summary.generated_at)) / 3600000;
-                const stale = !Number.isFinite(ageHours) || ageHours < 0 || ageHours > 24;
-                if (!cells.length) return <p className="text-sm">No geographic cells available for this district.</p>;
-                return <>
-                  <p className="text-xs text-slate-700">Research data issue date: {summary.issue_anchor_date_utc || "Unknown"} (UTC). {stale ? "This research snapshot is outdated or its timestamp is uncertain. Do not use it for current decisions." : "This is a recent experimental snapshot, not an official flood warning."}</p>
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[450px] text-left text-sm">
-                      <thead><tr className="border-b border-emerald-200"><th className="py-2 pr-3">Research horizon</th><th className="py-2 pr-3">Flagged grid area (km²)</th><th className="py-2">Cropland in flagged cells (ha)</th></tr></thead>
-                      <tbody>{[24,48,72].map(h => {
-                        const valid = cells.every(f => {
-                          const p = f.properties;
-                          const fraction = p[`sar_candidate_fraction_${h}h`];
-                          return Number.isFinite(fraction) && fraction >= 0 && fraction <= 1 &&
-                            Number.isFinite(p.cell_area_ha) && p.cell_area_ha > 0 &&
-                            Number.isFinite(p.cropland_ha) && p.cropland_ha >= 0 &&
-                            p.cropland_ha <= p.cell_area_ha;
-                        });
-                        if (!valid) return <tr key={h}><td className="py-2">{h}h</td><td colSpan={2}>Data unavailable</td></tr>;
-                        const flagged = cells.filter(f => f.properties[`sar_candidate_fraction_${h}h`] >= 0.10);
-                        const area = flagged.reduce((sum,f) => sum + f.properties.cell_area_ha / 100, 0);
-                        const crop = flagged.reduce((sum,f) => sum + f.properties.cropland_ha, 0);
-                        return <tr key={h} className="border-b border-emerald-100"><td className="py-2">{h} hours</td><td className="py-2">{area.toFixed(1)}</td><td className="py-2">{Math.round(crop).toLocaleString("en-BD")}</td></tr>;
-                      })}</tbody>
-                    </table>
-                  </div>
-                  <p className="text-xs text-slate-700">The full area of every grid cell passing the research-only 10% SAR-candidate cutoff is counted. The same cells may pass this cutoff at several horizons, producing repeated totals. This does not mean the model forecasts unchanged flooding. The areas do not measure predicted inundation, crop damage or validated flood risk.</p>
-                </>;
-              })()}
-            </section>
-          </div>
-
-
-          
-
-          {onOpenForecast && (
-            <button
-              type="button"
-              onClick={() => onOpenForecast({ district: result.supportedDistrict })}
-              className="mr-3 mb-3 rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white"
-            >
-              View {result.supportedDistrict} experimental 24/48/72-hour spatial scenarios →
-            </button>
-          )}
-          <p className="mb-3 text-xs text-slate-600">
-            The separate SAR spatial scenario is anchored to its own issue time; it is not a forecast uniquely produced for the selected calendar date.
-          </p>
-          <button
-            onClick={onOpenMap}
-            className="bg-slate-900 text-white rounded-xl px-5 py-3 font-semibold"
-          >
-            Explore Geographic Rainfall Map →
-          </button>
         </div>
       )}
     </div>
