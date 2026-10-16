@@ -6,6 +6,15 @@ const now=Date.parse("2026-10-16T11:00:00Z");
 const data={map,summary:{cells:306,generated_at:"2026-10-16T10:00:00Z",issue_anchor_date_utc:"2026-10-16",is_validated_flood_probability:false,is_validated_inundation_prediction:false}};
 for(const h of [24,48,72]) {const x=exposureForDistrict(data,"Sunamganj",h,"2026-10-16",now); assert.equal(x.ok,true);assert.equal(x.landKm2,1);assert.equal(x.cropHa,40);}
 assert.equal(exposureForDistrict(data,"Sunamganj",24,"2026-10-17",now).ok,false);
+// 18:50 UTC on Oct 16 = 00:50 Oct 17 in Bangladesh: valid same issue.
+const midnightBD=Date.parse("2026-10-16T18:50:00Z");
+const fresh=structuredClone(data); fresh.summary.generated_at="2026-10-16T18:35:00Z";
+assert.equal(exposureForDistrict(fresh,"Sunamganj",24,"2026-10-17",midnightBD).ok,true);
+// A future Bangladesh forecast date must not reuse today's research scenario.
+assert.equal(exposureForDistrict(fresh,"Sunamganj",24,"2026-10-18",midnightBD).ok,false);
+// Changing only the issue metadata cannot justify old data.
+const old=structuredClone(fresh);old.summary.issue_anchor_date_utc="2026-10-15";
+assert.equal(exposureForDistrict(old,"Sunamganj",24,"2026-10-17",midnightBD).ok,false);
 assert.equal(exposureForDistrict(data,"Sunamganj",24,"2026-10-16",now+24*3600000).ok,false);
 assert.equal(exposureForDistrict(data,"unknown",24,"2026-10-16",now).ok,false);
 assert.equal(exposureForDistrict(data,"Sunamganj",17,"2026-10-16",now).ok,false);
