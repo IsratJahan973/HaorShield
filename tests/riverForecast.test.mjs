@@ -49,3 +49,16 @@ const missingDay = {...east, daily:{time:['2026-10-16','2026-10-18','2026-10-19'
 assert.throws(()=>verifySunamganjNeighbor(west,missingDay,['2026-10-16','2026-10-17','2026-10-18']), /coverage/);
 assert.throws(()=>evaluateRiverForecast({...forecast, daily:{time:forecast.daily.time,river_discharge:[210,null,120]}},historical,{lat:24.89,lon:91.87},new Date('2026-10-16T01:00:00Z')), /complete three-day/);
 console.log('Displayed-date alignment, high-flow, and missing-data tests passed');
+
+// Never silently shift forecast horizons when today's hydrological date is missing.
+const shifted = {...forecast, daily:{time:['2026-10-17','2026-10-18','2026-10-19'],river_discharge:[210,160,120]}};
+assert.throws(() => evaluateRiverForecast(shifted,historical,{lat:24.89,lon:91.87},new Date('2026-10-16T04:00:00Z')), /for today and the next two days/);
+// Duplicate timestamps are not a valid three-day forecast.
+const duplicate = {...forecast, daily:{time:['2026-10-16','2026-10-16','2026-10-17','2026-10-18'],river_discharge:[210,210,160,120]}};
+assert.throws(() => evaluateRiverForecast(duplicate,historical,{lat:24.89,lon:91.87},new Date('2026-10-16T04:00:00Z')), /Duplicate/);
+// Out-of-order source rows must still align with their actual calendar dates.
+const scrambled = {...forecast, daily:{time:['2026-10-18','2026-10-16','2026-10-17'],river_discharge:[120,210,160]}};
+const aligned = evaluateRiverForecast(scrambled,historical,{lat:24.89,lon:91.87},new Date('2026-10-16T04:00:00Z'));
+assert.deepEqual(aligned.forecasts.map(x=>x.date),['2026-10-16','2026-10-17','2026-10-18']);
+assert.deepEqual(aligned.forecasts.map(x=>x.modeledDischargeM3s),[210,160,120]);
+console.log('Current-day alignment and malformed-date guards passed');
