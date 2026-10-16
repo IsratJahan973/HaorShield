@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import CropEarlyAction from "./CropEarlyAction.jsx";
 import SimpleRainMap from "./SimpleRainMap.jsx";
+import { summarizeCurrentWeather } from "./weatherNow.js";
 import { rollingRainfallWindows } from "./rainfallWindows.js";
 import { floodConcernOutlooks } from "./floodConcern.js";
 import { combinedFloodOutlooks } from "./floodOutlook.js";
@@ -511,7 +512,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       url.searchParams.set("longitude", selected.lon);
       url.searchParams.set(
         "current",
-        "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m"
+        "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code"
       );
       url.searchParams.set("hourly", "precipitation,precipitation_probability");
       url.searchParams.set("forecast_days", "5");
@@ -627,6 +628,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         riverForecastError,
         status,
         current: data.current,
+        weatherNow: summarizeCurrentWeather(data.current, retrievedAt),
         spatial
       });
 
@@ -854,6 +856,17 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
           <section aria-label="Your flood outlook" className="rounded-2xl bg-white border border-sky-200 p-5 md:p-7 space-y-4">
             <h3 className="text-2xl font-bold">Your area: {result.supportedDistrict}</h3>
             <p className="text-sm text-slate-600">Checked {new Date(result.retrievedAt).toLocaleString("en-BD", {timeZone:"Asia/Dhaka"})}</p>
+            <div className="rounded-xl border border-sky-200 bg-sky-50 p-4" aria-label="Current weather">
+              <h4 className="font-bold text-lg">Weather now</h4>
+              {result.weatherNow.fresh ? (
+                <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  <div><p className="text-xs text-slate-600">Conditions</p><p className="font-semibold">{result.weatherNow.description}</p></div>
+                  <div><p className="text-xs text-slate-600">Temperature</p><p className="font-semibold">{result.weatherNow.temperatureC === null ? "Not available" : `${result.weatherNow.temperatureC.toFixed(1)} °C`}</p></div>
+                  <div><p className="text-xs text-slate-600">Rain in latest weather report</p><p className="font-semibold">{result.weatherNow.rainMm === null ? "Not available" : `${result.weatherNow.rainMm.toFixed(1)} mm`}</p></div>
+                </div>
+              ) : <p className="mt-1">Current weather is temporarily unavailable.</p>}
+              <p className="mt-2 text-xs text-slate-600">Weather service estimate, not a local rain-gauge measurement. Forecast rain for coming days is shown below.</p>
+            </div>
             <h4 className="text-xl font-semibold">Flood concern over the next three days</h4>
             <div className="grid gap-3 sm:grid-cols-3">
               {result.combinedFloodOutlooks.map(outlook => {
