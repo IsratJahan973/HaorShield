@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import FarmerCropAdvice from "./FarmerCropAdvice.jsx";
 import SimpleRainMap from "./SimpleRainMap.jsx";
 import LandAttentionMap from "./LandAttentionMap.jsx";
-import OutlookEvidence from "./OutlookEvidence.jsx";
 import { summarizeCurrentWeather } from "./weatherNow.js";
 import { farmerHorizon, farmerSummary } from "./farmerOutlookView.js";
 import { rollingRainfallWindows } from "./rainfallWindows.js";
