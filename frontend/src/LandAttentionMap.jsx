@@ -31,7 +31,9 @@ function FitResearchArea({ features, districtBoundary, point }) {
   useEffect(() => {
     if (point) {
       // Approximate research search radius; no fake upazila polygon.
-      const bounds = L.circle(point, { radius: 20000 }).getBounds();
+      // Calculate a ~40 km viewing box without constructing an unmounted Circle.
+      // L.circle(...).getBounds() requires a map and crashes React before mount.
+      const bounds = L.latLng(point[0], point[1]).toBounds(40000);
       map.fitBounds(bounds, { padding: [26, 26], maxZoom: 10 });
       return;
     }
