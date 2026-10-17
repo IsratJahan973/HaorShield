@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const s=readFileSync(new URL('../frontend/src/FarmerCropAdvice.jsx', import.meta.url),'utf8');
+for(const heading of ['Prepare now','If water rises','After water recedes']) assert.ok(s.includes(heading));
+assert.match(s,/slice\(0, 3\)/);
+assert.match(s,/getFarmerAdvice\(crop, stage, field, concerns\)/);
+assert.match(s,/field === "river"/);
+assert.match(s,/field === "wet"/);
+assert.doesNotMatch(s,/General preparation and recovery guidance, not a prediction/);
+console.log('PASS compact crop presentation, unchanged decision engine and field priority');
