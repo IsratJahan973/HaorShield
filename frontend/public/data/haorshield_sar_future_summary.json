@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-17T11:02:13.360313+00:00",
+  "generated_at": "2026-10-17T15:48:13.816292+00:00",
   "issue_anchor_date_utc": "2026-10-17",
   "horizons_hours": [
     24,
@@ -36,8 +36,8 @@
     },
     "72": {
       "target_satellite_date_utc": "2026-10-20",
-      "research_land_proxy_ha": 85962.68,
-      "research_cropland_proxy_ha": 55917.99,
+      "research_land_proxy_ha": 85943.54,
+      "research_cropland_proxy_ha": 55903.56,
       "cells": 306,
       "model_variant": "antecedent_flow",
       "model_output": "experimental_SAR_candidate_fraction"
