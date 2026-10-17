@@ -17,7 +17,7 @@ export default function App() {
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-3 py-5 md:px-6 md:py-8">
-        <nav className="flex gap-2 mb-5" aria-label="Choose forecast or history"><button onClick={()=>setMode("live")} className={`rounded-xl px-4 py-2 text-sm font-semibold ${mode==="live"?"bg-sky-900 text-white":"bg-white border"}`}>Live forecast</button><button onClick={()=>setMode("history")} className={`rounded-xl px-4 py-2 text-sm font-semibold ${mode==="history"?"bg-sky-900 text-white":"bg-white border"}`}>Historical explorer</button></nav>
+        <nav className="grid grid-cols-2 gap-2 mb-5" aria-label="Choose forecast or history"><button onClick={()=>setMode("live")} className={`min-w-0 rounded-xl px-2 sm:px-4 py-3 text-sm font-semibold ${mode==="live"?"bg-sky-900 text-white":"bg-white border"}`}>Live forecast</button><button onClick={()=>setMode("history")} className={`min-w-0 rounded-xl px-2 sm:px-4 py-3 text-sm font-semibold ${mode==="history"?"bg-sky-900 text-white":"bg-white border"}`}>Historical explorer</button></nav>
         {mode==="live" ? <FloodRiskChecker /> : <HistoricalCalendarExplorer />}
       </main>
       <footer className="text-center text-xs text-slate-600 px-4 py-6">

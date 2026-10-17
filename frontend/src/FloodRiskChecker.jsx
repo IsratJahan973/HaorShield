@@ -694,7 +694,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
             </div>
 
           <h3 className="text-lg font-semibold">Rain expected</h3>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {result.rollingOutlooks.map(item => <div key={item.horizonHours} className="rounded-xl bg-sky-50 border p-3">
               <p className="text-sm font-semibold">Next {item.horizonHours} hours</p>
               <p className="text-lg font-bold">{Number.isFinite(item.rainfallMm) ? `${item.rainfallMm.toFixed(1)} mm` : "Not available"}</p>

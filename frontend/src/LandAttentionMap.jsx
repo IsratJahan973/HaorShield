@@ -151,7 +151,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
           </div>
 
           {forecastHasConcern ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="rounded-xl bg-amber-50 p-3">
                 <p className="text-sm">{selectedUpazila ? "Nearby research-cell land to monitor" : "Research-cell land to monitor"}</p>
                 <p className="text-xl font-bold">{selectedUpazila && displayFeatures.length === 0 ? "Unavailable" : `${fmt(selectedUpazila ? localTargetLandKm2 : check.landKm2)} km²`}</p>
@@ -162,7 +162,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="rounded-xl bg-blue-50 p-3">
                 <p className="text-sm">{selectedUpazila ? "Mapped land in selected area" : "Mapped district land"}</p>
                 <p className="text-xl font-bold">{selectedUpazila && displayFeatures.length === 0 ? "Unavailable" : `${fmt(mapStats?.mappedLandKm2 || 0)} km²`}</p>
@@ -201,7 +201,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
               <div className="font-semibold text-slate-900">{selectedUpazila ? `${selectedUpazila} area` : district} · {hours}-hour outlook</div>
               <span className="text-xs text-slate-500">Zoom to explore · OpenStreetMap</span>
             </div>
-            <div style={{ height: 420 }}>
+            <div className="h-[280px] sm:h-[360px] lg:h-[420px]">
               <MapContainer center={[24.8, 91.3]} zoom={8} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
                 <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <FitResearchArea features={displayFeatures} districtBoundary={selectedBoundary} upazilaBoundary={selectedUpazilaBoundary} />

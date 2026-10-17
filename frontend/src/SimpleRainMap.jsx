@@ -61,7 +61,7 @@ export default function SimpleRainMap({district, hours=24, selectedUpazila=null}
       {LEGEND.map(([color,label])=><span className="flex items-center gap-2" key={label}><span style={{backgroundColor:color}} className="w-4 h-4 rounded-sm border"/>{label}</span>)}
     </div>
     {error ? <p role="status">{error}</p> : !geo ? <p>Loading rain map…</p> : selectedUpazila && !selectedBoundary ? <p role="status">Selected upazila boundary unavailable. District-wide shading is hidden to prevent a misleading map.</p> : !visibleFeatures.length ? <p>No rainfall research cells overlap this area.</p> :
-      <div className="h-[290px] sm:h-[380px] rounded-xl overflow-hidden"><MapContainer key={`${district}-${selectedUpazila||"all"}`} center={[24.65,91.05]} zoom={8} minZoom={6} maxZoom={12} maxBounds={[[20,87],[27,95]]} maxBoundsViscosity={1} style={{height:"100%",width:"100%"}}>
+      <div className="h-[280px] sm:h-[380px] rounded-xl overflow-hidden"><MapContainer key={`${district}-${selectedUpazila||"all"}`} center={[24.65,91.05]} zoom={8} minZoom={6} maxZoom={12} maxBounds={[[20,87],[27,95]]} maxBoundsViscosity={1} style={{height:"100%",width:"100%"}}>
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <GeoJSON key={`${district}-${selectedUpazila||"all"}-${hours}-${Boolean(clips)}`} data={data} style={feature=>({color:"#475569", weight:.5,fillColor:COLORS[feature.properties?.[`alert${hours}`]]||"#93c5fd",fillOpacity:.6})} onEachFeature={(feature,layer)=>{
           const mm=Number(feature.properties?.[`rain${hours}_mm`]);

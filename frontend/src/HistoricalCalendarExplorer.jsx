@@ -77,7 +77,7 @@ export default function HistoricalCalendarExplorer() {
       <label className="text-sm font-semibold">District<select aria-label="Historical district" value={district} onChange={e => setDistrict(e.target.value)} className="mt-1 block w-full rounded-lg border px-3 py-2">{DISTRICTS.map(d => <option key={d}>{d}</option>)}</select></label>
     </div>
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2" aria-label="Four-day historical timeline">
-      {days.map((d, i) => <button type="button" key={d} aria-pressed={selectedDay === i} onClick={() => { setSelectedDay(i); const found = eventsForDate(d); if (found.length) setEventId(found[0].id); }} className={`rounded-xl text-left p-3 border ${selectedDay === i ? 'bg-orange-50 border-orange-500' : 'bg-white border-slate-200'}`}>
+      {days.map((d, i) => <button type="button" key={d} aria-pressed={selectedDay === i} onClick={() => { setSelectedDay(i); const found = eventsForDate(d); if (found.length) setEventId(found[0].id); }} className={`min-w-0 rounded-xl text-left p-2 sm:p-3 border ${selectedDay === i ? 'bg-orange-50 border-orange-500' : 'bg-white border-slate-200'}`}>
         <span className="block text-xs text-slate-500">Day {i + 1}</span><span className="font-semibold text-sm">{d}</span><span className="block text-xs mt-1 text-slate-600">{eventsForDate(d).length ? 'Archived event period' : 'No dated map'}</span>
       </button>)}
     </div>
@@ -94,7 +94,7 @@ export default function HistoricalCalendarExplorer() {
         </div>
         <div className="flex items-center gap-3 flex-wrap text-sm"><span className="font-semibold">{selectedEvent?.label}:</span><span className="inline-flex items-center gap-2"><span className="inline-block h-4 w-5 rounded-sm border" style={{ backgroundColor: color, borderColor: '#7f1d1d' }} /> Recorded flood footprint</span><span className="text-slate-500">Gray outline: district boundary</span></div>
       </> : <div className="bg-slate-50 rounded-xl border p-4 text-sm">No dated flood observation for this selection.</div>}
-      <div className="h-[360px] rounded-xl overflow-hidden border" aria-label="Historical recorded flood map">
+      <div className="h-[280px] sm:h-[360px] rounded-xl overflow-hidden border" aria-label="Historical recorded flood map">
         <MapContainer center={[24.6,91.2]} zoom={8} scrollWheelZoom={false} style={{ height:'100%', width:'100%' }}>
           <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           {districtLayer?.features?.length > 0 && <GeoJSON key={'boundary-'+district} data={districtLayer} style={f => ({ color: districtMatch(f.properties, district) || district === 'All districts' ? '#334155' : '#94a3b8', weight: districtMatch(f.properties,district) && district !== 'All districts' ? 2.5 : 0.8, fillOpacity: 0 })} />}

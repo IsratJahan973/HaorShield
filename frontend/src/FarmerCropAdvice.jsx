@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 const CROPS = [
   ["rice_boro", "Boro rice"], ["rice_aman", "Aman rice"], ["rice_aus", "Aus rice"],
-  ["vegetables", "Vegetables"], ["fish", "Fish pond"], ["other", "Other crops / livestock"]
+  ["vegetables", "Vegetables"], ["other", "Other crops / livestock"]
 ];
 const STAGES = [
   ["unknown", "Not sure"], ["planning", "Preparing / planting"],
