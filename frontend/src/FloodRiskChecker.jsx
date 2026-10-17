@@ -9,6 +9,8 @@ import { rollingRainfallWindows } from "./rainfallWindows.js";
 import { floodConcernOutlooks } from "./floodConcern.js";
 import { combinedFloodOutlooks } from "./floodOutlook.js";
 import { fetchRiverForecast } from "./riverForecast.js";
+import { findSupportedDistrict as matchGpsDistrict } from "./districtLocator.js";
+import { areaOptions, resolveManualLocation } from "./areaChoices.js";
 import { MapPin, CalendarDays, CloudRain, ShieldCheck,
          AlertTriangle, Search, Loader2 } from "lucide-react";
 
@@ -281,6 +283,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   const [scenarioError, setScenarioError] = useState("");
   const [districtBoundaries, setDistrictBoundaries] = useState(null);
   const [gpsLocation, setGpsLocation] = useState(null);
+  const [areaId, setAreaId] = useState("");
+  const gpsAttempt = React.useRef(0);
   const [locationError, setLocationError] = useState("");
   const [locating, setLocating] = useState(false);
 
@@ -316,72 +320,31 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       .catch(() => setDistrictBoundaries(null));
   }, []);
 
-  function pointInRing(lon, lat, ring) {
-    let inside = false;
-
-    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-      const xi = ring[i][0], yi = ring[i][1];
-      const xj = ring[j][0], yj = ring[j][1];
-
-      if ((yi > lat) !== (yj > lat) &&
-          lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) {
-        inside = !inside;
-      }
-    }
-
-    return inside;
-  }
-
-  function pointInPolygon(lon, lat, polygon) {
-    if (!polygon.length || !pointInRing(lon, lat, polygon[0])) {
-      return false;
-    }
-
-    return !polygon.slice(1).some(
-      hole => pointInRing(lon, lat, hole)
-    );
-  }
-
   function findSupportedDistrict(lat, lon) {
-    if (!districtBoundaries?.features?.length) {
-      throw new Error(
-        "District boundary data is not ready. Please retry."
-      );
-    }
-
-    for (const feature of districtBoundaries.features) {
-      const geometry = feature.geometry;
-      if (!geometry) continue;
-
-      const polygons = geometry.type === "Polygon"
-        ? [geometry.coordinates]
-        : geometry.type === "MultiPolygon"
-          ? geometry.coordinates
-          : [];
-
-      if (polygons.some(polygon =>
-        pointInPolygon(lon, lat, polygon)
-      )) {
-        const name = feature.properties?.ADM2_NAME || "";
-        return name === "Brahamanbaria"
-          ? "Brahmanbaria"
-          : name === "Maulvibazar"
-            ? "Moulvibazar"
-            : name;
-      }
-    }
-
-    return null;
+    return matchGpsDistrict(districtBoundaries, lat, lon);
   }
 
   function selectDistrict(name) {
     setDistrict(name);
     setGpsLocation(null);
+    setAreaId("");
+    gpsAttempt.current += 1;
+    setLocating(false);
+    setLocationError("");
+    setResult(null);
+  }
+
+  function selectArea(id) {
+    setAreaId(id);
+    setGpsLocation(null);
+    gpsAttempt.current += 1;
+    setLocating(false);
     setLocationError("");
     setResult(null);
   }
 
   function useGPS() {
+    const attempt = ++gpsAttempt.current;
     setLocationError("");
     setLocating(true);
     if (!navigator.geolocation || !window.isSecureContext) {
@@ -396,6 +359,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
     }
     navigator.geolocation.getCurrentPosition(
       position => {
+        if (attempt !== gpsAttempt.current) return;
         setLocating(false);
         const { latitude: lat, longitude: lon } = position.coords;
         let name;
@@ -411,12 +375,14 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         }
         const selected = { name, lat, lon };
         setDistrict(name);
+        setAreaId("");
         setGpsLocation(selected);
         setResult(null);
         setLocationError("");
         checkRisk(selected);
       },
       error => {
+        if (attempt !== gpsAttempt.current) return;
         setLocating(false);
         setGpsLocation(null);
         setLocationError(error.code === 1
@@ -440,8 +406,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
 
   function getLocation() {
     if (gpsLocation?.name === district) return gpsLocation;
-    const selected = DISTRICTS.find(d => d.name === district);
-    if (!selected) throw new Error("Select a district.");
+    const selected = resolveManualLocation(district, areaId, DISTRICTS);
+    if (!selected) throw new Error("Select a valid mapped area.");
     return selected;
   }
 
@@ -626,6 +592,16 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
             className="w-full border rounded-xl p-3">
             {DISTRICTS.map(d => <option key={d.name} value={d.name}>{d.name}</option>)}
           </select>
+          <label className="font-semibold text-sm block" htmlFor="area-choice">Select a specific area (optional)</label>
+          <select id="area-choice" value={areaId}
+            onChange={e => selectArea(e.target.value)}
+            className="w-full border rounded-xl p-3">
+            <option value="">District overview</option>
+            {areaOptions(district).map(area => (
+              <option key={area.id} value={area.id}>{area.label}</option>
+            ))}
+          </select>
+          <p className="text-xs text-slate-600">Mapped areas are geographic grid cells, not upazilas or precise flood prediction sites. Choose any area to demonstrate its local weather and rainfall outlook.</p>
           <button type="button" onClick={useGPS} disabled={locating || loading}
             className="bg-sky-800 text-white rounded-xl px-4 py-3 disabled:opacity-60">
             {locating ? "Finding your location..." : "Search Location (Use GPS)"}
@@ -634,8 +610,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
             GPS matched: {gpsLocation.name}. Forecasts use your detected position.
           </p>}
           {locationError && <p className="text-sm text-red-700" role="alert">{locationError}</p>}
-          <p className="text-xs text-slate-600">GPS permission is requested only when you press Search Location.
-            Alternatively choose one of the seven districts above. No typing is required.</p>
+          <p className="text-xs text-slate-600">GPS is optional and requests permission only when you press Search Location.
+            Manual district and area selection works from anywhere, including Dhaka. No typing is required.</p>
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
