@@ -6,11 +6,12 @@ const summary = JSON.parse(fs.readFileSync(new URL('../frontend/public/data/haor
 assert.deepEqual(followingFourDays('2017-03-28'), ['2017-03-28','2017-03-29','2017-03-30','2017-03-31']);
 assert.ok(eventExposure(summary, 4459, 'Sunamganj').percentage > 0);
 assert.ok(Number.isFinite(eventPercentagePointChange(summary, 4382, 4459, 'Sunamganj')));
-assert.match(text, /Recorded cropland flood overlap/);
-assert.match(text, /Versus previous archived event/);
+assert.match(text, /Estimated cropland flood overlap/);
+assert.match(text, /Compared with/);
 assert.match(text, /Recorded flood footprint/);
 assert.match(text, /No dated flood observation/);
 assert.match(text, /not an individual day/);
+assert.match(text, /2021 cropland as a proxy/);
 assert.match(text, /districtMatch\(f\.properties, district\)/);
 assert.match(text, /EVENT_COLORS/);
 assert.doesNotMatch(text, /Flood chance:|Day 1 – \d+%/);

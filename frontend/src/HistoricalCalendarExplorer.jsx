@@ -86,11 +86,11 @@ export default function HistoricalCalendarExplorer() {
       {eventMatchesDate ? <>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="sm:col-span-2 rounded-xl p-4 border" style={{ backgroundColor: '#fff7ed', borderColor: '#fed7aa' }}>
-            <div className="text-sm font-semibold text-orange-950">Recorded cropland flood overlap</div>
+            <div className="text-sm font-semibold text-orange-950">Estimated cropland flood overlap</div>
             <div className="text-4xl font-extrabold text-orange-800 mt-1">{exposure ? `${exposure.percentage.toFixed(1)}%` : '—'}</div>
             <div className="text-xs text-orange-900 mt-2">{district} · {selectedEvent?.label} event total</div>
           </div>
-          <div className="rounded-xl bg-slate-50 border p-4"><div className="text-sm text-slate-600">Versus previous archived event</div><div className="text-2xl font-bold mt-2">{difference === null ? '—' : `${difference > 0 ? '+' : ''}${difference.toFixed(1)} pp`}</div><div className="text-xs text-slate-600 mt-2">{preceding ? `Compared with ${preceding.label}` : 'First event in archive'}</div></div>
+          <div className="rounded-xl bg-slate-50 border p-4"><div className="text-sm text-slate-600">{preceding ? `Compared with ${preceding.label}` : 'Previous archived event comparison'}</div><div className="text-2xl font-bold mt-2">{difference === null ? 'Not available' : difference === 0 ? 'No change' : `${Math.abs(difference).toFixed(1)} percentage points ${difference > 0 ? 'higher' : 'lower'}`}</div><div className="text-xs text-slate-600 mt-2">Estimated cropland flood overlap</div></div>
         </div>
         <div className="flex items-center gap-3 flex-wrap text-sm"><span className="font-semibold">{selectedEvent?.label}:</span><span className="inline-flex items-center gap-2"><span className="inline-block h-4 w-5 rounded-sm border" style={{ backgroundColor: color, borderColor: '#7f1d1d' }} /> Recorded flood footprint</span><span className="text-slate-500">Gray outline: district boundary</span></div>
       </> : <div className="bg-slate-50 rounded-xl border p-4 text-sm">No dated flood observation for this selection.</div>}
@@ -102,7 +102,7 @@ export default function HistoricalCalendarExplorer() {
           {eventMatchesDate && layer?.features?.length > 0 && <GeoJSON key={'historical-'+eventId} data={layer} style={() => ({ color:'#9a3412', weight:1.3, fillColor:color, fillOpacity:0.63 })} />}
         </MapContainer>
       </div>
-      <p className="text-xs text-slate-500">Percentages and colored footprints summarize the entire archived event, not an individual day. The map displays the wider event footprint; selecting a district changes the map focus and district percentage.</p>
+      <p className="text-xs text-slate-500">Percentages estimate overlap using 2021 cropland as a proxy for these 2016–2017 events. Colored MODIS flood footprints summarize each archived event, not an individual day. The map displays the wider event footprint; selecting a district changes the map focus and district percentage.</p>
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
     </div>
   </section>;

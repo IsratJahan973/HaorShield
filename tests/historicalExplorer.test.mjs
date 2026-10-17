@@ -16,6 +16,6 @@ const explorer = fs.readFileSync(
 
 assert.match(
   explorer,
-  /entire archived event, not an individual day/i
+  /each archived event, not an individual day/i
 );
 console.log('Historical event composite, four-day calendar, unknown-day safety, event differences passed');

@@ -14,11 +14,12 @@ const getFarmerAdvice = vm.runInNewContext(`${helperSource}\ngetFarmerAdvice`);
 
 for (const [id, label] of [
   ['rice_boro', 'Boro rice'], ['rice_aman', 'Aman rice'], ['rice_aus', 'Aus rice'],
-  ['vegetables', 'Vegetables'], ['fish', 'Fish pond'], ['other', 'Other crops / livestock'],
+  ['vegetables', 'Vegetables'], ['other', 'Other crops / livestock'],
 ]) {
   assert.ok(source.includes(`"${id}"`), `Missing crop option ${id}`);
   assert.ok(source.includes(`"${label}"`), `Missing crop label ${label}`);
 }
+assert.doesNotMatch(source.split('const CROPS = [')[1].split('];')[0], /Fish pond|\[\"fish\"/, 'Fish pond must not appear in crop options');
 for (const stage of ['planning', 'seedling', 'growing', 'harvest']) {
   assert.ok(source.includes(`"${stage}"`), `Missing crop stage ${stage}`);
 }
@@ -47,7 +48,6 @@ assert.match(river.actions.join(' '), /safe|warning|rising water/i);
 for (const [crop, stage, keyword] of [
   ['rice_boro', 'seedling', /Boro/i], ['rice_aman', 'growing', /Aman/i],
   ['rice_aus', 'harvest', /Aus/i], ['vegetables', 'seedling', /seedling/i],
-  ['fish', 'growing', /fish/i],
 ]) {
   assert.match(getFarmerAdvice(crop, stage, 'normal', [{ rank: 1 }]).actions.join(' '), keyword);
 }
