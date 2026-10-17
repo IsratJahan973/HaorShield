@@ -20,6 +20,6 @@ for (const crop of ['rice_boro','rice_aman','rice_aus','vegetables','fish','othe
   assert.ok(result.prepare.length>=3 && result.duringFlood.length>=2 && result.recovery.length>=2);
   assert.ok(result.actions.length<=4);
 }
-assert.match(source,/Before water rises/);
+assert.match(source,/Prepare now/);
 assert.match(source,/After water recedes/);
 console.log('PASS FR-19 crop, stage, field overrides, evidence, timing, and safe action stages');
