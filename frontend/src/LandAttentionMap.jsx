@@ -59,16 +59,13 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
   const statusText = !check.ok
     ? null
     : forecastHasConcern
-      ? "Forecasts show increased flood concern for this period. Orange cells mark the parts of the district that need closer attention now. Light blue cells are other mapped areas."
-      : "No elevated flood concern was detected for this period. The district is shown in light blue only. Orange will appear only when a flood-concern target area is detected.";
+      ? "Elevated screening signal: orange cells highlight research areas to monitor."
+      : "No elevated screening signal for this period.";
 
   return (
     <section className="rounded-2xl border border-slate-200 p-4 space-y-3" aria-label="Land needing attention">
-      <h4 className="text-lg font-bold">Areas that may be vulnerable if flooding develops</h4>
-      <p className="text-sm text-slate-700">
-        Select 24, 48 or 72 hours to view your district. The map stays visible for location reference.
-        If flood concern is detected, only the affected part of the district turns orange.
-      </p>
+      <h4 className="text-lg font-bold">Nearby land and cropland</h4>
+
 
       <div className="flex flex-wrap gap-2" role="group" aria-label="Map forecast period">
         {HOURS.map(h => (
@@ -87,7 +84,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
       {check.ok ? (
         <>
           {selectedUpazila && <p className="text-sm rounded-lg bg-amber-50 p-3 text-amber-900" role="status">
-            Map focus: research cells with centers within 20 km of {selectedUpazila}. These are NOT official upazila boundaries, predicted flooded fields, or an upazila-wide area total.
+            Map coverage: research cells within 20 km of {selectedUpazila} (not administrative boundaries).
           </p>}
           {selectedUpazila && displayFeatures.length === 0 && <p className="text-sm text-orange-800" role="status">No research-grid cells are near this point. No local area estimate is available.</p>}
           <div className="rounded-xl bg-sky-50 p-4 text-sm text-slate-800">
@@ -123,15 +120,15 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
             <div className="flex flex-wrap gap-4 text-sm text-slate-700">
               <div className="flex items-center gap-2">
                 <span className="inline-block h-5 w-8 rounded border border-sky-400 bg-sky-200" />
-                <span>Light blue: mapped district area with no current flood target</span>
+                <span>Light blue: mapped research cells</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-block h-5 w-8 rounded border border-orange-500 bg-orange-300" />
-                <span>Light orange: target area needing attention</span>
+                <span>Light orange: increased screening signal</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-block h-5 w-8 rounded border border-orange-800 bg-orange-700" />
-                <span>Dark orange: stronger target area within the selected period</span>
+                <span>Dark orange: stronger screening signal</span>
               </div>
             </div>
           </div>
@@ -139,7 +136,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
           <div style={{ height: 320 }} className="overflow-hidden rounded-xl border" aria-label="Map showing land needing attention">
             <MapContainer center={[24.8, 91.3]} zoom={8} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
               <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <FitArea features={displayFeatures.length ? displayFeatures : check.features} />
+              <FitArea features={displayFeatures.length ? displayFeatures : selectedUpazila ? [] : check.features} />
               <GeoJSON
                 key={`${district}-${selectedUpazila || "district"}-${hours}-${forecastHasConcern ? 'risk' : 'norisk'}`}
                 data={{ type: "FeatureCollection", features: displayFeatures }}
@@ -166,10 +163,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
             </MapContainer>
           </div>
 
-          <p className="text-xs text-slate-600">
-            This map does not show flood depth, confirmed flooded land, or crop damage.
-            It only helps show which part of the district would be watched more closely if flood concern increases.
-          </p>
+
         </>
       ) : (
         <p className="rounded-xl bg-slate-100 p-3 text-sm" role="status">
@@ -177,7 +171,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
         </p>
       )}
 
-      <p className="text-xs text-slate-500">For safety decisions, follow official flood warnings and local advice.</p>
+
     </section>
   );
 }
