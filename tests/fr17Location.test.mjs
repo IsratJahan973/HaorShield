@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { chooseVerifiedPlace, nearbyResearchCells, greatCircleDistanceKm, resolveUpazilaForecastPoint } from '../frontend/src/upazilaForecastLocation.js';
+const contains = (lat,lon) => lat>24.5 && lat<25.6 && lon>90.8 && lon<91.8 ? 'Sunamganj' : null;
+const point = chooseVerifiedPlace([{name:'Tahirpur',latitude:25.1,longitude:91.2}], 'Tahirpur','Sunamganj',contains);
+assert.equal(point?.selectedUpazila,'Tahirpur');
+assert.equal(chooseVerifiedPlace([{name:'Tahirpur',latitude:23.7,longitude:90.4}],'Tahirpur','Sunamganj',contains),null);
+assert.equal(chooseVerifiedPlace([{name:'Tahirpur',latitude:null,longitude:91.2}],'Tahirpur','Sunamganj',contains),null);
+assert(greatCircleDistanceKm(25.1,91.2,25.1,91.2)<0.01);
+const square=(lon,lat)=>({type:'Feature',geometry:{type:'Polygon',coordinates:[[[lon,lat],[lon+0.01,lat],[lon+0.01,lat+0.01],[lon,lat+0.01],[lon,lat]]]},properties:{}});
+assert.equal(nearbyResearchCells([square(91.2,25.1),square(92,26)],{lat:25.1,lon:91.2}).length,1);
+const fake=async () => ({ok:true,json:async()=>({results:[{name:'Tahirpur',latitude:25.1,longitude:91.2}]})});
+assert.equal((await resolveUpazilaForecastPoint('Tahirpur','Sunamganj',contains,fake)).lat,25.1);
+let count=0;
+const outside=async ()=>{count++;return {ok:true,json:async()=> count===1?{results:[{name:'Tahirpur',latitude:23,longitude:90}]}:[]};};
+await assert.rejects(()=>resolveUpazilaForecastPoint('Tahirpur','Sunamganj',contains,outside),/Cannot verify/);
+console.log('PASS FR17 geocoding validation, safe fallback, and nearby research cells');
