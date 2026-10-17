@@ -1,32 +1,21 @@
 import assert from 'node:assert/strict';
+import { areaOptions, resolveManualLocation, UPAZILAS } from '../frontend/src/areaChoices.js';
 import { readFileSync } from 'node:fs';
-import { areaOptions, resolveManualLocation, MAPPED_AREAS } from '../frontend/src/areaChoices.js';
-const districts=[
-  {name:'Brahmanbaria',lat:23.96,lon:91.11},{name:'Habiganj',lat:24.38,lon:91.42},
-  {name:'Kishoreganj',lat:24.44,lon:90.78},{name:'Moulvibazar',lat:24.48,lon:91.77},
-  {name:'Netrakona',lat:24.88,lon:90.73},{name:'Sunamganj',lat:25.07,lon:91.40},
-  {name:'Sylhet',lat:24.89,lon:91.87}
-];
-assert.equal(Object.keys(MAPPED_AREAS).length,7);
-assert.equal(Object.values(MAPPED_AREAS).flat().length,306);
-for(const district of districts){
- const areas=areaOptions(district.name);
- assert.ok(areas.length>0);
- assert.equal(resolveManualLocation(district.name,'',districts).lat,district.lat);
- for(const area of areas){
-   assert.ok(Number.isFinite(area.lat) && Number.isFinite(area.lon));
-   const selected=resolveManualLocation(district.name,area.id,districts);
-   assert.equal(selected.name,district.name);
-   assert.equal(selected.lat,area.lat);
-   assert.equal(selected.lon,area.lon);
- }
+
+const districts = Object.keys(UPAZILAS).map((name, index) => ({ name, lat:24 + index * 0.1, lon:91 }));
+assert.equal(districts.length, 7);
+for (const district of districts) {
+  const items = areaOptions(district.name);
+  assert.ok(items.length >= 7, `${district.name} has named choices`);
+  assert.ok(items.every(item => !item.label.includes('Mapped area') && !item.label.includes('°')), 'No numeric grid IDs');
+  assert.equal(new Set(items.map(item => item.id)).size, items.length);
+  assert.equal(resolveManualLocation(district.name, '', districts).name, district.name);
+  assert.equal(resolveManualLocation(district.name, items[0].id, districts).selectedUpazila, items[0].id);
+  assert.equal(resolveManualLocation(district.name, 'Made-up place', districts), null);
 }
-assert.equal(resolveManualLocation('Sylhet','not-a-valid-id',districts),null);
-const ui=readFileSync(new URL('../frontend/src/FloodRiskChecker.jsx',import.meta.url),'utf8');
-assert.match(ui,/id="area-choice"/);
-assert.match(ui,/onChange=\{e => selectArea\(e.target.value\)\}/);
-assert.match(ui,/getCurrentPosition\(/);
-assert.match(ui,/onClick=\{useGPS\}/);
-assert.match(ui,/gpsAttempt.current/);
-assert.match(ui,/resolveManualLocation\(district, areaId, DISTRICTS\)/);
-console.log('PASS FR-16 manual district/area selection and opt-in GPS');
+const view = readFileSync(new URL('../frontend/src/FloodRiskChecker.jsx', import.meta.url), 'utf8');
+assert.match(view,/Select upazila/);
+assert.match(view,/onClick=\{useGPS\}/);
+assert.match(view,/district-level, not upazila predictions/);
+assert.doesNotMatch(view,/Mapped areas are geographic grid cells/);
+console.log('PASS updated area-choice test: seven named upazila menus, manual fallback, GPS opt-in, no false upazila forecasts');
