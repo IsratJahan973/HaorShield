@@ -9,5 +9,13 @@ assert.equal(HISTORICAL_EVENTS.length,3);
 const summary=JSON.parse(fs.readFileSync(new URL('../frontend/public/data/haorshield_dashboard_data.json',import.meta.url),'utf8'));
 assert.ok(eventExposure(summary,4382).percentage>40);
 assert.ok(Number.isFinite(eventPercentagePointChange(summary,4382,4508,'All districts')));
-assert.ok(fs.readFileSync(new URL('../frontend/src/HistoricalCalendarExplorer.jsx',import.meta.url),'utf8').includes('Daily percentage change: unavailable'));
+const explorer = fs.readFileSync(
+  new URL('../frontend/src/HistoricalCalendarExplorer.jsx', import.meta.url),
+  'utf8'
+);
+
+assert.match(
+  explorer,
+  /entire archived event, not an individual day/i
+);
 console.log('Historical event composite, four-day calendar, unknown-day safety, event differences passed');
