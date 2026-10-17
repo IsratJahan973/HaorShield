@@ -17,7 +17,14 @@ export function exposureForDistrict(data, district, hours, forecastDate, nowMs=D
   const part = type => localDateParts.find(x => x.type === type)?.value;
   const bangladeshDate = `${part("year")}-${part("month")}-${part("day")}`;
   if(summary.issue_anchor_date_utc !== utcIssueDate) return unavailable("The land map is for an older forecast issue. Wait for the next update.");
-  if(forecastDate !== bangladeshDate) return unavailable("The land map is only available for today's outlook. Choose today to see it.");
+  // Scenario layers cover 24/48/72 hours after a UTC issue, not a selected-day inundation map.
+  // Allow the relevant near-future calendar window without claiming day-specific observations.
+  const anchorDay = Date.parse(`${summary.issue_anchor_date_utc}T00:00:00Z`);
+  const chosenDay = /^\d{4}-\d{2}-\d{2}$/.test(forecastDate || "")
+    ? Date.parse(`${forecastDate}T00:00:00Z`) : NaN;
+  const dayOffset = (chosenDay - anchorDay) / 86400000;
+  if (!Number.isInteger(dayOffset) || dayOffset < 0 || dayOffset > 3)
+    return unavailable("No current research scenario covers this selected date. Choose a date within the current forecast window.");
   const seen=new Set();
   const features=[];
   for (const f of map.features) {
@@ -40,5 +47,5 @@ export function exposureForDistrict(data, district, hours, forecastDate, nowMs=D
   const flagged=features.filter(f=>Number(f.properties[`sar_candidate_fraction_${hours}h`])>=0.10);
   const landKm2=flagged.reduce((s,f)=>s+Number(f.properties.cell_area_ha)/100,0);
   const cropHa=flagged.reduce((s,f)=>s+Number(f.properties.cropland_ha),0);
-  return {ok:true,features,flaggedCount:flagged.length,landKm2,cropHa};
+  return {ok:true,features,flaggedCount:flagged.length,landKm2,cropHa, issueDate:summary.issue_anchor_date_utc, scenarioBased:true};
 }

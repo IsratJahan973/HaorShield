@@ -83,6 +83,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
 
       {check.ok ? (
         <>
+          <p className="text-xs text-slate-600" role="status">Experimental research scenario issued {check.issueDate} (UTC), showing a {hours}-hour scenario. This is not a dated flood-inundation prediction for {forecastDate}.</p>
           {selectedUpazila && <p className="text-sm rounded-lg bg-amber-50 p-3 text-amber-900" role="status">
             Map coverage: research cells within 20 km of {selectedUpazila} (not administrative boundaries).
           </p>}
@@ -94,11 +95,11 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
           {forecastHasConcern ? (
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-amber-50 p-3">
-                <p className="text-sm">{selectedUpazila ? "Nearby research-cell land to monitor" : "Target land area"}</p>
+                <p className="text-sm">{selectedUpazila ? "Nearby research-cell land to monitor" : "Research-cell land to monitor"}</p>
                 <p className="text-xl font-bold">{fmt(selectedUpazila ? localTargetLandKm2 : check.landKm2)} km²</p>
               </div>
               <div className="rounded-xl bg-orange-50 p-3">
-                <p className="text-sm">{selectedUpazila ? "Nearby research-cell cropland to monitor" : "Target cropland area"}</p>
+                <p className="text-sm">{selectedUpazila ? "Nearby research-cell cropland to monitor" : "Research-cell cropland to monitor"}</p>
                 <p className="text-xl font-bold">{fmt(selectedUpazila ? localTargetCropHa : check.cropHa)} hectares</p>
               </div>
             </div>

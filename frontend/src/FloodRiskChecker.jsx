@@ -447,7 +447,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       url.searchParams.set("timezone", "Asia/Dhaka");
 
       const response = await fetch(url.toString());
-      if (!response.ok) throw new Error("Weather service unavailable.");
+      if (!response.ok) throw new Error(`Weather service unavailable (HTTP ${response.status}). Please retry shortly.`);
 
       const data = await response.json();
       const times = data.hourly?.time;
@@ -563,7 +563,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       });
 
     } catch (e) {
-      setError(e.message || "Unable to retrieve forecast.");
+      setError(e instanceof TypeError ? "Weather service could not be reached. Check your connection and try again." : (e.message || "Unable to retrieve forecast."));
     } finally {
       setLoading(false);
     }
@@ -655,7 +655,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
 
       {activeSection === "flood" && error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-800">
-          {error}
+          <p>{error}</p>
+          <button type="button" disabled={loading} onClick={() => checkRisk()} className="mt-3 rounded-lg border border-red-400 bg-white px-4 py-2 font-semibold disabled:opacity-50">Retry forecast</button>
         </div>
       )}
 
