@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import FarmerCropAdvice from "./FarmerCropAdvice.jsx";
 import SimpleRainMap from "./SimpleRainMap.jsx";
 import LandAttentionMap from "./LandAttentionMap.jsx";
+import OutlookEvidence from "./OutlookEvidence.jsx";
 import { summarizeCurrentWeather } from "./weatherNow.js";
 import { farmerHorizon, farmerSummary } from "./farmerOutlookView.js";
 import { rollingRainfallWindows } from "./rainfallWindows.js";
@@ -655,6 +656,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                   <p className="text-sm mt-2">🌧️ {item.rainText}</p>
                   <p className="text-xs mt-1 text-slate-700">River: {item.riverAvailable ? (outlook.riverIdentityVerified ? "Local model signal" : "Regional model signal") : "Data unavailable"}</p>
                   {item.uncertain && <p className="text-xs mt-2 text-slate-600">{item.riverAvailable ? "Local river match unverified" : "River forecast incomplete"}</p>}
+                  <OutlookEvidence outlook={outlook} />
                 </div>;
               })}
             </div>

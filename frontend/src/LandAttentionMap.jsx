@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import L from "leaflet";
 import { MapContainer, TileLayer, GeoJSON, Circle, CircleMarker, Tooltip, useMap } from "react-leaflet";
 import { exposureForDistrict } from "./landAttention.js";
@@ -111,6 +111,8 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
 
   const statusText = !check.ok
     ? null
+    : selectedUpazila && displayFeatures.length === 0
+      ? "Local map coverage is unavailable for this selection."
     : forecastHasConcern
       ? "Elevated screening signal: orange cells highlight research areas to monitor."
       : "No elevated screening signal for this period.";
@@ -120,9 +122,9 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h4 className="text-lg font-bold text-slate-900">Land &amp; cropland outlook map</h4>
-          <p className="text-sm text-slate-500">{selectedUpazila ? `${selectedUpazila}, ` : ""}{district} Â· Experimental geographic screening</p>
+          <p className="text-sm text-slate-500">{selectedUpazila ? `${selectedUpazila}, ` : ""}{district} · Experimental geographic screening</p>
         </div>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Research map Â· Not inundation</span>
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Research map · Not inundation</span>
       </div>
 
 
@@ -152,22 +154,22 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-amber-50 p-3">
                 <p className="text-sm">{selectedUpazila ? "Nearby research-cell land to monitor" : "Research-cell land to monitor"}</p>
-                <p className="text-xl font-bold">{fmt(selectedUpazila ? localTargetLandKm2 : check.landKm2)} kmÂ²</p>
+                <p className="text-xl font-bold">{selectedUpazila && displayFeatures.length === 0 ? "Unavailable" : `${fmt(selectedUpazila ? localTargetLandKm2 : check.landKm2)} km²`}</p>
               </div>
               <div className="rounded-xl bg-orange-50 p-3">
                 <p className="text-sm">{selectedUpazila ? "Nearby research-cell cropland to monitor" : "Research-cell cropland to monitor"}</p>
-                <p className="text-xl font-bold">{fmt(selectedUpazila ? localTargetCropHa : check.cropHa)} hectares</p>
+                <p className="text-xl font-bold">{selectedUpazila && displayFeatures.length === 0 ? "Unavailable" : `${fmt(selectedUpazila ? localTargetCropHa : check.cropHa)} hectares`}</p>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-blue-50 p-3">
-                <p className="text-sm">{selectedUpazila ? "Nearby mapped land (20 km cells)" : "Mapped district land"}</p>
-                <p className="text-xl font-bold">{fmt(mapStats?.mappedLandKm2 || 0)} kmÂ²</p>
+                <p className="text-sm">{selectedUpazila ? "Mapped land in selected area" : "Mapped district land"}</p>
+                <p className="text-xl font-bold">{selectedUpazila && displayFeatures.length === 0 ? "Unavailable" : `${fmt(mapStats?.mappedLandKm2 || 0)} km²`}</p>
               </div>
               <div className="rounded-xl bg-cyan-50 p-3">
-                <p className="text-sm">{selectedUpazila ? "Nearby mapped cropland (20 km cells)" : "Mapped cropland"}</p>
-                <p className="text-xl font-bold">{fmt(mapStats?.mappedCropHa || 0)} hectares</p>
+                <p className="text-sm">{selectedUpazila ? "Mapped cropland in selected area" : "Mapped cropland"}</p>
+                <p className="text-xl font-bold">{selectedUpazila && displayFeatures.length === 0 ? "Unavailable" : `${fmt(mapStats?.mappedCropHa || 0)} hectares`}</p>
               </div>
             </div>
           )}
@@ -196,12 +198,12 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
 
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm" aria-label="Map showing land needing attention">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white px-4 py-3">
-              <div className="font-semibold text-slate-900">{selectedUpazila ? `${selectedUpazila} area` : district} Â· {hours}-hour outlook</div>
-              <span className="text-xs text-slate-500">Zoom to explore Â· OpenStreetMap</span>
+              <div className="font-semibold text-slate-900">{selectedUpazila ? `${selectedUpazila} area` : district} · {hours}-hour outlook</div>
+              <span className="text-xs text-slate-500">Zoom to explore · OpenStreetMap</span>
             </div>
             <div style={{ height: 420 }}>
               <MapContainer center={[24.8, 91.3]} zoom={8} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
-                <TileLayer attribution="Â© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <FitResearchArea features={displayFeatures} districtBoundary={selectedBoundary} upazilaBoundary={selectedUpazilaBoundary} />
                 {/* Research cells are intentionally light. They are not upazila boundaries. */}
                 <GeoJSON

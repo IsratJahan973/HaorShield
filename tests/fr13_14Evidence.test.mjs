@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const source = readFileSync(new URL("../frontend/src/OutlookEvidence.jsx", import.meta.url), "utf8");
+const checker = readFileSync(new URL("../frontend/src/FloodRiskChecker.jsx", import.meta.url), "utf8");
+assert.match(source, /<details/);
+assert.match(source, /outlook\?\.factors/);
+assert.match(source, /rainfallAvailable/);
+assert.match(source, /riverAvailable/);
+assert.match(source, /riverIdentityVerified/);
+assert.match(source, /not measured flood probabilities/);
+assert.match(checker, /import OutlookEvidence from "\.\/OutlookEvidence\.jsx";/);
+assert.match(checker, /<OutlookEvidence outlook=\{outlook\} \/>/);
+console.log("PASS FR-13/14 evidence, uncertainty and optional compact display");
