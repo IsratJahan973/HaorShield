@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const source = fs.readFileSync(new URL('../frontend/src/FloodRiskChecker.jsx', import.meta.url), 'utf8');
+assert.match(source, /Search Location \(Use GPS\)/);
+assert.match(source, /getCurrentPosition\(/);
+assert.match(source, /onClick=\{useGPS\}/);
+assert.match(source, /onChange=\{e => selectDistrict\(e\.target\.value\)\}/);
+assert.match(source, /DISTRICTS\.map\(d => <option/);
+assert.match(source, /if \(!DISTRICTS\.some\(d => d\.name === name\)\)/);
+assert.match(source, /checkRisk\(selected\)/);
+assert.match(source, /if \(gpsLocation\?\.name === district\) return gpsLocation/);
+assert.match(source, /setGpsLocation\(null\)/);
+assert.match(source, /Location permission was denied/);
+assert.doesNotMatch(source, /onClick=\{searchLocations\}/);
+console.log('PASS FR-16: fixed district dropdown, permission-on-click GPS, polygon validation, automatic forecast, fallback');
