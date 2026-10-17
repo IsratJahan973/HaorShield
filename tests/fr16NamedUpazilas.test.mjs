@@ -16,6 +16,8 @@ for (const district of districts) {
 const view = readFileSync(new URL('../frontend/src/FloodRiskChecker.jsx', import.meta.url), 'utf8');
 assert.match(view,/Select upazila/);
 assert.match(view,/onClick=\{useGPS\}/);
-assert.match(view,/district-level, not upazila predictions/);
+assert.match(view,/resolveUpazilaForecastPoint/);
+assert.match(view,/selectedUpazila=\{result.selectedUpazila\}/);
+assert.match(view,/screening index/);
 assert.doesNotMatch(view,/Mapped areas are geographic grid cells/);
 console.log('PASS FR-16: seven named upazila menus, manual fallback, GPS opt-in, no false upazila forecasts');
