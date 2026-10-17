@@ -280,22 +280,15 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   const [scenarioData, setScenarioData] = useState(null);
   const [scenarioError, setScenarioError] = useState("");
   const [districtBoundaries, setDistrictBoundaries] = useState(null);
-  const [locationMode, setLocationMode] = useState("district");
-  const [searchText, setSearchText] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [searching, setSearching] = useState(false);
-  const [selectedPlace, setSelectedPlace] = useState(null);
   const [gpsLocation, setGpsLocation] = useState(null);
   const [locationError, setLocationError] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const suggestions = selectedPlace ? [] : districtSuggestions(searchText);
+  const [locating, setLocating] = useState(false);
 
-  const mapRefreshCycle = Math.floor(freshnessClock / (15 * 60_000));
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([
-      fetch("/data/haorshield_sar_future_candidates.geojson", { signal: controller.signal, cache: "no-store" }),
-      fetch("/data/haorshield_sar_future_summary.json", { signal: controller.signal, cache: "no-store" })
+      fetch("/data/haorshield_sar_future_candidates.geojson", { signal: controller.signal }),
+      fetch("/data/haorshield_sar_future_summary.json", { signal: controller.signal })
     ]).then(async ([mapResponse, summaryResponse]) => {
       if (!mapResponse.ok || !summaryResponse.ok) throw new Error("Experimental map data unavailable.");
       const [map, summary] = await Promise.all([mapResponse.json(), summaryResponse.json()]);
@@ -311,7 +304,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       if (err.name !== "AbortError") setScenarioError(err.message);
     });
     return () => controller.abort();
-  }, [mapRefreshCycle]);
+  }, []);
 
   useEffect(() => {
     fetch("/data/haorshield_districts.geojson")
@@ -381,96 +374,58 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
     return null;
   }
 
-  function chooseSuggestedDistrict(place) {
-    setSelectedPlace({ name: place.name, lat: place.lat, lon: place.lon });
-    setDistrict(place.name);
-    setSearchText(place.name);
-    setSearchResults([]);
-    setShowSuggestions(false);
+  function selectDistrict(name) {
+    setDistrict(name);
+    setGpsLocation(null);
     setLocationError("");
     setResult(null);
   }
 
-  async function searchLocations() {
-    const query = searchText.trim();
-    if (query.length < 2) {
-      setLocationError("Enter at least two characters.");
-      return;
-    }
-
-    // Keep a supported district match usable without any external service.
-    const localMatches = districtSuggestions(query);
-    setSearching(true);
-    setLocationError("");
-    setShowSuggestions(false);
-    setSearchResults([]);
-    setSelectedPlace(null);
-
-    try {
-      const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
-      url.searchParams.set("name", query);
-      url.searchParams.set("count", "30");
-      url.searchParams.set("language", "en");
-      url.searchParams.set("countryCode", "BD");
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Location search service unavailable.");
-      const data = await response.json();
-
-      // Do not offer misleading outside-district names (e.g. Kishoreganj,
-      // Nilphamari). The SAME boundary check is applied again on submit.
-      const supported = (data.results || []).filter(place => {
-        if (place.country_code !== "BD" ||
-            !Number.isFinite(place.latitude) ||
-            !Number.isFinite(place.longitude)) return false;
-        try {
-          return DISTRICTS.some(d => d.name ===
-            findSupportedDistrict(place.latitude, place.longitude));
-        } catch { return false; }
-      });
-      const unique = supported.filter((p, i, all) =>
-        all.findIndex(other => other.latitude === p.latitude &&
-          other.longitude === p.longitude) === i);
-      setSearchResults(unique);
-      if (!unique.length) {
-        setShowSuggestions(true);
-        setLocationError(localMatches.length
-          ? "No additional supported towns found. Choose a suggested district."
-          : "No supported places found. Try a district name or another spelling.");
-      }
-    } catch {
-      setShowSuggestions(true);
-      setLocationError(localMatches.length
-        ? "Town search is temporarily unavailable. Choose a district suggestion."
-        : "Town search is temporarily unavailable. Try a supported district name.");
-    } finally {
-      setSearching(false);
-    }
-  }
-
   function useGPS() {
     setLocationError("");
-
-    if (!navigator.geolocation) {
-      setLocationError("GPS is not supported by this browser.");
+    setLocating(true);
+    if (!navigator.geolocation || !window.isSecureContext) {
+      setLocationError("Location requires HTTPS and a browser with GPS support. Select a district below.");
+      setLocating(false);
       return;
     }
-
+    if (!districtBoundaries?.features?.length) {
+      setLocationError("District boundaries are loading or unavailable. Select a district below.");
+      setLocating(false);
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       position => {
-        setGpsLocation({
-          name: "My GPS Location",
-          lat: position.coords.latitude,
-          lon: position.coords.longitude
-        });
+        setLocating(false);
+        const { latitude: lat, longitude: lon } = position.coords;
+        let name;
+        try { name = findSupportedDistrict(lat, lon); }
+        catch {
+          setLocationError("District boundaries are unavailable. Select a district below.");
+          return;
+        }
+        if (!DISTRICTS.some(d => d.name === name)) {
+          setGpsLocation(null);
+          setLocationError("Your location is outside the seven supported districts. Select a district below.");
+          return;
+        }
+        const selected = { name, lat, lon };
+        setDistrict(name);
+        setGpsLocation(selected);
+        setResult(null);
+        setLocationError("");
+        checkRisk(selected);
       },
-      () => setLocationError(
-        "Unable to access GPS. Check browser location permissions."
-      ),
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 60000
-      }
+      error => {
+        setLocating(false);
+        setGpsLocation(null);
+        setLocationError(error.code === 1
+          ? "Location permission was denied. Select a district below, or allow location access in your browser."
+          : error.code === 3
+            ? "Location request timed out. Select a district below or retry."
+            : "Your location could not be determined. Select a district below.");
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
     );
   }
 
@@ -484,33 +439,21 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   }, [result?.retrievedAt]);
 
   function getLocation() {
-    if (locationMode === "search") {
-      if (!selectedPlace) {
-        throw new Error("Select a location from the search results.");
-      }
-      return selectedPlace;
-    }
-
-    if (locationMode === "gps") {
-      if (!gpsLocation) {
-        throw new Error("Click Use My GPS Location first.");
-      }
-      return gpsLocation;
-    }
-
+    if (gpsLocation?.name === district) return gpsLocation;
     const selected = DISTRICTS.find(d => d.name === district);
     if (!selected) throw new Error("Select a district.");
     return selected;
   }
 
-  async function checkRisk() {
+  async function checkRisk(locationOverride = null) {
     setLoading(true);
     setError("");
     setResult(null);
     setActiveSection("flood");
 
     try {
-      const selected = getLocation();
+      const selected = locationOverride && typeof locationOverride.lat === "number"
+        ? locationOverride : getLocation();
 
       const supportedDistrict = findSupportedDistrict(
         selected.lat, selected.lon
@@ -677,171 +620,24 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
 
       {activeSection === "flood" && <div className="bg-white border rounded-2xl p-6 space-y-5">
         <div className="space-y-3">
-          <label className="font-semibold text-sm block">
-            Location selection method
-          </label>
-
-          <div className="flex flex-wrap gap-2">
-            {[
-              ["district", "Select District"],
-              ["search", "Search Location"],
-              ["gps", "Use GPS"]
-            ].map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => {
-                  setLocationMode(value);
-                  setLocationError("");
-                  setResult(null);
-                  setSearchText("");
-                  setSelectedPlace(null);
-                  setSearchResults([]);
-                  setShowSuggestions(false);
-                }}
-                className={`px-4 py-2 rounded-lg border text-sm font-semibold ${
-                  locationMode === value
-                    ? "bg-sky-800 text-white"
-                    : "bg-white text-slate-700"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {locationMode === "search" && (
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                <input
-                  value={searchText}
-                  onChange={e => {
-                    setSearchText(e.target.value);
-                    setSelectedPlace(null);
-                    setSearchResults([]);
-                    setShowSuggestions(true);
-                    setLocationError("");
-                  }}
-                  placeholder=""
-                  autoComplete="off"
-                  aria-label="Search a district or town"
-                  onFocus={() => setShowSuggestions(true)}
-                  onKeyDown={e => {
-                    if (e.key === "Escape") setShowSuggestions(false);
-                    if (e.key === "Enter" && suggestions.length) {
-                      e.preventDefault();
-                      chooseSuggestedDistrict(suggestions[0]);
-                    }
-                  }}
-                  className="flex-1 min-w-0 border rounded-xl p-3"
-                />
-                <button
-                  type="button"
-                  onClick={searchLocations}
-                  disabled={searching}
-                  className="bg-sky-800 text-white px-4 rounded-xl"
-                >
-                  {searching ? "Searching..." : "Search"}
-                </button>
-              </div>
-
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden" role="listbox" aria-label="Suggested supported districts">
-                  <p className="px-3 py-2 text-xs text-slate-500">Suggested supported districts</p>
-                  {suggestions.map(place => (
-                    <button key={place.name} type="button" role="option"
-                      aria-selected={false}
-                      onClick={() => chooseSuggestedDistrict(place)}
-                      className="block w-full text-left px-3 py-3 text-sm border-t hover:bg-sky-50 focus:bg-sky-50">
-                      {place.name} District, Bangladesh
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {searchResults.length > 0 && (
-                <select
-                  value={selectedPlace
-                    ? `${selectedPlace.lat},${selectedPlace.lon}`
-                    : ""}
-                  onChange={e => {
-                    const match = searchResults.find(p =>
-                      `${p.latitude},${p.longitude}` === e.target.value
-                    );
-                    if (match) {
-                      setSearchText(match.name);
-                      setShowSuggestions(false);
-                      setLocationError("");
-                    }
-                    setSelectedPlace(match ? {
-                      name: match.name +
-                        (match.admin1 ? `, ${match.admin1}` : ""),
-                      lat: match.latitude,
-                      lon: match.longitude
-                    } : null);
-                  }}
-                  className="w-full border rounded-xl p-3"
-                >
-                  <option value="">Select a matching location</option>
-                  {searchResults.map((place, i) => (
-                    <option
-                      key={i}
-                      value={`${place.latitude},${place.longitude}`}
-                    >
-                      {place.name}
-                      {place.admin2 ? `, ${place.admin2}` : ""}
-                      {place.admin1 ? `, ${place.admin1}` : ""}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-          )}
-
-          {locationMode === "gps" && (
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={useGPS}
-                className="bg-sky-800 text-white rounded-xl px-4 py-3"
-              >
-                Use My GPS Location
-              </button>
-              {gpsLocation && (
-                <p className="text-sm text-emerald-700">
-                  GPS location received:
-                  {" "}{gpsLocation.lat.toFixed(4)},
-                  {" "}{gpsLocation.lon.toFixed(4)}
-                </p>
-              )}
-            </div>
-          )}
-
-          {locationError && (
-            <p className="text-sm text-red-700">{locationError}</p>
-          )}
+          <label className="font-semibold text-sm block" htmlFor="district-choice">Select your district</label>
+          <select id="district-choice" value={district}
+            onChange={e => selectDistrict(e.target.value)}
+            className="w-full border rounded-xl p-3">
+            {DISTRICTS.map(d => <option key={d.name} value={d.name}>{d.name}</option>)}
+          </select>
+          <button type="button" onClick={useGPS} disabled={locating || loading}
+            className="bg-sky-800 text-white rounded-xl px-4 py-3 disabled:opacity-60">
+            {locating ? "Finding your location..." : "Search Location (Use GPS)"}
+          </button>
+          {gpsLocation && <p className="text-sm text-emerald-700" role="status">
+            GPS matched: {gpsLocation.name}. Forecasts use your detected position.
+          </p>}
+          {locationError && <p className="text-sm text-red-700" role="alert">{locationError}</p>}
+          <p className="text-xs text-slate-600">GPS permission is requested only when you press Search Location.
+            Alternatively choose one of the seven districts above. No typing is required.</p>
         </div>
-
         <div className="grid md:grid-cols-2 gap-4">
-          {locationMode === "district" && <div>
-            <label className="font-semibold text-sm block mb-2">
-              <MapPin size={16} className="inline mr-2"/>
-              Your location
-            </label>
-            <select
-              value={district}
-              onChange={e => setDistrict(e.target.value)}
-              className="w-full border rounded-xl p-3"
-            >
-              {DISTRICTS.map(d => (
-                <option key={d.name} value={d.name}>{d.name}</option>
-              ))}
-            </select>
-            <p className="text-xs text-slate-500 mt-2">
-              Currently uses district-center weather coordinates.
-            </p>
-          </div>}
-
           <div>
             <label className="font-semibold text-sm block mb-2">
               <CalendarDays size={16} className="inline mr-2"/>
