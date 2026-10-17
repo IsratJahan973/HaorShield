@@ -607,8 +607,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
               <option key={area.id} value={area.id}>{area.label}</option>
             ))}
           </select>
-          {areaId && <p className="text-sm text-sky-900" role="status">Selected: {areaId}, {district}. Weather will use a verified local point if available; the map is research screening, not an upazila flood prediction.</p>}
-          <p className="text-xs text-slate-600">Choose a real upazila name. The upazila selection will use local weather/rainfall only if a valid local point is found. Flood occurrence and exact inundation are not predicted.</p>
+          {areaId && <p className="text-sm text-sky-900" role="status">Selected: {areaId}, {district}</p>}
+          <p className="text-xs text-slate-600">Choose a location to see its forecast.</p>
           <button type="button" onClick={useGPS} disabled={locating || loading}
             className="bg-sky-800 text-white rounded-xl px-4 py-3 disabled:opacity-60">
             {locating ? "Finding your location..." : "Search Location (Use GPS)"}
@@ -670,12 +670,12 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         <div className="space-y-5">
           <section aria-label="Your flood outlook" className="rounded-2xl bg-white border border-sky-200 p-5 md:p-7 space-y-4">
             <h3 className="text-2xl font-bold">Your area: {result.selectedUpazila ? `${result.selectedUpazila}, ` : ""}{result.supportedDistrict}</h3>
-            {result.selectedUpazila && <p className="text-sm text-slate-700">Rainfall and weather are sampled near the verified {result.selectedUpazila} location. River-discharge evidence may represent a wider area; this is an experimental flood-concern screening, not an upazila inundation forecast.</p>}
+            
             <p className="text-sm text-slate-600">Checked {new Date(result.retrievedAt).toLocaleString("en-BD", {timeZone:"Asia/Dhaka"})} · Refreshes every 15 minutes</p>
             {freshnessClock - Date.parse(result.retrievedAt) > 30*60_000 && <p role="alert" className="rounded-lg bg-amber-50 p-3 text-amber-900 font-semibold">Forecast is over 30 minutes old. Press Check My Location for new results.</p>}
             <div>
-              <h4 className="text-xl font-bold">Flood concern for the next 24, 48 and 72 hours</h4>
-              <p className="text-sm text-slate-600 mt-1">Each card explains the available rainfall, river evidence, uncertainty and practical next step. An unavailable signal is not a low-risk forecast.</p>
+              <h4 className="text-xl font-bold">Flood outlook · 24, 48 and 72 hours</h4>
+              
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               {result.combinedFloodOutlooks.map(outlook => {
@@ -684,27 +684,20 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                 const tones = { sky: "bg-sky-50 border-sky-300", amber: "bg-yellow-50 border-yellow-400", orange: "bg-orange-50 border-orange-400", red: "bg-red-50 border-red-500", slate: "bg-slate-100 border-slate-300" };
                 return <div key={outlook.horizonHours} className={`rounded-2xl border-2 p-4 ${tones[item.tone]}`}>
                   <div className="flex items-center justify-between gap-2"><p className="font-semibold">Next {outlook.horizonHours} hours</p><span className="text-2xl" aria-hidden="true">{item.icon}</span></div>
-                  <p className="text-xl font-extrabold mt-2">{item.title}</p>
-                  <p className="mt-2 font-semibold text-sm">🌧️ {item.rainText}</p>
-                  <p className="text-sm mt-2 text-slate-700">{item.detail}</p>
-                  <p className="text-xs mt-2 font-medium text-slate-700">River: {item.riverText}</p>
-                  <p className="text-sm mt-2 font-semibold text-slate-800">Next step: {item.action}</p>
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <span className="text-3xl font-extrabold tabular-nums">{Number.isInteger(outlook.rank) && item.rainAvailable && item.riverAvailable ? `${Math.round(outlook.rank / 3 * 100)}%` : "—"}</span>
+                    <span className="text-xs font-medium text-slate-600">screening index</span>
+                  </div>
+                  <p className="text-base font-bold mt-1">{item.title}</p>
+                  <p className="text-sm mt-2">🌧️ {item.rainText}</p>
+                  <p className="text-xs mt-1 text-slate-700">River: {item.riverAvailable ? (outlook.riverIdentityVerified ? "Local model signal" : "Regional model signal") : "Data unavailable"}</p>
+                  {item.uncertain && <p className="text-xs mt-2 text-slate-600">{item.riverAvailable ? "Local river match unverified" : "River forecast incomplete"}</p>}
                 </div>;
               })}
             </div>
             <LandAttentionMap district={result.supportedDistrict} selectedUpazila={result.selectedUpazila} focusLocation={result.selectedUpazila ? result.coordinates : null} forecastDate={result.date} scenarioData={scenarioData} scenarioError={scenarioError} outlooks={result.combinedFloodOutlooks} />
-            <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4 space-y-2">
-              <h4 className="text-lg font-bold">Why does HaorShield show this?</h4>
-              {farmerSummary(result.combinedFloodOutlooks, result.riverForecast, result.riverForecastError).lines.map((line, i) => <p className="text-sm text-slate-700" key={i}>{line}</p>)}
-            </div>
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
-              <h4 className="font-bold text-lg">What should I do?</h4>
-              <ul className="mt-2 space-y-2 list-disc ml-5 text-sm md:text-base">
-                {farmerSummary(result.combinedFloodOutlooks, result.riverForecast, result.riverForecastError).advice.map((line, i) => <li key={i}>{line}</li>)}
-              </ul>
-            </div>
-            {result.currentOutdated && <p role="alert" className="font-semibold text-amber-800">Weather information may be old. Check official updates.</p>}
-            <p className="text-xs text-slate-600">These are early signs, not a confirmed flood prediction. Follow official Bangladesh flood warnings.</p>
+            <p className="text-xs text-slate-500">Screening index: 0% = no elevated modeled signal; 100% = highest signal band. This is not a measured flood probability.</p>
+            {result.currentOutdated && <p role="alert" className="font-semibold text-amber-800">Weather data may be old. Refresh the forecast.</p>}
           </section>
         </div>
       )}
