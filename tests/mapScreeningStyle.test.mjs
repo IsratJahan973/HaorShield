@@ -10,7 +10,7 @@ assert.match(source, /const\s+forecastHasConcern\s*=\s*Number\(selectedForecast\
 assert.match(source, /const\s+active\s*=\s*forecastHasConcern\s*&&\s*frac\s*>=\s*0\.10/);
 assert.match(source, /fillColor:\s*"#bfdbfe"/); // light blue for non-target cells
 assert.match(source, /fillColor:\s*strong\s*\?\s*"#c2410c"\s*:\s*"#fdba74"/);
-assert.match(source, /nearbyResearchCells\(check\.features,\s*focusLocation,\s*20\)/);
+assert.match(source, /clipResearchCells\(check\.features,\s*polygonClips,\s*district,\s*selectedUpazila\)/);
 assert.match(source, /data=\{\{\s*type:\s*"FeatureCollection",\s*features:\s*displayFeatures\s*\}\}/);
 assert.match(source, /selectedUpazila\s*\?\s*localTargetLandKm2\s*:\s*check\.landKm2/);
 assert.match(source, /selectedUpazila\s*\?\s*localTargetCropHa\s*:\s*check\.cropHa/);

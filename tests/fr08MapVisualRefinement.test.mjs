@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const flood = fs.readFileSync(new URL('../frontend/src/LandAttentionMap.jsx', import.meta.url), 'utf8');
+const rain = fs.readFileSync(new URL('../frontend/src/SimpleRainMap.jsx', import.meta.url), 'utf8');
+assert.match(flood, /hasKnownLowerConcern.*selectedForecast/s);
+assert.match(flood, /displayFeatures\.length > 0/);
+assert.match(flood, /fillOpacity: hasKnownLowerConcern \? 0\.30 : 0/);
+assert.match(flood, /fillColor: hasKnownLowerConcern \? '#93c5fd' : 'transparent'/);
+assert.match(flood, /clipResearchCells/);
+assert.match(flood, /FitResearchArea/);
+assert.doesNotMatch(flood, /L\.circle\(point.*getBounds/);
+assert.match(rain, /color:'#0369a1',weight:2\.7/);
+assert.match(rain, /clipRainCells/);
+assert.doesNotMatch(rain, /#e11d48/);
+console.log('PASS blue lower-signal shading gated on coverage, softer boundaries, clipping and crash protection');

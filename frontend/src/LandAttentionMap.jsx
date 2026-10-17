@@ -3,12 +3,12 @@ import L from "leaflet";
 import { MapContainer, TileLayer, GeoJSON, Circle, CircleMarker, Tooltip, useMap } from "react-leaflet";
 import { exposureForDistrict } from "./landAttention.js";
 import { nearbyResearchCells } from "./upazilaForecastLocation.js";
+import { selectUpazilaBoundary, clipResearchCells } from "./upazilaPolygonOverlay.js";
 
 const HOURS = [24, 48, 72];
 
-// Administrative boundaries come from the existing district GeoJSON, not from
-// research grid rectangles. An upazila focus is a point with a 20 km search
-// radius, NOT an administrative upazila polygon.
+// District and upazila boundaries come from their geographic datasets.
+// The screening cells are clipped to the selected upazila and remain coarse inputs.
 function normalizeDistrict(name) {
   return String(name || "").toLowerCase().replace(/[^a-z]/g, "");
 }
@@ -26,22 +26,15 @@ function focusCoordinates(point) {
   return Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180
     ? [lat, lon] : null;
 }
-function FitResearchArea({ features, districtBoundary, point }) {
+function FitResearchArea({ features, districtBoundary, upazilaBoundary }) {
   const map = useMap();
   useEffect(() => {
-    if (point) {
-      // Approximate research search radius; no fake upazila polygon.
-      // Calculate a ~40 km viewing box without constructing an unmounted Circle.
-      // L.circle(...).getBounds() requires a map and crashes React before mount.
-      const bounds = L.latLng(point[0], point[1]).toBounds(40000);
-      map.fitBounds(bounds, { padding: [26, 26], maxZoom: 10 });
-      return;
-    }
-    const region = districtBoundary?.features?.length ? districtBoundary.features : features;
+    // Bounds come from attached-independent polygon geometry; never call Circle.getBounds.
+    const region = upazilaBoundary?.features?.length ? upazilaBoundary.features : (districtBoundary?.features?.length ? districtBoundary.features : features);
     if (!region.length) return;
     const bounds = L.geoJSON({ type: "FeatureCollection", features: region }).getBounds();
     if (bounds.isValid()) map.fitBounds(bounds, { padding: [26, 26], maxZoom: 10 });
-  }, [features, districtBoundary, point, map]);
+  }, [features, districtBoundary, upazilaBoundary, map]);
   return null;
 }
 
@@ -51,17 +44,19 @@ function featureFraction(feature, hours) {
 }
 
 function totalMappedLandKm2(features) {
-  return features.reduce((sum, f) => sum + Number(f.properties?.cell_area_ha || 0) / 100, 0);
+  return features.reduce((sum, f) => sum + Number(f.properties?.cell_area_ha || 0) * Number(f.properties?.overlapFraction ?? 1) / 100, 0);
 }
 
 function totalMappedCroplandHa(features) {
-  return features.reduce((sum, f) => sum + Number(f.properties?.cropland_ha || 0), 0);
+  return features.reduce((sum, f) => sum + Number(f.properties?.cropland_ha || 0) * Number(f.properties?.overlapFraction ?? 1), 0);
 }
 
 export default function LandAttentionMap({ district, forecastDate, scenarioData, scenarioError, outlooks = [], focusLocation = null, selectedUpazila = null }) {
   const [hours, setHours] = useState(24);
   const [districtBoundary, setDistrictBoundary] = useState(null);
   const [boundariesAvailable, setBoundariesAvailable] = useState(true);
+  const [upazilaBoundaries, setUpazilaBoundaries] = useState(null);
+  const [polygonClips, setPolygonClips] = useState(null);
   const focusPoint = useMemo(() => focusCoordinates(focusLocation), [focusLocation]);
   useEffect(() => {
     let active = true;
@@ -71,6 +66,16 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
       .catch(() => { if (active) setBoundariesAvailable(false); });
     return () => { active = false; };
   }, []);
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      fetch('/data/haorshield_upazila_boundaries.geojson').then(r => { if (!r.ok) throw Error('Boundary missing'); return r.json(); }),
+      fetch('/data/haorshield_upazila_cell_clips.json').then(r => { if (!r.ok) throw Error('Clips missing'); return r.json(); })
+    ]).then(([boundaries, clips]) => { if (active) { setUpazilaBoundaries(boundaries); setPolygonClips(clips); } })
+      .catch(() => { if (active) { setUpazilaBoundaries(null); setPolygonClips(null); } });
+    return () => { active = false; };
+  }, []);
+  const selectedUpazilaBoundary = useMemo(() => selectUpazilaBoundary(upazilaBoundaries, district, selectedUpazila), [upazilaBoundaries, district, selectedUpazila]);
   const selectedBoundary = useMemo(() => {
     const features = districtBoundary?.features?.filter(f => matchesDistrict(f, district)) || [];
     return features.length ? { type: "FeatureCollection", features } : null;
@@ -81,15 +86,18 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
     [scenarioData, district, hours, forecastDate]
   );
 
-  // For an upazila, this is a 20 km radius around a VERIFIED local point,
-  // NOT an administrative polygon or a prediction of submerged land.
-  const displayFeatures = useMemo(() => check.ok
-    ? nearbyResearchCells(check.features, focusLocation, 20) : [], [check, focusLocation]);
+  // Clip research cells by the mapped upazila boundary, not a circular point buffer.
+  const displayFeatures = useMemo(() => !check.ok ? [] : selectedUpazila
+    ? selectedUpazilaBoundary ? clipResearchCells(check.features, polygonClips, district, selectedUpazila) : []
+    : check.features, [check, district, selectedUpazila, selectedUpazilaBoundary, polygonClips]);
   const nearbyTargets = displayFeatures.filter(f => Number(f.properties[`sar_candidate_fraction_${hours}h`]) >= 0.10);
-  const localTargetLandKm2 = nearbyTargets.reduce((s, f) => s + Number(f.properties.cell_area_ha) / 100, 0);
-  const localTargetCropHa = nearbyTargets.reduce((s, f) => s + Number(f.properties.cropland_ha), 0);
+  const localTargetLandKm2 = nearbyTargets.reduce((s, f) => s + Number(f.properties.cell_area_ha) * Number(f.properties.overlapFraction ?? 1) / 100, 0);
+  const localTargetCropHa = nearbyTargets.reduce((s, f) => s + Number(f.properties.cropland_ha) * Number(f.properties.overlapFraction ?? 1), 0);
   const selectedForecast = outlooks.find(o => o.horizonHours === hours);
   const forecastHasConcern = Number(selectedForecast?.rank) >= 2;
+  // Light blue means a lower *screening signal*, never a zero flood probability.
+  const hasKnownLowerConcern = selectedForecast?.rank != null && Number.isFinite(Number(selectedForecast.rank))
+    && Number(selectedForecast.rank) < 2 && displayFeatures.length > 0;
 
   const fmt = n => Math.round(n).toLocaleString("en-BD");
 
@@ -136,9 +144,9 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
         <>
           <p className="text-xs text-slate-600" role="status">Experimental research scenario issued {check.issueDate} (UTC), showing a {hours}-hour scenario. This is not a dated flood-inundation prediction for {forecastDate}.</p>
           {selectedUpazila && <p className="text-sm rounded-lg bg-amber-50 p-3 text-amber-900" role="status">
-            Map coverage: research cells within 20 km of {selectedUpazila} (not administrative boundaries).
+            Map coverage: research-cell polygons clipped to the mapped administrative boundary of {selectedUpazila}. Values remain experimental, not actual flood-inundation estimates.
           </p>}
-          {selectedUpazila && displayFeatures.length === 0 && <p className="text-sm text-orange-800" role="status">No research-grid cells are near this point. No local area estimate is available.</p>}
+          {selectedUpazila && displayFeatures.length === 0 && <p className="text-sm text-orange-800" role="status">No research-grid coverage intersects this upazila, or its verified boundary is unavailable. No local area estimate is available.</p>}
           <div className="rounded-xl bg-sky-50 p-4 text-sm text-slate-800">
             {statusText}
           </div>
@@ -172,7 +180,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
             <div className="flex flex-wrap gap-4 text-sm text-slate-700">
               <div className="flex items-center gap-2">
                 <span className="inline-block h-4 w-7 rounded border border-sky-300 bg-sky-100" />
-                <span>Light blue: mapped research cells</span>
+                <span>Light blue: lower screening signal / mapped cells (not zero risk)</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-block h-5 w-8 rounded border border-orange-500 bg-orange-300" />
@@ -197,7 +205,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
             <div style={{ height: 420 }}>
               <MapContainer center={[24.8, 91.3]} zoom={8} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
                 <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <FitResearchArea features={displayFeatures} districtBoundary={selectedBoundary} point={selectedUpazila ? focusPoint : null} />
+                <FitResearchArea features={displayFeatures} districtBoundary={selectedBoundary} upazilaBoundary={selectedUpazilaBoundary} />
                 {/* Research cells are intentionally light. They are not upazila boundaries. */}
                 <GeoJSON
                   key={`cells-${district}-${selectedUpazila || "all"}-${hours}-${forecastHasConcern}`}
@@ -220,21 +228,23 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
                     fillOpacity: 0, dashArray: "", lineCap: "round", lineJoin: "round" })}
                   onEachFeature={(_, layer) => layer.bindTooltip(`${district} district`, { sticky: true })}
                 />}
-                {selectedUpazila && focusPoint && <>
-                  <Circle center={focusPoint} radius={20000}
-                    pathOptions={{ color: "#0369a1", weight: 1.6, dashArray: "6 6", fillColor: "#0284c7", fillOpacity: 0.025 }} />
-                  <CircleMarker center={focusPoint} radius={7}
-                    pathOptions={{ color: "#ffffff", weight: 2.5, fillColor: "#075985", fillOpacity: 1 }}>
-                    <Tooltip permanent direction="top" offset={[0, -7]}>{selectedUpazila} · reference point</Tooltip>
-                  </CircleMarker>
-                </>}
+                {selectedUpazilaBoundary && <GeoJSON
+                  key={`upazila-boundary-${district}-${selectedUpazila}`}
+                  data={selectedUpazilaBoundary}
+                  style={() => ({ color: '#0369a1', weight: 2.7,
+                    fillColor: hasKnownLowerConcern ? '#93c5fd' : 'transparent',
+                    fillOpacity: hasKnownLowerConcern ? 0.30 : 0,
+                    opacity: 0.95, lineCap: 'round', lineJoin: 'round' })}
+                  onEachFeature={(_, layer) => layer.bindTooltip(`${selectedUpazila} upazila`, { sticky: true })}
+                />}
               </MapContainer>
             </div>
             <div className="border-t border-slate-200 bg-white px-4 py-3 text-xs text-slate-600">
               {selectedUpazila
-                ? `The dotted circle shows a 20 km research radius around the ${selectedUpazila} reference point, not its administrative boundary.`
+                ? `The blue outline marks the mapped administrative boundary of ${selectedUpazila}. Pale blue is a lower experimental screening signal where mapped cells exist, not proof of no flood risk. Orange remains limited to intersecting research cells.`
                 : "The dark outline shows the selected district; rectangular overlays are research cells, not administrative areas."}
-              {!selectedBoundary && !boundariesAvailable && " Official-style district boundary data could not be loaded."}
+              {selectedUpazila && !selectedUpazilaBoundary && " Upazila boundary unavailable: no district-wide forecast shading is substituted."}
+              {!selectedBoundary && !boundariesAvailable && " District boundary data could not be loaded."}
             </div>
           </div>
 

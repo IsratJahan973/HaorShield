@@ -695,7 +695,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       {result && activeSection === "map" && (
         <section aria-label="Rain map" className="space-y-3">
           <h2 className="text-2xl font-bold">Rain map for {result.supportedDistrict}</h2>
-          <SimpleRainMap district={result.supportedDistrict} hours={24}/>
+          <SimpleRainMap district={result.supportedDistrict} selectedUpazila={result.selectedUpazila} hours={24}/>
         </section>
       )}
       {result && activeSection === "crops" && (
