@@ -407,7 +407,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
   function getLocation() {
     if (gpsLocation?.name === district) return gpsLocation;
     const selected = resolveManualLocation(district, areaId, DISTRICTS);
-    if (!selected) throw new Error("Select a valid mapped area.");
+    if (!selected) throw new Error("Select a valid upazila.");
     return selected;
   }
 
@@ -592,16 +592,17 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
             className="w-full border rounded-xl p-3">
             {DISTRICTS.map(d => <option key={d.name} value={d.name}>{d.name}</option>)}
           </select>
-          <label className="font-semibold text-sm block" htmlFor="area-choice">Select a specific area (optional)</label>
+          <label className="font-semibold text-sm block" htmlFor="area-choice">Select upazila (optional)</label>
           <select id="area-choice" value={areaId}
             onChange={e => selectArea(e.target.value)}
             className="w-full border rounded-xl p-3">
-            <option value="">District overview</option>
+            <option value="">Entire district (overview)</option>
             {areaOptions(district).map(area => (
               <option key={area.id} value={area.id}>{area.label}</option>
             ))}
           </select>
-          <p className="text-xs text-slate-600">Mapped areas are geographic grid cells, not upazilas or precise flood prediction sites. Choose any area to demonstrate its local weather and rainfall outlook.</p>
+          {areaId && <p className="text-sm text-sky-900" role="status">Selected: {areaId}, {district}. Current forecasts and map estimates are district-level, not upazila predictions.</p>}
+          <p className="text-xs text-slate-600">Choose a real upazila name. Current forecast calculations and highlighted land estimates remain district-level; upazila-specific predictions are not yet supported.</p>
           <button type="button" onClick={useGPS} disabled={locating || loading}
             className="bg-sky-800 text-white rounded-xl px-4 py-3 disabled:opacity-60">
             {locating ? "Finding your location..." : "Search Location (Use GPS)"}
@@ -611,7 +612,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
           </p>}
           {locationError && <p className="text-sm text-red-700" role="alert">{locationError}</p>}
           <p className="text-xs text-slate-600">GPS is optional and requests permission only when you press Search Location.
-            Manual district and area selection works from anywhere, including Dhaka. No typing is required.</p>
+            Manual district and upazila selection works from anywhere, including Dhaka. No typing is required.</p>
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
