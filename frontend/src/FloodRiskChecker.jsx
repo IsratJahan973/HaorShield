@@ -674,31 +674,33 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
             <p className="text-sm text-slate-600">Checked {new Date(result.retrievedAt).toLocaleString("en-BD", {timeZone:"Asia/Dhaka"})} · Refreshes every 15 minutes</p>
             {freshnessClock - Date.parse(result.retrievedAt) > 30*60_000 && <p role="alert" className="rounded-lg bg-amber-50 p-3 text-amber-900 font-semibold">Forecast is over 30 minutes old. Press Check My Location for new results.</p>}
             <div>
-              <h4 className="text-xl font-bold">What may happen in the next 3 days?</h4>
-              <p className="text-sm text-slate-600 mt-1">Look at each period to see the rain and flood concern for your area.</p>
+              <h4 className="text-xl font-bold">Flood concern for the next 24, 48 and 72 hours</h4>
+              <p className="text-sm text-slate-600 mt-1">Each card explains the available rainfall, river evidence, uncertainty and practical next step. An unavailable signal is not a low-risk forecast.</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               {result.combinedFloodOutlooks.map(outlook => {
                 const rainfall = result.rollingOutlooks.find(x => x.horizonHours === outlook.horizonHours);
-                const item = farmerHorizon(outlook, rainfall);
+                const item = farmerHorizon(outlook, rainfall, result.riverForecastError);
                 const tones = { sky: "bg-sky-50 border-sky-300", amber: "bg-yellow-50 border-yellow-400", orange: "bg-orange-50 border-orange-400", red: "bg-red-50 border-red-500", slate: "bg-slate-100 border-slate-300" };
                 return <div key={outlook.horizonHours} className={`rounded-2xl border-2 p-4 ${tones[item.tone]}`}>
                   <div className="flex items-center justify-between gap-2"><p className="font-semibold">Next {outlook.horizonHours} hours</p><span className="text-2xl" aria-hidden="true">{item.icon}</span></div>
                   <p className="text-xl font-extrabold mt-2">{item.title}</p>
                   <p className="mt-2 font-semibold text-sm">🌧️ {item.rainText}</p>
                   <p className="text-sm mt-2 text-slate-700">{item.detail}</p>
+                  <p className="text-xs mt-2 font-medium text-slate-700">River: {item.riverText}</p>
+                  <p className="text-sm mt-2 font-semibold text-slate-800">Next step: {item.action}</p>
                 </div>;
               })}
             </div>
             <LandAttentionMap district={result.supportedDistrict} selectedUpazila={result.selectedUpazila} focusLocation={result.selectedUpazila ? result.coordinates : null} forecastDate={result.date} scenarioData={scenarioData} scenarioError={scenarioError} outlooks={result.combinedFloodOutlooks} />
             <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4 space-y-2">
               <h4 className="text-lg font-bold">Why does HaorShield show this?</h4>
-              {farmerSummary(result.combinedFloodOutlooks, result.riverForecast).lines.map((line, i) => <p className="text-sm text-slate-700" key={i}>{line}</p>)}
+              {farmerSummary(result.combinedFloodOutlooks, result.riverForecast, result.riverForecastError).lines.map((line, i) => <p className="text-sm text-slate-700" key={i}>{line}</p>)}
             </div>
             <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
               <h4 className="font-bold text-lg">What should I do?</h4>
               <ul className="mt-2 space-y-2 list-disc ml-5 text-sm md:text-base">
-                {farmerSummary(result.combinedFloodOutlooks, result.riverForecast).advice.map((line, i) => <li key={i}>{line}</li>)}
+                {farmerSummary(result.combinedFloodOutlooks, result.riverForecast, result.riverForecastError).advice.map((line, i) => <li key={i}>{line}</li>)}
               </ul>
             </div>
             {result.currentOutdated && <p role="alert" className="font-semibold text-amber-800">Weather information may be old. Check official updates.</p>}
