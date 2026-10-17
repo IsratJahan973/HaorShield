@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import L from "leaflet";
 import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import { exposureForDistrict } from "./landAttention.js";
+import { nearbyResearchCells } from "./upazilaForecastLocation.js";
 
 const HOURS = [24, 48, 72];
 
@@ -27,7 +28,7 @@ function totalMappedCroplandHa(features) {
   return features.reduce((sum, f) => sum + Number(f.properties?.cropland_ha || 0), 0);
 }
 
-export default function LandAttentionMap({ district, forecastDate, scenarioData, scenarioError, outlooks = [] }) {
+export default function LandAttentionMap({ district, forecastDate, scenarioData, scenarioError, outlooks = [], focusLocation = null, selectedUpazila = null }) {
   const [hours, setHours] = useState(24);
 
   const check = useMemo(
@@ -35,6 +36,13 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
     [scenarioData, district, hours, forecastDate]
   );
 
+  // For an upazila, this is a 20 km radius around a VERIFIED local point,
+  // NOT an administrative polygon or a prediction of submerged land.
+  const displayFeatures = useMemo(() => check.ok
+    ? nearbyResearchCells(check.features, focusLocation, 20) : [], [check, focusLocation]);
+  const nearbyTargets = displayFeatures.filter(f => Number(f.properties[`sar_candidate_fraction_${hours}h`]) >= 0.10);
+  const localTargetLandKm2 = nearbyTargets.reduce((s, f) => s + Number(f.properties.cell_area_ha) / 100, 0);
+  const localTargetCropHa = nearbyTargets.reduce((s, f) => s + Number(f.properties.cropland_ha), 0);
   const selectedForecast = outlooks.find(o => o.horizonHours === hours);
   const forecastHasConcern = Number(selectedForecast?.rank) >= 2;
 
@@ -43,10 +51,10 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
   const mapStats = useMemo(() => {
     if (!check.ok) return null;
     return {
-      mappedLandKm2: totalMappedLandKm2(check.features),
-      mappedCropHa: totalMappedCroplandHa(check.features)
+      mappedLandKm2: totalMappedLandKm2(displayFeatures),
+      mappedCropHa: totalMappedCroplandHa(displayFeatures)
     };
-  }, [check]);
+  }, [check, displayFeatures]);
 
   const statusText = !check.ok
     ? null
@@ -78,6 +86,10 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
 
       {check.ok ? (
         <>
+          {selectedUpazila && <p className="text-sm rounded-lg bg-amber-50 p-3 text-amber-900" role="status">
+            Map focus: research cells with centers within 20 km of {selectedUpazila}. These are NOT official upazila boundaries, predicted flooded fields, or an upazila-wide area total.
+          </p>}
+          {selectedUpazila && displayFeatures.length === 0 && <p className="text-sm text-orange-800" role="status">No research-grid cells are near this point. No local area estimate is available.</p>}
           <div className="rounded-xl bg-sky-50 p-4 text-sm text-slate-800">
             {statusText}
           </div>
@@ -85,22 +97,22 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
           {forecastHasConcern ? (
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-amber-50 p-3">
-                <p className="text-sm">Target land area</p>
-                <p className="text-xl font-bold">{fmt(check.landKm2)} km²</p>
+                <p className="text-sm">{selectedUpazila ? "Nearby research-cell land to monitor" : "Target land area"}</p>
+                <p className="text-xl font-bold">{fmt(selectedUpazila ? localTargetLandKm2 : check.landKm2)} km²</p>
               </div>
               <div className="rounded-xl bg-orange-50 p-3">
-                <p className="text-sm">Target cropland area</p>
-                <p className="text-xl font-bold">{fmt(check.cropHa)} hectares</p>
+                <p className="text-sm">{selectedUpazila ? "Nearby research-cell cropland to monitor" : "Target cropland area"}</p>
+                <p className="text-xl font-bold">{fmt(selectedUpazila ? localTargetCropHa : check.cropHa)} hectares</p>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-blue-50 p-3">
-                <p className="text-sm">Mapped district land</p>
+                <p className="text-sm">{selectedUpazila ? "Nearby mapped land (20 km cells)" : "Mapped district land"}</p>
                 <p className="text-xl font-bold">{fmt(mapStats?.mappedLandKm2 || 0)} km²</p>
               </div>
               <div className="rounded-xl bg-cyan-50 p-3">
-                <p className="text-sm">Mapped cropland</p>
+                <p className="text-sm">{selectedUpazila ? "Nearby mapped cropland (20 km cells)" : "Mapped cropland"}</p>
                 <p className="text-xl font-bold">{fmt(mapStats?.mappedCropHa || 0)} hectares</p>
               </div>
             </div>
@@ -127,10 +139,10 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
           <div style={{ height: 320 }} className="overflow-hidden rounded-xl border" aria-label="Map showing land needing attention">
             <MapContainer center={[24.8, 91.3]} zoom={8} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
               <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <FitArea features={check.features} />
+              <FitArea features={displayFeatures.length ? displayFeatures : check.features} />
               <GeoJSON
-                key={`${district}-${hours}-${forecastHasConcern ? 'risk' : 'norisk'}`}
-                data={{ type: "FeatureCollection", features: check.features }}
+                key={`${district}-${selectedUpazila || "district"}-${hours}-${forecastHasConcern ? 'risk' : 'norisk'}`}
+                data={{ type: "FeatureCollection", features: displayFeatures }}
                 style={feature => {
                   const frac = featureFraction(feature, hours);
                   const isTarget = forecastHasConcern && frac >= 0.10;
