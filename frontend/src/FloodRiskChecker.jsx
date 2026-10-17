@@ -11,6 +11,7 @@ import { combinedFloodOutlooks } from "./floodOutlook.js";
 import { fetchRiverForecast } from "./riverForecast.js";
 import { findSupportedDistrict as matchGpsDistrict } from "./districtLocator.js";
 import { areaOptions, resolveManualLocation } from "./areaChoices.js";
+import { resolveUpazilaForecastPoint } from "./upazilaForecastLocation.js";
 import { MapPin, CalendarDays, CloudRain, ShieldCheck,
          AlertTriangle, Search, Loader2 } from "lucide-react";
 
@@ -418,8 +419,11 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
     setActiveSection("flood");
 
     try {
-      const selected = locationOverride && typeof locationOverride.lat === "number"
+      let selected = locationOverride && typeof locationOverride.lat === "number"
         ? locationOverride : getLocation();
+      if (!locationOverride && !gpsLocation && areaId) {
+        selected = await resolveUpazilaForecastPoint(areaId, district, findSupportedDistrict);
+      }
 
       const supportedDistrict = findSupportedDistrict(
         selected.lat, selected.lon
@@ -533,6 +537,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       setResult({
         district: selected.name,
         supportedDistrict,
+        selectedUpazila: selected.selectedUpazila || null,
+        locationBasis: selected.locationBasis || (gpsLocation ? "GPS point" : "district reference point"),
         coordinates: {
           lat: selected.lat,
           lon: selected.lon
@@ -601,8 +607,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
               <option key={area.id} value={area.id}>{area.label}</option>
             ))}
           </select>
-          {areaId && <p className="text-sm text-sky-900" role="status">Selected: {areaId}, {district}. Current forecasts and map estimates are district-level, not upazila predictions.</p>}
-          <p className="text-xs text-slate-600">Choose a real upazila name. Current forecast calculations and highlighted land estimates remain district-level; upazila-specific predictions are not yet supported.</p>
+          {areaId && <p className="text-sm text-sky-900" role="status">Selected: {areaId}, {district}. Weather will use a verified local point if available; the map is research screening, not an upazila flood prediction.</p>}
+          <p className="text-xs text-slate-600">Choose a real upazila name. The upazila selection will use local weather/rainfall only if a valid local point is found. Flood occurrence and exact inundation are not predicted.</p>
           <button type="button" onClick={useGPS} disabled={locating || loading}
             className="bg-sky-800 text-white rounded-xl px-4 py-3 disabled:opacity-60">
             {locating ? "Finding your location..." : "Search Location (Use GPS)"}
@@ -663,7 +669,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       {result && activeSection === "flood" && (
         <div className="space-y-5">
           <section aria-label="Your flood outlook" className="rounded-2xl bg-white border border-sky-200 p-5 md:p-7 space-y-4">
-            <h3 className="text-2xl font-bold">Your area: {result.supportedDistrict}</h3>
+            <h3 className="text-2xl font-bold">Your area: {result.selectedUpazila ? `${result.selectedUpazila}, ` : ""}{result.supportedDistrict}</h3>
+            {result.selectedUpazila && <p className="text-sm text-slate-700">Rainfall and weather are sampled near the verified {result.selectedUpazila} location. River-discharge evidence may represent a wider area; this is an experimental flood-concern screening, not an upazila inundation forecast.</p>}
             <p className="text-sm text-slate-600">Checked {new Date(result.retrievedAt).toLocaleString("en-BD", {timeZone:"Asia/Dhaka"})} · Refreshes every 15 minutes</p>
             {freshnessClock - Date.parse(result.retrievedAt) > 30*60_000 && <p role="alert" className="rounded-lg bg-amber-50 p-3 text-amber-900 font-semibold">Forecast is over 30 minutes old. Press Check My Location for new results.</p>}
             <div>
@@ -683,7 +690,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                 </div>;
               })}
             </div>
-            <LandAttentionMap district={result.supportedDistrict} forecastDate={result.date} scenarioData={scenarioData} scenarioError={scenarioError} outlooks={result.combinedFloodOutlooks} />
+            <LandAttentionMap district={result.supportedDistrict} selectedUpazila={result.selectedUpazila} focusLocation={result.selectedUpazila ? result.coordinates : null} forecastDate={result.date} scenarioData={scenarioData} scenarioError={scenarioError} outlooks={result.combinedFloodOutlooks} />
             <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4 space-y-2">
               <h4 className="text-lg font-bold">Why does HaorShield show this?</h4>
               {farmerSummary(result.combinedFloodOutlooks, result.riverForecast).lines.map((line, i) => <p className="text-sm text-slate-700" key={i}>{line}</p>)}
@@ -701,7 +708,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       )}
       {result && activeSection === "weather" && (
         <section className="bg-white rounded-2xl border p-5 md:p-7 space-y-4" aria-label="Local weather">
-          <h2 className="text-2xl font-bold">Weather in {result.supportedDistrict}</h2>
+          <h2 className="text-2xl font-bold">Weather in {result.selectedUpazila ? `${result.selectedUpazila}, ` : ""}{result.supportedDistrict}</h2>
                       <div className="rounded-2xl bg-gradient-to-r from-sky-50 to-white border border-sky-200 p-4 md:p-5" aria-label="Current weather">
               <div className="flex gap-3 items-center mb-3">
                 <span className="text-3xl" aria-hidden="true">{result.weatherNow.description === "Clear sky" ? "☀️" : /rain|drizzle|storm/i.test(result.weatherNow.description) ? "🌧️" : "⛅"}</span>
