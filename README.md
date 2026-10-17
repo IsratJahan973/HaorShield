@@ -1,75 +1,43 @@
-# HaorShield V2
+HaorShield FR-17 — CONSOLIDATED LOCATION / FLOOD MAP / CROPLAND PATCH
 
-**Experimental flood-concern and agricultural preparedness platform for northeastern Bangladesh.**
+This is ONE ZIP containing ALL FR-17 replacement/new files. No extra ZIP needed.
 
-**Live website:** https://haorshield.pages.dev  
-**Source code:** https://github.com/IsratJahan973/HaorShield
+Copy from this package into your existing repository, preserving folders:
+  frontend/src/FloodRiskChecker.jsx            REPLACE
+  frontend/src/LandAttentionMap.jsx             REPLACE
+  frontend/src/upazilaForecastLocation.js      ADD
+  tests/fr17Location.test.mjs                   ADD
 
-## What a farmer can do
+Keep existing districtLocator.js, areaChoices.js, landAttention.js and all other files.
 
-1. Select a supported district or location and check the available 24-, 48- and 72-hour outlooks.
-2. See current weather, forecast rainfall amounts and a plain-language **experimental flood-concern screening**.
-3. View district maps and, where the current screening indicates increased concern, geographic cells suggested for closer monitoring.
-4. Get practical crop-preparedness guidance for Boro, Aman and Aus rice, vegetables and fish ponds, considering the crop stage and observed field conditions.
-5. Consult official flood information for safety-critical decisions.
+What changes:
+- Choosing an upazila requests a point for that named locality (first Open-Meteo geocoding,
+  then Nominatim). The returned point must be inside the chosen supported district.
+  If neither service can verify a valid location, the website displays an error.
+  It never silently substitutes the district centre for a selected upazila.
+- Rainfall, current weather, and flood-concern inputs use that selected point.
+  River model evidence can cover a larger basin and is not upazila-specific.
+- The research map shows complete screening cells whose coordinate-center is
+  within 20 km of the verified upazila point. This is an APPROXIMATE VICINITY,
+  not the upazila polygon or a flood inundation prediction.
+- Nearby research-cell land / cropland screening figures come from those same cells.
+  They are NOT actual predicted flooded areas or upazila-wide crop losses.
+- For District overview the original district map and area totals are preserved.
+- GPS remains click-to-use and optional; no historical data added to the interface.
 
-**Supported districts:** Brahmanbaria, Habiganj, Kishoreganj, Moulvibazar, Netrakona, Sunamganj and Sylhet.
+Run from HaorShield-main ROOT folder, not frontend:
+  node --test
+  cd frontend
+  npm.cmd run build
 
-## What the system uses
+Only commit after both succeed. Cloudflare then deploys from GitHub.
 
-- React, Vite, Tailwind and Leaflet on the frontend; Python/FastAPI backend.
-- Open-Meteo weather forecasts and modeled Copernicus GloFAS river-discharge information via Open-Meteo Flood API.
-- Experimental geographic screening across 306 cells and ESA WorldCover cropland context.
-- GitHub Actions for regenerating/publishing dated forecast and screening files, with freshness checks on the website.
+Validation locally: FR-17's 7 behavior assertions passed. Full current
+repository suite and Vite production build must be run on the user's machine.
 
-## Important scientific boundary
-
-HaorShield **does not currently provide an independently validated prediction that a specific field will flood**, a calibrated probability of flood occurrence, an official warning, or a modeled flood-depth/inundation footprint. The 24/48/72-hour results are **experimental flood-concern screening** using available forecast information. Nearest modeled river cells may not represent the selected location's river.
-
-The map's blue shading shows mapped areas without a current flagged target under the screening rules; it is **not a guarantee of safety**. Orange shading, when displayed, marks geographic **monitoring candidates**, not land known or certain to flood. The map uses a separate research indicator; its cells and crop-area figures must not be represented as predicted inundation or crop loss. Official FFWC/BWDB guidance takes precedence.
-
-Research-only Random Forest model performance against proxy labels is not valid evidence of public flood-occurrence forecasting accuracy. The independent observational labels and probability calibration necessary for verified FR-06/FR-07 claims remain unavailable. See `docs/COMPETITION_MODEL_RESEARCH_2026-10-16.md` for details.
-
-## Project sections
-
-- **Flood Check:** 24/48/72-hour experimental concern and matching geographic monitoring view.
-- **Weather:** current conditions and rainfall outlook.
-- **Rain Map:** mapped rainfall information.
-- **Crop Advice:** short practical agricultural preparations tailored to crop and field condition.
-
-## Run checks and build locally
-
-From the repository root with a supported Node.js version:
-
-```bash
-node --test
-cd frontend
-npm ci
-npm run build
-```
-
-Frontend local development:
-
-```bash
-cd frontend
-npm ci
-npm run dev
-```
-
-Backend setup (see `backend/requirements.txt`, `render.yaml`):
-
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
-
-## Deployment
-
-Frontend: Cloudflare Pages (`frontend`, `npm run build`, output `dist`).  
-Backend: Render deployment from `render.yaml`.  
-Dated spatial data: inspect GitHub Actions results and ensure that the paired spatial map and metadata are published together. A successful job by itself does not establish scientific forecast validation.
-
-## Competition demonstration
-
-See [`docs/COMPETITION_SUBMISSION_2026-10-17.md`](docs/COMPETITION_SUBMISSION_2026-10-17.md) for the suggested demo, tested milestones, limitations and final handover checklist.
+Known scientific/data limits:
+- These geocoders may fail to resolve some named upazilas. In that case the
+  interface explicitly reports no verified local point; try District overview.
+- Accurate upazila boundaries and independent flood observations are not
+  currently integrated, so true upazila-wide flood and cropland predictions
+  cannot be claimed.
