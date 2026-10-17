@@ -37,5 +37,24 @@ def main():
         future.to_csv(p,index=False)
         try:m.run(p,out);raise AssertionError('Future feature timestamps accepted')
         except m.EvidenceError:pass
-        print('PASS: synthetic-only pipeline execution, proxy-label rejection, future-feature rejection')
+        # Optional predictors are forbidden without their own issue-time evidence.
+        optional=fixture();optional['river_level_issue']=12.5
+        optional.to_csv(p,index=False)
+        try:m.run(p,out);raise AssertionError('Unverified optional feature timing accepted')
+        except m.EvidenceError:pass
+        optional['river_level_issue_available_utc']=(pd.to_datetime(optional.issue_utc,utc=True)+pd.Timedelta(hours=1)).astype(str)
+        optional.to_csv(p,index=False)
+        try:m.run(p,out);raise AssertionError('Future river observation accepted')
+        except m.EvidenceError:pass
+        # Reject missing prediction horizons, rather than crashing while casting to int.
+        malformed=fixture();malformed.loc[0,'horizon_hours']=np.nan
+        malformed.to_csv(p,index=False)
+        try:m.run(p,out);raise AssertionError('Missing horizon accepted')
+        except m.EvidenceError:pass
+        report=__import__('json').loads((out/'verified_future_flood_diagnostic.json').read_text())
+        assert not report['operationally_validated']
+        for h in ('24','48','72'):
+            assert 'selected_model_test' in report['per_horizon'][h]
+            assert all('test' not in v for v in report['per_horizon'][h]['candidate_models_validation_only'].values())
+        print('PASS: synthetic-only pipeline, evidence timing, proxy rejection, blind selected-model testing')
 if __name__=='__main__':main()

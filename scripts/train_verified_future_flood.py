@@ -38,8 +38,10 @@ def audit(df: pd.DataFrame):
         if df[name].isna().any(): raise EvidenceError(f'{name} has invalid timestamps')
     if df[['issue_utc','cell_id','horizon_hours']].duplicated().any():
         raise EvidenceError('Duplicate issue/cell/horizon records')
-    if not set(df['horizon_hours'].astype(int).unique()).issubset({24,48,72}):
-        raise EvidenceError('Only horizons 24/48/72 supported')
+    hours=pd.to_numeric(df['horizon_hours'],errors='coerce')
+    if hours.isna().any() or not hours.isin([24,48,72]).all():
+        raise EvidenceError('Only numeric horizons 24/48/72 supported')
+    df['horizon_hours']=hours.astype(int)
     if not df['outcome_verified'].isin([True,1,'true','True']).all():
         raise EvidenceError('All supplied outcomes must be independently verified; reject unknown labels')
     if not df['observed_flood'].isin([0,1]).all():
@@ -56,6 +58,20 @@ def audit(df: pd.DataFrame):
         raise EvidenceError('Independent observed outcome provenance required in outcome_source')
     if df['outcome_source'].astype(str).str.contains('sar_candidate|proxy|synthetic|unverified',case=False,regex=True).any():
         raise EvidenceError('Unverified or synthetic outcomes cannot be operational training evidence')
+    feature_cols=BASE_FEATURES+[c for c in OPTIONAL_FEATURES if c in df.columns and df[c].notna().any()]
+    for column in feature_cols:
+        numeric=pd.to_numeric(df[column],errors='coerce')
+        if numeric.isna().all() or (~np.isfinite(numeric.dropna())).any():
+            raise EvidenceError(f'{column} needs finite numerical evidence')
+        df[column]=numeric
+    for column in OPTIONAL_FEATURES:
+        if column not in feature_cols: continue
+        timestamp_col=f'{column}_available_utc'
+        if timestamp_col not in df.columns:
+            raise EvidenceError(f'{timestamp_col} required to prove optional feature timing')
+        available=pd.to_datetime(df[timestamp_col],utc=True,errors='coerce')
+        if (available.isna() & df[column].notna()).any() or (available[df[column].notna()]>df.loc[df[column].notna(),'issue_utc']).any():
+            raise EvidenceError(f'{column} contains information unavailable at forecast issue')
     return df
 
 def split_unique_issue_times(frame):
@@ -114,15 +130,19 @@ def run(path,out):
             # no probability calibration from arbitrary small candidate labels
             validation.append((brier_score_loss(va.observed_flood,prob),name))
             r[name]={'validation':eval_stats(va.observed_flood.to_numpy(),prob,.5)}
-            r[name]['test']=eval_stats(te.observed_flood.to_numpy(),model.predict_proba(te[cols])[:,1],.5)
         best=min(validation)[1]
+        # Score the untouched test partition ONLY for the model selected on validation.
+        # Never inspect all candidate test scores while deciding which model to report.
+        chosen=candidates[best]
+        chosen_test=eval_stats(te.observed_flood.to_numpy(),chosen.predict_proba(te[cols])[:,1],.5)
         report['per_horizon'][str(horizon)]={'features':cols,'selected_on_validation':best,
           'split_issue_dates':{'train':int(tr.issue_utc.nunique()),'validation':int(va.issue_utc.nunique()),'test':int(te.issue_utc.nunique())},
           'latest_train_outcome':tr.outcome_end_utc.max().isoformat(),
           'earliest_validation_issue':va.issue_utc.min().isoformat(),
           'latest_validation_outcome':va.outcome_end_utc.max().isoformat(),
           'earliest_test_issue':te.issue_utc.min().isoformat(),
-          'candidate_models':r}
+          'candidate_models_validation_only':r,
+          'selected_model_test':chosen_test}
     (out/'verified_future_flood_diagnostic.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
     print('DIAGNOSTIC ONLY:',out/'verified_future_flood_diagnostic.json')
 
