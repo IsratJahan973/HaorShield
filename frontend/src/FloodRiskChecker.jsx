@@ -720,6 +720,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                 <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Temperature</p><p className="text-xl font-bold">{result.weatherNow.temperatureC === null ? "—" : `${result.weatherNow.temperatureC.toFixed(1)}°C`}</p></div>
                 <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Rain in latest report</p><p className="text-xl font-bold">{result.weatherNow.rainMm === null ? "—" : `${result.weatherNow.rainMm.toFixed(1)} mm`}</p></div>
                 <div className="bg-white rounded-xl p-3 border border-sky-100 col-span-2 sm:col-span-1"><p className="text-xs text-slate-600">Chance of rain today*</p><p className="text-xl font-bold">{result.maxHourlyPrecipChance === null ? "—" : `${Math.round(result.maxHourlyPrecipChance)}%`}</p></div>
+                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Humidity</p><p className="text-xl font-bold">{result.weatherNow.humidityPct === null ? "—" : `${Math.round(result.weatherNow.humidityPct)}%`}</p></div>
+                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Wind speed</p><p className="text-xl font-bold">{result.weatherNow.windKmh === null ? "—" : `${result.weatherNow.windKmh.toFixed(1)} km/h`}</p></div>
               </div>
               <p className="text-xs text-slate-500 mt-2">*Highest forecast chance in the remaining hours of the selected day, not a full-day average. Weather service estimates.</p>
             </div>
