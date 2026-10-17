@@ -1,3 +1,4 @@
+import { selectForecastDay } from "./forecastDaySelection.js";
 
 import React, { useEffect, useState } from "react";
 import FarmerCropAdvice from "./FarmerCropAdvice.jsx";
@@ -90,15 +91,8 @@ function localDate(offset = 0) {
   return base.toISOString().slice(0, 10);
 }
 
-// After 11 PM in Bangladesh, the final hourly forecast for today has
-// normally passed. Start with tomorrow rather than a date with zero hours.
-function initialForecastDate() {
-  const hourParts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Dhaka", hour: "2-digit", hourCycle: "h23"
-  }).formatToParts(new Date());
-  const hour = Number(hourParts.find(part => part.type === "hour")?.value);
-  return localDate(hour >= 23 ? 1 : 0);
-}
+// The current date remains selectable even near midnight: rolling forecasts cross day boundaries.
+function initialForecastDate() { return localDate(); }
 
 // Project-specific screening bands for 24-hour-equivalent rainfall.
 // They are NOT official BMD categories or flood-risk probabilities.
@@ -483,44 +477,10 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       }
       const end = new Date(now.getTime() + 72 * 3600000);
 
-      const selectedHours = futureHours.filter(h =>
-        h.timestamp <= end &&
-        h.time.slice(0, 10) === date
-      );
-
-      if (!selectedHours.length) {
-        const availableDates = [...new Set(futureHours
-          .filter(h => h.timestamp <= end && !Number.isNaN(h.timestamp.getTime()))
-          .map(h => h.time.slice(0, 10)))];
-        if (date === localDate() && availableDates.length && !availableDates.includes(date)) {
-          throw new Error(
-            `No forecast hours remain today. Please choose ${availableDates[0]} to see the next available rainfall forecast.`
-          );
-        }
-        if (availableDates.length) {
-          throw new Error(
-            `No usable forecast hours for ${date}. Available forecast dates within the next 72 hours: ${availableDates.join(", ")}.`
-          );
-        }
-        throw new Error(
-          "The weather service returned no usable future hourly forecasts. Please try again later."
-        );
-      }
-
-      if (selectedHours.some(h => h.value === null || !Number.isFinite(Number(h.value)) || Number(h.value) < 0)) {
-        throw new Error("Some rainfall data is missing.");
-      }
-
-      const rainfall = selectedHours.reduce(
-        (sum, h) => sum + Number(h.value), 0
-      );
-
-      const status = category(rainfall, selectedHours.length);
-      const availablePops = selectedHours
-        .map(h => h.probability)
-        .filter(p => Number.isFinite(p) && p >= 0 && p <= 100);
-      const maxHourlyPrecipChance = availablePops.length === selectedHours.length
-        ? Math.max(...availablePops) : null;
+      const selectedRain = selectForecastDay(futureHours, date, localDate(), rollingOutlooks[0], now.getTime());
+      if (!selectedRain.ok) throw new Error(selectedRain.message);
+      const {rainfall, maxChance: maxHourlyPrecipChance} = selectedRain;
+      const status = category(rainfall, selectedRain.hours);
       const retrievedAt = new Date().toISOString();
       const observationTime = data.current?.time || null;
       const weatherAgeHours = observationTime
@@ -528,7 +488,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         : Infinity;
       const currentOutdated = !Number.isFinite(weatherAgeHours) ||
         weatherAgeHours < -1 || weatherAgeHours > 6;
-      const rainRate24 = rainfall * 24 / selectedHours.length;
+      const rainRate24 = rainfall * 24 / selectedRain.hours;
 
       // Research scenarios have an independent issue anchor, not the selected
       // weather calendar day. Never present them as that day's flood prediction.
@@ -547,7 +507,8 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         rainfall,
         rainRate24,
         maxHourlyPrecipChance,
-        hours: selectedHours.length,
+        hours: selectedRain.hours,
+        rollingFallback: selectedRain.rollingFallback,
         retrievedAt,
         observationTime,
         currentOutdated,
@@ -697,6 +658,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                 </div>;
               })}
             </div>
+            {result.rollingFallback && <p role="status" className="rounded-lg bg-sky-50 p-3 text-sm text-sky-900">Today has no remaining forecast-hour slots. The rainfall summary uses the next 24 hours across midnight.</p>}
             <LandAttentionMap district={result.supportedDistrict} selectedUpazila={result.selectedUpazila} focusLocation={result.selectedUpazila ? result.coordinates : null} forecastDate={result.date} scenarioData={scenarioData} scenarioError={scenarioError} outlooks={result.combinedFloodOutlooks} />
             <p className="text-xs text-slate-500">Screening index: 0% = no elevated modeled signal; 100% = highest signal band. This is not a measured flood probability.</p>
             {result.currentOutdated && <p role="alert" className="font-semibold text-amber-800">Weather data may be old. Refresh the forecast.</p>}
@@ -714,11 +676,11 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Temperature</p><p className="text-xl font-bold">{result.weatherNow.temperatureC === null ? "—" : `${result.weatherNow.temperatureC.toFixed(1)}°C`}</p></div>
                 <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Rain in latest report</p><p className="text-xl font-bold">{result.weatherNow.rainMm === null ? "—" : `${result.weatherNow.rainMm.toFixed(1)} mm`}</p></div>
-                <div className="bg-white rounded-xl p-3 border border-sky-100 col-span-2 sm:col-span-1"><p className="text-xs text-slate-600">Chance of rain today*</p><p className="text-xl font-bold">{result.maxHourlyPrecipChance === null ? "—" : `${Math.round(result.maxHourlyPrecipChance)}%`}</p></div>
+                <div className="bg-white rounded-xl p-3 border border-sky-100 col-span-2 sm:col-span-1"><p className="text-xs text-slate-600">Chance of rain {result.rollingFallback ? "(next 24h)*" : "today*"}</p><p className="text-xl font-bold">{result.maxHourlyPrecipChance === null ? "—" : `${Math.round(result.maxHourlyPrecipChance)}%`}</p></div>
                 <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Humidity</p><p className="text-xl font-bold">{result.weatherNow.humidityPct === null ? "—" : `${Math.round(result.weatherNow.humidityPct)}%`}</p></div>
                 <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Wind speed</p><p className="text-xl font-bold">{result.weatherNow.windKmh === null ? "—" : `${result.weatherNow.windKmh.toFixed(1)} km/h`}</p></div>
               </div>
-              <p className="text-xs text-slate-500 mt-2">*Highest forecast chance in the remaining hours of the selected day, not a full-day average. Weather service estimates.</p>
+              <p className="text-xs text-slate-500 mt-2">*Highest hourly forecast chance in the displayed window, not a daily average. Weather service estimates.</p>
             </div>
 
           <h3 className="text-lg font-semibold">Rain expected</h3>
