@@ -6,7 +6,7 @@ import SimpleRainMap from "./SimpleRainMap.jsx";
 import LandAttentionMap from "./LandAttentionMap.jsx";
 import { summarizeCurrentWeather } from "./weatherNow.js";
 import { farmerHorizon, farmerSummary } from "./farmerOutlookView.js";
-import { rollingRainfallWindows } from "./rainfallWindows.js";
+import { rollingRainfallWindows, rainfallIntensityBand } from "./rainfallWindows.js";
 import { floodConcernOutlooks } from "./floodConcern.js";
 import { combinedFloodOutlooks } from "./floodOutlook.js";
 import { fetchRiverForecast } from "./riverForecast.js";
@@ -97,20 +97,24 @@ function initialForecastDate() { return localDate(); }
 // Project-specific screening bands for 24-hour-equivalent rainfall.
 // They are NOT official BMD categories or flood-risk probabilities.
 export function category(mm, hours = 24) {
-  const rate = hours > 0 ? (Number(mm) * 24 / hours) : 0;
-  if (rate >= 100) return {
+  const band = rainfallIntensityBand(mm, hours);
+  if (band === "Unavailable") return {
+    label: "Unavailable", color: "text-slate-700",
+    background: "bg-slate-100", level: "Rainfall forecast unavailable"
+  };
+  if (band === "Very Heavy") return {
     label: "Very Heavy", color: "text-red-700",
     background: "bg-red-50", level: "Very Heavy Rainfall"
   };
-  if (rate >= 50) return {
+  if (band === "Heavy") return {
     label: "Heavy", color: "text-orange-700",
     background: "bg-orange-50", level: "Heavy Rainfall"
   };
-  if (rate >= 10) return {
+  if (band === "Moderate") return {
     label: "Moderate", color: "text-amber-700",
     background: "bg-amber-50", level: "Moderate Rainfall"
   };
-  if (rate > 0) return {
+  if (band === "Light") return {
     label: "Light", color: "text-sky-700",
     background: "bg-sky-50", level: "Light Rainfall"
   };
@@ -447,19 +451,25 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       const times = data.hourly?.time;
       const rain = data.hourly?.precipitation;
       const rainProbabilities = data.hourly?.precipitation_probability;
-      if (!Array.isArray(times) || !Array.isArray(rain) || times.length !== rain.length) {
+      if (!Array.isArray(times) || !Array.isArray(rain) ||
+          times.length !== rain.length || times.length === 0) {
         throw new Error("Incomplete hourly rainfall forecast from the weather source.");
       }
+      // Never silently coerce missing precipitation (null / empty string) into zero.
+      // A malformed hourly reading is retained as unavailable for window validation.
+      const validRainAmount = value =>
+        typeof value === "number" && Number.isFinite(value) && value >= 0;
+      const validRainChance = value =>
+        typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
 
       const now = new Date();
       const futureHours = times
         .map((t, i) => ({
           time: t,
-          value: rain[i],
+          value: validRainAmount(rain[i]) ? rain[i] : null,
           probability: Array.isArray(rainProbabilities) &&
-            Number.isFinite(Number(rainProbabilities[i])) &&
-            rainProbabilities[i] !== null
-              ? Number(rainProbabilities[i]) : null,
+            rainProbabilities.length === times.length && validRainChance(rainProbabilities[i])
+              ? rainProbabilities[i] : null,
           timestamp: new Date(t + "+06:00")
         }))
         .filter(h => h.timestamp > now);

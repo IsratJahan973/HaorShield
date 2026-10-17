@@ -19,10 +19,10 @@ export function selectForecastDay(hours, selectedDate, todayDate, rolling24, now
     return {ok:true, rainfall:rolling24.rainfallMm, hours:24,
       maxChance:rolling24.rainChanceMax, rollingFallback:true};
   }
-  if (selected.some(h => h.value == null || !Number.isFinite(Number(h.value)) || Number(h.value)<0))
+  if (selected.some(h => typeof h.value !== 'number' || !Number.isFinite(h.value) || h.value<0))
     return {ok:false,message:'Some rainfall data is missing.'};
   const chances = selected.map(h=>h.probability);
-  const completeChance = chances.every(p => p != null && Number.isFinite(Number(p)) && Number(p)>=0 && Number(p)<=100);
+  const completeChance = chances.every(p => typeof p === 'number' && Number.isFinite(p) && p>=0 && p<=100);
   return {ok:true, rainfall:selected.reduce((s,h)=>s+Number(h.value),0),hours:selected.length,
     maxChance:completeChance ? Math.max(...chances.map(Number)) : null,rollingFallback:false};
 }
