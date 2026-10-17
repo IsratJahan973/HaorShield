@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { followingFourDays, eventExposure, eventPercentagePointChange } from '../frontend/src/historicalExplorerData.js';
+const text = fs.readFileSync(new URL('../frontend/src/HistoricalCalendarExplorer.jsx', import.meta.url), 'utf8');
+const summary = JSON.parse(fs.readFileSync(new URL('../frontend/public/data/haorshield_dashboard_data.json', import.meta.url), 'utf8'));
+assert.deepEqual(followingFourDays('2017-03-28'), ['2017-03-28','2017-03-29','2017-03-30','2017-03-31']);
+assert.ok(eventExposure(summary, 4459, 'Sunamganj').percentage > 0);
+assert.ok(Number.isFinite(eventPercentagePointChange(summary, 4382, 4459, 'Sunamganj')));
+assert.match(text, /Recorded cropland flood overlap/);
+assert.match(text, /Versus previous archived event/);
+assert.match(text, /Recorded flood footprint/);
+assert.match(text, /No dated flood observation/);
+assert.match(text, /not an individual day/);
+assert.match(text, /districtMatch\(f\.properties, district\)/);
+assert.match(text, /EVENT_COLORS/);
+assert.doesNotMatch(text, /Flood chance:|Day 1 – \d+%/);
+console.log('Historical presentation: event-based percent, comparison, no daily invention, district focus and map styling passed');
