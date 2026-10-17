@@ -689,6 +689,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
                     <span className="text-xs font-medium text-slate-600">screening index</span>
                   </div>
                   <p className="text-base font-bold mt-1">{item.title}</p>
+                  <p className="text-xs font-semibold mt-1">Experimental concern level: {outlook.riskLevel ?? "Unavailable"}</p>
                   <p className="text-sm mt-2">🌧️ {item.rainText}</p>
                   <p className="text-xs mt-1 text-slate-700">River: {item.riverAvailable ? (outlook.riverIdentityVerified ? "Local model signal" : "Regional model signal") : "Data unavailable"}</p>
                   {item.uncertain && <p className="text-xs mt-2 text-slate-600">{item.riverAvailable ? "Local river match unverified" : "River forecast incomplete"}</p>}

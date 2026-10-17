@@ -10,6 +10,8 @@ const LABELS = {
   elevated: ['Elevated flood concern signal', 2, 'text-orange-700'],
   high: ['High flood concern signal', 3, 'text-red-700']
 };
+// FR-07: ordinal concern levels, not flood probabilities.
+const RISK_LEVELS = { routine: 'Low', watch: 'Moderate', elevated: 'High', high: 'Very High', unknown: null };
 const LIMITATION = 'Experimental forecast screening, NOT verified local flood occurrence, inundation, calibrated probability or official warning. Forecast river flow is a nearby modeled grid-cell signal with unverified river-network relevance, not a measured BWDB danger level. UTC river model days and rolling local rainfall windows differ; upstream rainfall and existing flooding may be missed.';
 function rankRain(x) {
   if (!x?.usable) return null;
@@ -59,6 +61,8 @@ export function combinedFloodOutlooks(rainfallConcerns, riverForecast, now = new
     } else factors.push('Comparable UTC model-day river forecasts unavailable or date-misaligned');
     return {
       horizonHours, label, rank, className,
+      riskLevel: RISK_LEVELS[category], riskLevelOrdinal: rank,
+      riskLevelBasis: 'Experimental rainfall and regional modeled river-flow screening; not a calibrated flood probability',
       rainfallAvailable: localRain !== null, riverAvailable: usableRiver,
       riverIdentityVerified: identityVerified,
       evidenceQuality: !complete ? 'Partial evidence — not a flood-safety clearance' :
