@@ -65,19 +65,13 @@ These sources help investigate environmental conditions, historical flood patter
 | 🐛 Feedback & Issues | [GitHub Issues](https://github.com/IsratJahan973/HaorShield/issues) |
 | 👩‍💻 Project Lead | [Israt Jahan — GitHub](https://github.com/IsratJahan973) |
 
-## Meet the Team
-
-**Israt Jahan** — Team Lead & Developer  
-**Hafsa Rezwona** — Data Analyst  
-**Lamisa Anjum** — Research
-
 Developed for **Hack for Humanity: Bangladesh**, organized by The AI Collective Bangladesh with AIUB.
 
 **Track:** Climate Resilience & Environmental Sustainability
 
 ## Important Note
 
-HaorShield is an experimental research platform. Its flood-screening indicators are **not validated flood probabilities or official flood warnings**. Historical flood information is not a prediction of future flooding.
+HaorShield is an experimental research platform. Its flood-screening indicators are **not validated flood probabilities or official flood warnings**. 
 
 The platform is designed to support environmental awareness, research, and agricultural preparedness.
 
