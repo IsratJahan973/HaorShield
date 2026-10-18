@@ -1,5 +1,5 @@
 {
-  "retrieved_at": "2026-10-18T10:37:44.859247+00:00",
+  "retrieved_at": "2026-10-18T15:36:27.548667+00:00",
   "source": "Copernicus GloFAS v4 via Open-Meteo",
   "hydrology_model": "forecast_v4",
   "historical_reference": "1984-2021 consolidated_v4",
@@ -90,11 +90,11 @@
       "model_longitude": 91.875,
       "flow_band_24": 0,
       "flow_label_24": "Below historical high-flow threshold",
-      "peak_discharge_24_m3_s": 9.35,
+      "peak_discharge_24_m3_s": 9.33,
       "daily_forecasts_24": [
         {
           "date_utc": "2026-10-19",
-          "discharge_m3_s": 9.35,
+          "discharge_m3_s": 9.33,
           "flow_band": 0,
           "historical_p95_m3_s": 20.525,
           "historical_p99_m3_s": 26.089
@@ -102,11 +102,11 @@
       ],
       "flow_band_48": 0,
       "flow_label_48": "Below historical high-flow threshold",
-      "peak_discharge_48_m3_s": 9.35,
+      "peak_discharge_48_m3_s": 9.33,
       "daily_forecasts_48": [
         {
           "date_utc": "2026-10-19",
-          "discharge_m3_s": 9.35,
+          "discharge_m3_s": 9.33,
           "flow_band": 0,
           "historical_p95_m3_s": 20.525,
           "historical_p99_m3_s": 26.089
@@ -121,11 +121,11 @@
       ],
       "flow_band_72": 0,
       "flow_label_72": "Below historical high-flow threshold",
-      "peak_discharge_72_m3_s": 9.35,
+      "peak_discharge_72_m3_s": 9.33,
       "daily_forecasts_72": [
         {
           "date_utc": "2026-10-19",
-          "discharge_m3_s": 9.35,
+          "discharge_m3_s": 9.33,
           "flow_band": 0,
           "historical_p95_m3_s": 20.525,
           "historical_p99_m3_s": 26.089
@@ -178,7 +178,7 @@
         },
         {
           "date_utc": "2026-10-20",
-          "discharge_m3_s": 1530.09,
+          "discharge_m3_s": 1533.62,
           "flow_band": 0,
           "historical_p95_m3_s": 2593.18,
           "historical_p99_m3_s": 2804.43
@@ -197,7 +197,7 @@
         },
         {
           "date_utc": "2026-10-20",
-          "discharge_m3_s": 1530.09,
+          "discharge_m3_s": 1533.62,
           "flow_band": 0,
           "historical_p95_m3_s": 2593.18,
           "historical_p99_m3_s": 2804.43
@@ -399,7 +399,7 @@
         },
         {
           "date_utc": "2026-10-21",
-          "discharge_m3_s": 1.76,
+          "discharge_m3_s": 1.77,
           "flow_band": 0,
           "historical_p95_m3_s": 6.346,
           "historical_p99_m3_s": 8.753
