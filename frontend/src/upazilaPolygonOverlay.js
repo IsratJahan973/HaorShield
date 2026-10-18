@@ -8,7 +8,17 @@ export function placeKey(district, upazila) {
       .replace('maulvibazar', 'moulvibazar')
       .replace(/upazilla$/, '')
       .replace(/upazila$/, '');
-    return key === 'dharmapasha' ? 'dharampasha' : key;
+    // Only verified historical names and spelling aliases. Do not guess boundaries.
+    const aliases = {
+      dharmapasha: 'dharampasha',
+      baniachong: 'baniachang',
+      bishwambarpur: 'bishwamvarpur',
+      shalla: 'sulla',
+      shantiganj: 'dakshinsunamganj',
+      dakshinsunamganj: 'dakshinsunamganj',
+      golabganj: 'golapganj'
+    };
+    return aliases[key] || key;
   };
   return `${normalized(district)}|${normalized(upazila)}`;
 }
