@@ -1,5 +1,5 @@
 {
-  "retrieved_at": "2026-10-19T03:50:37.399856+00:00",
+  "retrieved_at": "2026-10-19T12:35:52.722220+00:00",
   "source": "Copernicus GloFAS v4 via Open-Meteo",
   "hydrology_model": "forecast_v4",
   "historical_reference": "1984-2021 consolidated_v4",
@@ -334,7 +334,7 @@
         },
         {
           "date_utc": "2026-10-22",
-          "discharge_m3_s": 4.97,
+          "discharge_m3_s": 4.96,
           "flow_band": 0,
           "historical_p95_m3_s": 13.06,
           "historical_p99_m3_s": 17.257
