@@ -1,10 +1,10 @@
 {
-  "issued_at": "2026-10-20T23:08:33.380671+06:00",
-  "target_window_start_local": "2026-10-21",
+  "issued_at": "2026-10-21T03:38:38.526262+06:00",
+  "target_window_start_local": "2026-10-22",
   "target_window_end_local": {
-    "24": "2026-10-22",
-    "48": "2026-10-23",
-    "72": "2026-10-24"
+    "24": "2026-10-23",
+    "48": "2026-10-24",
+    "72": "2026-10-25"
   },
   "forecast_horizons_hours": [
     24,
@@ -51,7 +51,7 @@
       "experimental_24h_score_pct": 2.22,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.63,
-      "forecast_rain_72h_mm": 0.1,
+      "forecast_rain_72h_mm": 0.0,
       "experimental_72h_score_pct": 4.75
     },
     {
