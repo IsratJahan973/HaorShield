@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-10-21T03:38:38.526262+06:00",
+  "issued_at": "2026-10-21T10:49:55.369437+06:00",
   "target_window_start_local": "2026-10-22",
   "target_window_end_local": {
     "24": "2026-10-23",
@@ -39,8 +39,8 @@
       "experimental_24h_score_pct": 1.98,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.32,
-      "forecast_rain_72h_mm": 0.0,
-      "experimental_72h_score_pct": 2.18
+      "forecast_rain_72h_mm": 0.1,
+      "experimental_72h_score_pct": 2.19
     },
     {
       "station_id": "KU01",
