@@ -1,10 +1,10 @@
 {
-  "issued_at": "2026-10-21T23:13:40.132850+06:00",
-  "target_window_start_local": "2026-10-22",
+  "issued_at": "2026-10-22T03:44:08.193005+06:00",
+  "target_window_start_local": "2026-10-23",
   "target_window_end_local": {
-    "24": "2026-10-23",
-    "48": "2026-10-24",
-    "72": "2026-10-25"
+    "24": "2026-10-24",
+    "48": "2026-10-25",
+    "72": "2026-10-26"
   },
   "forecast_horizons_hours": [
     24,
@@ -25,9 +25,9 @@
       "longitude": 91.395,
       "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 1.99,
-      "forecast_rain_48h_mm": 0.1,
+      "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 1.81,
-      "forecast_rain_72h_mm": 0.1,
+      "forecast_rain_72h_mm": 0.0,
       "experimental_72h_score_pct": 1.66
     },
     {
@@ -37,10 +37,10 @@
       "longitude": 91.8687,
       "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 1.98,
-      "forecast_rain_48h_mm": 0.6,
-      "experimental_48h_score_pct": 2.34,
-      "forecast_rain_72h_mm": 0.7,
-      "experimental_72h_score_pct": 2.2
+      "forecast_rain_48h_mm": 0.1,
+      "experimental_48h_score_pct": 2.32,
+      "forecast_rain_72h_mm": 0.1,
+      "experimental_72h_score_pct": 2.19
     },
     {
       "station_id": "KU01",
@@ -49,22 +49,22 @@
       "longitude": 91.8667,
       "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 2.22,
-      "forecast_rain_48h_mm": 0.0,
-      "experimental_48h_score_pct": 2.63,
-      "forecast_rain_72h_mm": 0.2,
-      "experimental_72h_score_pct": 4.76
+      "forecast_rain_48h_mm": 0.4,
+      "experimental_48h_score_pct": 2.64,
+      "forecast_rain_72h_mm": 0.4,
+      "experimental_72h_score_pct": 4.77
     },
     {
       "station_id": "KU02",
       "station": "Amalshid",
       "latitude": 24.8167,
       "longitude": 92.2,
-      "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.27,
-      "forecast_rain_48h_mm": 0.0,
+      "forecast_rain_24h_mm": 0.2,
+      "experimental_24h_score_pct": 2.28,
+      "forecast_rain_48h_mm": 0.2,
       "experimental_48h_score_pct": 3.25,
-      "forecast_rain_72h_mm": 0.4,
-      "experimental_72h_score_pct": 6.8
+      "forecast_rain_72h_mm": 0.2,
+      "experimental_72h_score_pct": 6.79
     },
     {
       "station_id": "NM01",
