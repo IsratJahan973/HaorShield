@@ -1,10 +1,10 @@
 {
-  "issued_at": "2026-10-22T23:12:04.337385+06:00",
-  "target_window_start_local": "2026-10-23",
+  "issued_at": "2026-10-23T03:37:05.454727+06:00",
+  "target_window_start_local": "2026-10-24",
   "target_window_end_local": {
-    "24": "2026-10-24",
-    "48": "2026-10-25",
-    "72": "2026-10-26"
+    "24": "2026-10-25",
+    "48": "2026-10-26",
+    "72": "2026-10-27"
   },
   "forecast_horizons_hours": [
     24,
@@ -23,11 +23,11 @@
       "station": "Sunamganj",
       "latitude": 25.0658,
       "longitude": 91.395,
-      "forecast_rain_24h_mm": 0.0,
+      "forecast_rain_24h_mm": 0.1,
       "experimental_24h_score_pct": 1.99,
-      "forecast_rain_48h_mm": 0.0,
+      "forecast_rain_48h_mm": 0.1,
       "experimental_48h_score_pct": 1.81,
-      "forecast_rain_72h_mm": 0.0,
+      "forecast_rain_72h_mm": 0.1,
       "experimental_72h_score_pct": 1.66
     },
     {
@@ -35,24 +35,24 @@
       "station": "Sylhet",
       "latitude": 24.8949,
       "longitude": 91.8687,
-      "forecast_rain_24h_mm": 0.4,
-      "experimental_24h_score_pct": 1.99,
-      "forecast_rain_48h_mm": 1.2,
-      "experimental_48h_score_pct": 2.35,
-      "forecast_rain_72h_mm": 1.2,
-      "experimental_72h_score_pct": 2.21
+      "forecast_rain_24h_mm": 0.1,
+      "experimental_24h_score_pct": 1.98,
+      "forecast_rain_48h_mm": 0.1,
+      "experimental_48h_score_pct": 2.32,
+      "forecast_rain_72h_mm": 0.1,
+      "experimental_72h_score_pct": 2.19
     },
     {
       "station_id": "KU01",
       "station": "Sherpur (Sylhet)",
       "latitude": 24.6833,
       "longitude": 91.8667,
-      "forecast_rain_24h_mm": 0.4,
+      "forecast_rain_24h_mm": 0.1,
       "experimental_24h_score_pct": 2.23,
-      "forecast_rain_48h_mm": 0.9,
-      "experimental_48h_score_pct": 2.66,
-      "forecast_rain_72h_mm": 0.9,
-      "experimental_72h_score_pct": 4.79
+      "forecast_rain_48h_mm": 0.1,
+      "experimental_48h_score_pct": 2.63,
+      "forecast_rain_72h_mm": 0.1,
+      "experimental_72h_score_pct": 4.75
     },
     {
       "station_id": "KU02",
@@ -61,10 +61,10 @@
       "longitude": 92.2,
       "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 2.27,
-      "forecast_rain_48h_mm": 0.5,
-      "experimental_48h_score_pct": 3.27,
-      "forecast_rain_72h_mm": 0.5,
-      "experimental_72h_score_pct": 6.81
+      "forecast_rain_48h_mm": 0.0,
+      "experimental_48h_score_pct": 3.25,
+      "forecast_rain_72h_mm": 0.0,
+      "experimental_72h_score_pct": 6.77
     },
     {
       "station_id": "NM01",
