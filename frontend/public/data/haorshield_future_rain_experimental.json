@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-10-22T10:48:24.915135+06:00",
+  "issued_at": "2026-10-22T17:54:39.202186+06:00",
   "target_window_start_local": "2026-10-23",
   "target_window_end_local": {
     "24": "2026-10-24",
@@ -35,36 +35,36 @@
       "station": "Sylhet",
       "latitude": 24.8949,
       "longitude": 91.8687,
-      "forecast_rain_24h_mm": 0.5,
-      "experimental_24h_score_pct": 1.99,
-      "forecast_rain_48h_mm": 0.7,
-      "experimental_48h_score_pct": 2.34,
-      "forecast_rain_72h_mm": 0.7,
-      "experimental_72h_score_pct": 2.2
+      "forecast_rain_24h_mm": 1.8,
+      "experimental_24h_score_pct": 2.02,
+      "forecast_rain_48h_mm": 2.3,
+      "experimental_48h_score_pct": 2.39,
+      "forecast_rain_72h_mm": 2.3,
+      "experimental_72h_score_pct": 2.24
     },
     {
       "station_id": "KU01",
       "station": "Sherpur (Sylhet)",
       "latitude": 24.6833,
       "longitude": 91.8667,
-      "forecast_rain_24h_mm": 0.2,
-      "experimental_24h_score_pct": 2.23,
-      "forecast_rain_48h_mm": 0.4,
-      "experimental_48h_score_pct": 2.64,
-      "forecast_rain_72h_mm": 0.4,
-      "experimental_72h_score_pct": 4.77
+      "forecast_rain_24h_mm": 0.8,
+      "experimental_24h_score_pct": 2.24,
+      "forecast_rain_48h_mm": 1.2,
+      "experimental_48h_score_pct": 2.67,
+      "forecast_rain_72h_mm": 1.2,
+      "experimental_72h_score_pct": 4.81
     },
     {
       "station_id": "KU02",
       "station": "Amalshid",
       "latitude": 24.8167,
       "longitude": 92.2,
-      "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.27,
-      "forecast_rain_48h_mm": 0.0,
-      "experimental_48h_score_pct": 3.25,
-      "forecast_rain_72h_mm": 0.0,
-      "experimental_72h_score_pct": 6.77
+      "forecast_rain_24h_mm": 0.6,
+      "experimental_24h_score_pct": 2.29,
+      "forecast_rain_48h_mm": 0.9,
+      "experimental_48h_score_pct": 3.28,
+      "forecast_rain_72h_mm": 0.9,
+      "experimental_72h_score_pct": 6.84
     },
     {
       "station_id": "NM01",
