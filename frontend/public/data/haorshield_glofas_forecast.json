@@ -1,5 +1,5 @@
 {
-  "retrieved_at": "2026-10-23T11:15:35.659071+00:00",
+  "retrieved_at": "2026-10-23T16:44:00.775692+00:00",
   "source": "Copernicus GloFAS v4 via Open-Meteo",
   "hydrology_model": "forecast_v4",
   "historical_reference": "1984-2021 consolidated_v4",
@@ -48,7 +48,7 @@
         },
         {
           "date_utc": "2026-10-25",
-          "discharge_m3_s": 467.81,
+          "discharge_m3_s": 466.74,
           "flow_band": 0,
           "historical_p95_m3_s": 1134.01,
           "historical_p99_m3_s": 1310.541
@@ -67,7 +67,7 @@
         },
         {
           "date_utc": "2026-10-25",
-          "discharge_m3_s": 467.81,
+          "discharge_m3_s": 466.74,
           "flow_band": 0,
           "historical_p95_m3_s": 1134.01,
           "historical_p99_m3_s": 1310.541
@@ -139,7 +139,7 @@
         },
         {
           "date_utc": "2026-10-26",
-          "discharge_m3_s": 8.4,
+          "discharge_m3_s": 8.38,
           "flow_band": 0,
           "historical_p95_m3_s": 20.525,
           "historical_p99_m3_s": 26.089
