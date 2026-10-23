@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-10-23T17:41:02.735456+06:00",
+  "issued_at": "2026-10-23T23:08:48.070501+06:00",
   "target_window_start_local": "2026-10-24",
   "target_window_end_local": {
     "24": "2026-10-25",
@@ -35,11 +35,11 @@
       "station": "Sylhet",
       "latitude": 24.8949,
       "longitude": 91.8687,
-      "forecast_rain_24h_mm": 0.2,
+      "forecast_rain_24h_mm": 0.1,
       "experimental_24h_score_pct": 1.98,
-      "forecast_rain_48h_mm": 0.2,
+      "forecast_rain_48h_mm": 0.1,
       "experimental_48h_score_pct": 2.32,
-      "forecast_rain_72h_mm": 0.2,
+      "forecast_rain_72h_mm": 0.1,
       "experimental_72h_score_pct": 2.19
     },
     {
@@ -47,12 +47,12 @@
       "station": "Sherpur (Sylhet)",
       "latitude": 24.6833,
       "longitude": 91.8667,
-      "forecast_rain_24h_mm": 0.1,
+      "forecast_rain_24h_mm": 0.2,
       "experimental_24h_score_pct": 2.23,
-      "forecast_rain_48h_mm": 0.1,
-      "experimental_48h_score_pct": 2.63,
-      "forecast_rain_72h_mm": 0.1,
-      "experimental_72h_score_pct": 4.75
+      "forecast_rain_48h_mm": 0.2,
+      "experimental_48h_score_pct": 2.64,
+      "forecast_rain_72h_mm": 0.2,
+      "experimental_72h_score_pct": 4.76
     },
     {
       "station_id": "KU02",
