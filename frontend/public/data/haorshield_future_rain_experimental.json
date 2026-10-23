@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-10-23T03:37:05.454727+06:00",
+  "issued_at": "2026-10-23T10:51:06.486153+06:00",
   "target_window_start_local": "2026-10-24",
   "target_window_end_local": {
     "24": "2026-10-25",
@@ -23,11 +23,11 @@
       "station": "Sunamganj",
       "latitude": 25.0658,
       "longitude": 91.395,
-      "forecast_rain_24h_mm": 0.1,
+      "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 1.99,
-      "forecast_rain_48h_mm": 0.1,
+      "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 1.81,
-      "forecast_rain_72h_mm": 0.1,
+      "forecast_rain_72h_mm": 0.0,
       "experimental_72h_score_pct": 1.66
     },
     {
