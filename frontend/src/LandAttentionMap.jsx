@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, GeoJSON, Circle, CircleMarker, Tooltip, useMap
 import { exposureForDistrict } from "./landAttention.js";
 import { nearbyResearchCells } from "./upazilaForecastLocation.js";
 import { selectUpazilaBoundary, clipResearchCells } from "./upazilaPolygonOverlay.js";
+import { useLanguage, toBengaliNumerals } from "./LanguageContext.jsx";
 
 const HOURS = [24, 48, 72];
 
@@ -52,6 +53,7 @@ function totalMappedCroplandHa(features) {
 }
 
 export default function LandAttentionMap({ district, forecastDate, scenarioData, scenarioError, outlooks = [], focusLocation = null, selectedUpazila = null }) {
+  const { t, tDistrict, tUpazila, language } = useLanguage();
   const [hours, setHours] = useState(24);
   const [districtBoundary, setDistrictBoundary] = useState(null);
   const [boundariesAvailable, setBoundariesAvailable] = useState(true);
@@ -99,7 +101,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
   const hasKnownLowerConcern = selectedForecast?.rank != null && Number.isFinite(Number(selectedForecast.rank))
     && Number(selectedForecast.rank) < 2 && displayFeatures.length > 0;
 
-  const fmt = n => Math.round(n).toLocaleString("en-BD");
+  const fmt = n => language === "bn" ? toBengaliNumerals(Math.round(n).toLocaleString("en-US")) : Math.round(n).toLocaleString("en-BD");
 
   const mapStats = useMemo(() => {
     if (!check.ok) return null;
@@ -112,19 +114,23 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
   const statusText = !check.ok
     ? null
     : selectedUpazila && displayFeatures.length === 0
-      ? "Local map coverage is unavailable for this selection."
+      ? t("landMap.statusUnavailable", "Local map coverage is unavailable for this selection.")
     : forecastHasConcern
-      ? "Elevated screening signal: orange cells highlight research areas to monitor."
-      : "No elevated screening signal for this period.";
+      ? t("landMap.statusElevated", "Elevated screening signal: orange cells highlight research areas to monitor.")
+      : t("landMap.statusNormal", "No elevated screening signal for this period.");
 
   return (
     <section className="rounded-2xl border border-slate-200 p-4 space-y-3" aria-label="Land needing attention">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h4 className="text-lg font-bold text-slate-900">Land &amp; cropland outlook map</h4>
-          <p className="text-sm text-slate-500">{selectedUpazila ? `${selectedUpazila}, ` : ""}{district} · Experimental geographic screening</p>
+          <h4 className="text-lg font-bold text-slate-900">{t("landMap.title", "Land & cropland outlook map")}</h4>
+          <p className="text-sm text-slate-500">
+            {t("landMap.subtitle", "{area} · Experimental geographic screening", {
+              area: `${selectedUpazila ? `${tUpazila(selectedUpazila)}, ` : ""}${tDistrict(district)}`
+            })}
+          </p>
         </div>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Research map · Not inundation</span>
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{t("landMap.badge", "Research map · Not inundation")}</span>
       </div>
 
 
@@ -137,15 +143,21 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
             onClick={() => setHours(h)}
             className={`rounded-lg border px-4 py-2 font-semibold ${hours === h ? "bg-sky-800 text-white" : "bg-white text-slate-900"}`}
           >
-            {h} hours
+            {t("landMap.hoursButton", "{hours} hours", { hours: h })}
           </button>
         ))}
       </div>
 
       {check.ok ? (
         <>
-          <p className="text-xs text-slate-600" role="status">Experimental research scenario issued {check.issueDate} (UTC), showing a {hours}-hour scenario. This is not a dated flood-inundation prediction for {forecastDate}.</p>
-          {selectedUpazila && displayFeatures.length === 0 && <p className="text-sm text-orange-800" role="status">No research-grid coverage intersects this upazila, or its verified boundary is unavailable. No local area estimate is available.</p>}
+          <p className="text-xs text-slate-600" role="status">
+            {t("landMap.scenarioScenario", "Experimental research scenario issued {issueDate} (UTC), showing a {hours}-hour scenario. This is not a dated flood-inundation prediction for {forecastDate}.", {
+              issueDate: check.issueDate,
+              hours,
+              forecastDate
+            })}
+          </p>
+          {selectedUpazila && displayFeatures.length === 0 && <p className="text-sm text-orange-800" role="status">{t("landMap.noUpazilaCoverage", "No research-grid coverage intersects this upazila, or its verified boundary is unavailable. No local area estimate is available.")}</p>}
           <div className="rounded-xl bg-sky-50 p-4 text-sm text-slate-800">
             {statusText}
           </div>
@@ -153,53 +165,53 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
           {forecastHasConcern ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="rounded-xl bg-amber-50 p-3">
-                <p className="text-sm">{selectedUpazila ? "Nearby research-cell land to monitor" : "Research-cell land to monitor"}</p>
-                <p className="text-xl font-bold">{selectedUpazila && displayFeatures.length === 0 ? "Unavailable" : `${fmt(selectedUpazila ? localTargetLandKm2 : check.landKm2)} km²`}</p>
+                <p className="text-sm">{selectedUpazila ? t("landMap.monitorLandNearby", "Nearby research-cell land to monitor") : t("landMap.monitorLandDistrict", "Research-cell land to monitor")}</p>
+                <p className="text-xl font-bold">{selectedUpazila && (displayFeatures.length === 0 ? "Unavailable" : null) ? (language === "bn" ? "অনুপলব্ধ" : "Unavailable") : `${fmt(selectedUpazila ? localTargetLandKm2 : check.landKm2)} ${t("common.km2", "km²")}`}</p>
               </div>
               <div className="rounded-xl bg-orange-50 p-3">
-                <p className="text-sm">{selectedUpazila ? "Nearby research-cell cropland to monitor" : "Research-cell cropland to monitor"}</p>
-                <p className="text-xl font-bold">{selectedUpazila && displayFeatures.length === 0 ? "Unavailable" : `${fmt(selectedUpazila ? localTargetCropHa : check.cropHa)} hectares`}</p>
+                <p className="text-sm">{selectedUpazila ? t("landMap.monitorCropNearby", "Nearby research-cell cropland to monitor") : t("landMap.monitorCropDistrict", "Research-cell cropland to monitor")}</p>
+                <p className="text-xl font-bold">{selectedUpazila && (displayFeatures.length === 0 ? "Unavailable" : null) ? (language === "bn" ? "অনুপলব্ধ" : "Unavailable") : `${fmt(selectedUpazila ? localTargetCropHa : check.cropHa)} ${t("common.hectares", "hectares")}`}</p>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="rounded-xl bg-blue-50 p-3">
-                <p className="text-sm">{selectedUpazila ? "Mapped land in selected area" : "Mapped district land"}</p>
-                <p className="text-xl font-bold">{selectedUpazila && displayFeatures.length === 0 ? "Unavailable" : `${fmt(mapStats?.mappedLandKm2 || 0)} km²`}</p>
+                <p className="text-sm">{selectedUpazila ? t("landMap.mappedLandArea", "Mapped land in selected area") : t("landMap.mappedLandDistrict", "Mapped district land")}</p>
+                <p className="text-xl font-bold">{selectedUpazila && (displayFeatures.length === 0 ? "Unavailable" : null) ? (language === "bn" ? "অনুপলব্ধ" : "Unavailable") : `${fmt(mapStats?.mappedLandKm2 || 0)} ${t("common.km2", "km²")}`}</p>
               </div>
               <div className="rounded-xl bg-cyan-50 p-3">
-                <p className="text-sm">{selectedUpazila ? "Mapped cropland in selected area" : "Mapped cropland"}</p>
-                <p className="text-xl font-bold">{selectedUpazila && displayFeatures.length === 0 ? "Unavailable" : `${fmt(mapStats?.mappedCropHa || 0)} hectares`}</p>
+                <p className="text-sm">{selectedUpazila ? t("landMap.mappedCropArea", "Mapped cropland in selected area") : t("landMap.mappedCropDistrict", "Mapped cropland")}</p>
+                <p className="text-xl font-bold">{selectedUpazila && (displayFeatures.length === 0 ? "Unavailable" : null) ? (language === "bn" ? "অনুপলব্ধ" : "Unavailable") : `${fmt(mapStats?.mappedCropHa || 0)} ${t("common.hectares", "hectares")}`}</p>
               </div>
             </div>
           )}
 
           <div className="rounded-xl border border-slate-200 bg-white p-3">
-            <p className="font-semibold text-slate-900 mb-2">Map color guide</p>
+            <p className="font-semibold text-slate-900 mb-2">{t("landMap.colorGuideTitle", "Map color guide")}</p>
             <div className="flex flex-wrap gap-4 text-sm text-slate-700">
               <div className="flex items-center gap-2">
                 <span className="inline-block h-4 w-7 rounded border border-sky-300 bg-sky-100" />
-                <span>Light blue: lower screening signal / mapped cells (not zero risk)</span>
+                <span>{t("landMap.legendLightBlue", "Light blue: lower screening signal / mapped cells (not zero risk)")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-block h-5 w-8 rounded border border-orange-500 bg-orange-300" />
-                <span>Light orange: increased screening signal</span>
+                <span>{t("landMap.legendLightOrange", "Light orange: increased screening signal")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-block h-5 w-8 rounded border border-orange-800 bg-orange-700" />
-                <span>Dark orange: stronger screening signal</span>
+                <span>{t("landMap.legendDarkOrange", "Dark orange: stronger screening signal")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="inline-block h-4 w-7 rounded border-2 border-slate-800 bg-transparent" />
-                <span>Dark outline: selected district boundary</span>
+                <span>{t("landMap.legendDarkOutline", "Dark outline: selected district boundary")}</span>
               </div>
             </div>
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm" aria-label="Map showing land needing attention">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white px-4 py-3">
-              <div className="font-semibold text-slate-900">{selectedUpazila ? `${selectedUpazila} area` : district} · {hours}-hour outlook</div>
-              <span className="text-xs text-slate-500">Zoom to explore · OpenStreetMap</span>
+              <div className="font-semibold text-slate-900">{selectedUpazila ? `${tUpazila(selectedUpazila)} ` : ""}{tDistrict(district)} · {t("landMap.hoursButton", "{hours}-hour outlook", { hours })}</div>
+              <span className="text-xs text-slate-500">{t("landMap.zoomNote", "Zoom to explore · OpenStreetMap")}</span>
             </div>
             <div className="h-[280px] sm:h-[360px] lg:h-[420px]">
               <MapContainer center={[24.8, 91.3]} zoom={8} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
@@ -240,10 +252,12 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
             </div>
             <div className="border-t border-slate-200 bg-white px-4 py-3 text-xs text-slate-600">
               {selectedUpazila
-                ? `The blue outline marks the mapped administrative boundary of ${selectedUpazila}. Pale blue is a lower experimental screening signal where mapped cells exist, not proof of no flood risk. Orange remains limited to intersecting research cells.`
-                : "The dark outline shows the selected district; rectangular overlays are research cells, not administrative areas."}
-              {selectedUpazila && !selectedUpazilaBoundary && " Upazila boundary unavailable: no district-wide forecast shading is substituted."}
-              {!selectedBoundary && !boundariesAvailable && " District boundary data could not be loaded."}
+                ? (language === "bn"
+                    ? `নীল সীমারেখা ${tUpazila(selectedUpazila)} উপজেলার mapped administrative boundary চিহ্নিত করে। হালকা নীল রং কম সংকেত নির্দেশ করে যা ঝুঁকিমুক্তির প্রমাণ নয়। কমলা রং শুধু গবেষণা সেলেই সীমাবদ্ধ।`
+                    : `The blue outline marks the mapped administrative boundary of ${selectedUpazila}. Pale blue is a lower experimental screening signal where mapped cells exist, not proof of no flood risk. Orange remains limited to intersecting research cells.`)
+                : t("landMap.districtOutlineNote", "The dark outline shows the selected district; rectangular overlays are research cells, not administrative areas.")}
+              {selectedUpazila && !selectedUpazilaBoundary && t("landMap.upazilaMissing", " Upazila boundary unavailable: no district-wide forecast shading is substituted.")}
+              {!selectedBoundary && !boundariesAvailable && t("landMap.districtMissing", " District boundary data could not be loaded.")}
             </div>
           </div>
 
@@ -251,7 +265,7 @@ export default function LandAttentionMap({ district, forecastDate, scenarioData,
         </>
       ) : (
         <p className="rounded-xl bg-slate-100 p-3 text-sm" role="status">
-          {scenarioError ? "Land map is unavailable right now." : check.message}
+          {scenarioError ? t("landMap.unavailable", "Land map is unavailable right now.") : check.message}
         </p>
       )}
 

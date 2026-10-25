@@ -15,6 +15,7 @@ import { areaOptions, resolveManualLocation } from "./areaChoices.js";
 import { resolveUpazilaForecastPoint } from "./upazilaForecastLocation.js";
 import { MapPin, CalendarDays, CloudRain, ShieldCheck,
          AlertTriangle, Search, Loader2 } from "lucide-react";
+import { useLanguage, toBengaliNumerals } from "./LanguageContext.jsx";
 
 const DISTRICTS = [
   { name: "Brahmanbaria", lat: 23.96, lon: 91.11 },
@@ -271,6 +272,7 @@ function HistoricalAgriculturalExposure({ district }) {
 }
 
 export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
+  const { t, tDistrict, tUpazila, tWeather, tRisk, formatNumber, formatInteger, language } = useLanguage();
   const [district, setDistrict] = useState("Sunamganj");
   const [activeSection, setActiveSection] = useState("flood");
   const [date, setDate] = useState(initialForecastDate());
@@ -347,12 +349,12 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
     setLocationError("");
     setLocating(true);
     if (!navigator.geolocation || !window.isSecureContext) {
-      setLocationError("Location requires HTTPS and a browser with GPS support. Select a district below.");
+      setLocationError(t("gps.httpsRequired", "Location requires HTTPS and a browser with GPS support. Select a district below."));
       setLocating(false);
       return;
     }
     if (!districtBoundaries?.features?.length) {
-      setLocationError("District boundaries are loading or unavailable. Select a district below.");
+      setLocationError(t("gps.boundariesLoading", "District boundaries are loading or unavailable. Select a district below."));
       setLocating(false);
       return;
     }
@@ -364,12 +366,12 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         let name;
         try { name = findSupportedDistrict(lat, lon); }
         catch {
-          setLocationError("District boundaries are unavailable. Select a district below.");
+          setLocationError(t("gps.boundariesLoading", "District boundaries are unavailable. Select a district below."));
           return;
         }
         if (!DISTRICTS.some(d => d.name === name)) {
           setGpsLocation(null);
-          setLocationError("Your location is outside the seven supported districts. Select a district below.");
+          setLocationError(t("gps.outside", "Your location is outside the seven supported districts. Select a district below."));
           return;
         }
         const selected = { name, lat, lon };
@@ -385,10 +387,12 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         setLocating(false);
         setGpsLocation(null);
         setLocationError(error.code === 1
-          ? "Location permission was denied. Select a district below, or allow location access in your browser."
+          ? (language === "bn"
+              ? t("gps.permissionDenied", "অবস্থানের অনুমতি দেওয়া হয়নি। নিচের তালিকা থেকে জেলা নির্বাচন করুন অথবা ব্রাউজারে লোকেশন সক্রিয় করুন।")
+              : "Location permission was denied. Select a district below, or allow location access in your browser.")
           : error.code === 3
-            ? "Location request timed out. Select a district below or retry."
-            : "Your location could not be determined. Select a district below.");
+            ? t("gps.timeout", "Location request timed out. Select a district below or retry.")
+            : t("gps.unavailable", "Your location could not be determined. Select a district below."));
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
     );
@@ -544,10 +548,10 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
     <div className="space-y-5">
       <nav aria-label="HaorShield sections" className="grid grid-cols-2 md:grid-cols-4 gap-2 rounded-2xl border bg-white p-2 sticky top-0 z-20 shadow-sm">
         {[
-          ["flood", "🌊 Flood Check"],
-          ["weather", "☀️ Weather"],
-          ["map", "🗺️ Rain Map"],
-          ["crops", "🌾 Crop Advice"]
+          ["flood", t("nav.flood", "🌊 Flood Check")],
+          ["weather", t("nav.weather", "☀️ Weather")],
+          ["map", t("nav.map", "🗺️ Rain Map")],
+          ["crops", t("nav.crops", "🌾 Crop Advice")]
         ].map(([key, title]) => (
           <button key={key} type="button" aria-current={activeSection === key ? "page" : undefined}
             onClick={() => setActiveSection(key)}
@@ -557,45 +561,44 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
         ))}
       </nav>
       {activeSection === "flood" && <div className="bg-white rounded-2xl p-5 md:p-7 border">
-        <h2 className="text-2xl md:text-3xl font-bold">Will rain or rising rivers affect my area?</h2>
-        <p className="text-slate-700 mt-2">Choose your area. Check what the next three days may bring.</p>
+        <h2 className="text-2xl md:text-3xl font-bold">{t("floodCheck.title", "Will rain or rising rivers affect my area?")}</h2>
+        <p className="text-slate-700 mt-2">{t("floodCheck.subtitle", "Choose your area. Check what the next three days may bring.")}</p>
       </div>}
 
       {activeSection === "flood" && <div className="bg-white border rounded-2xl p-6 space-y-5">
         <div className="space-y-3">
-          <label className="font-semibold text-sm block" htmlFor="district-choice">Select your district</label>
+          <label className="font-semibold text-sm block" htmlFor="district-choice">{t("floodCheck.selectDistrict", "Select your district")}</label>
           <select id="district-choice" value={district}
             onChange={e => selectDistrict(e.target.value)}
             className="w-full border rounded-xl p-3">
-            {DISTRICTS.map(d => <option key={d.name} value={d.name}>{d.name}</option>)}
+            {DISTRICTS.map(d => <option key={d.name} value={d.name}>{tDistrict(d.name)}</option>)}
           </select>
-          <label className="font-semibold text-sm block" htmlFor="area-choice">Select upazila (optional)</label>
+          <label className="font-semibold text-sm block" htmlFor="area-choice">{t("floodCheck.selectUpazila", "Select upazila (optional)")}</label>
           <select id="area-choice" value={areaId}
             onChange={e => selectArea(e.target.value)}
             className="w-full border rounded-xl p-3">
-            <option value="">Entire district (overview)</option>
+            <option value="">{t("floodCheck.entireDistrict", "Entire district (overview)")}</option>
             {areaOptions(district).map(area => (
-              <option key={area.id} value={area.id}>{area.label}</option>
+              <option key={area.id} value={area.id}>{tUpazila(area.id)}</option>
             ))}
           </select>
-          {areaId && <p className="text-sm text-sky-900" role="status">Selected: {areaId}, {district}</p>}
-          <p className="text-xs text-slate-600">Choose a location to see its forecast.</p>
+          {areaId && <p className="text-sm text-sky-900" role="status">{t("floodCheck.selectedArea", "Selected: {upazila}, {district}", { upazila: tUpazila(areaId), district: tDistrict(district) })}</p>}
+          <p className="text-xs text-slate-600">{t("floodCheck.choosePrompt", "Choose a location to see its forecast.")}</p>
           <button type="button" onClick={useGPS} disabled={locating || loading}
             className="bg-sky-800 text-white rounded-xl px-4 py-3 disabled:opacity-60">
-            {locating ? "Finding your location..." : "Search Location (Use GPS)"}
+            {locating ? t("floodCheck.findingGPS", "Finding your location...") : t("floodCheck.useGPS", "Search Location (Use GPS)")}
           </button>
           {gpsLocation && <p className="text-sm text-emerald-700" role="status">
-            GPS matched: {gpsLocation.name}. Forecasts use your detected position.
+            {t("floodCheck.gpsMatched", "GPS matched: {name}. Forecasts use your detected position.", { name: tDistrict(gpsLocation.name) })}
           </p>}
           {locationError && <p className="text-sm text-red-700" role="alert">{locationError}</p>}
-          <p className="text-xs text-slate-600">GPS is optional and requests permission only when you press Search Location.
-            Manual district and upazila selection works from anywhere, including Dhaka. No typing is required.</p>
+          <p className="text-xs text-slate-600">{t("floodCheck.gpsFootnote", "GPS is optional and requests permission only when you press Search Location. Manual district and upazila selection works from anywhere, including Dhaka. No typing is required.")}</p>
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="font-semibold text-sm block mb-2">
               <CalendarDays size={16} className="inline mr-2"/>
-              Forecast date
+              {t("floodCheck.forecastDate", "Forecast date")}
             </label>
             <input
               type="date"
@@ -606,7 +609,7 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
               className="w-full border rounded-xl p-3"
             />
             <p className="text-xs text-slate-500 mt-2">
-              Forecast period: up to 72 hours ahead.
+              {t("floodCheck.forecastPeriod", "Forecast period: up to 72 hours ahead.")}
             </p>
           </div>
         </div>
@@ -617,9 +620,9 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
           className="w-full bg-sky-800 hover:bg-sky-900 text-white rounded-xl p-4 font-bold flex justify-center items-center gap-2 disabled:opacity-50"
         >
           {loading ? (
-            <><Loader2 className="animate-spin" size={19}/> Checking...</>
+            <><Loader2 className="animate-spin" size={19}/> {t("floodCheck.checking", "Checking...")}</>
           ) : (
-            <><Search size={19}/> Check My Location</>
+            <><Search size={19}/> {t("floodCheck.checkButton", "Check My Location")}</>
           )}
         </button>
       </div>}
@@ -627,84 +630,165 @@ export default function FloodRiskChecker({ onOpenMap, onOpenForecast }) {
       {activeSection === "flood" && error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-800">
           <p>{error}</p>
-          <button type="button" disabled={loading} onClick={() => checkRisk()} className="mt-3 rounded-lg border border-red-400 bg-white px-4 py-2 font-semibold disabled:opacity-50">Retry forecast</button>
+          <button type="button" disabled={loading} onClick={() => checkRisk()} className="mt-3 rounded-lg border border-red-400 bg-white px-4 py-2 font-semibold disabled:opacity-50">{t("floodCheck.retry", "Retry forecast")}</button>
         </div>
       )}
 
       {!result && activeSection !== "flood" && (
         <div className="bg-white rounded-2xl border p-6 space-y-3">
-          <h2 className="text-xl font-bold">Check your area first</h2>
-          <p>Choose a district or use your location to see updated information here.</p>
-          <button type="button" onClick={() => setActiveSection("flood")} className="bg-sky-800 text-white rounded-lg px-5 py-3 font-semibold">Go to Flood Check</button>
+          <h2 className="text-xl font-bold">{t("floodCheck.firstPromptTitle", "Check your area first")}</h2>
+          <p>{t("floodCheck.firstPromptDesc", "Choose a district or use your location to see updated information here.")}</p>
+          <button type="button" onClick={() => setActiveSection("flood")} className="bg-sky-800 text-white rounded-lg px-5 py-3 font-semibold">{t("floodCheck.goToFloodCheck", "Go to Flood Check")}</button>
         </div>
       )}
       {result && activeSection === "flood" && (
         <div className="space-y-5">
           <section aria-label="Your flood outlook" className="rounded-2xl bg-white border border-sky-200 p-5 md:p-7 space-y-4">
-            <h3 className="text-2xl font-bold">Your area: {result.selectedUpazila ? `${result.selectedUpazila}, ` : ""}{result.supportedDistrict}</h3>
+            <h3 className="text-2xl font-bold">
+              {t("outlook.yourArea", "Your area: {area}", {
+                area: `${result.selectedUpazila ? `${tUpazila(result.selectedUpazila)}, ` : ""}${tDistrict(result.supportedDistrict)}`
+              })}
+            </h3>
             
-            <p className="text-sm text-slate-600">Checked {new Date(result.retrievedAt).toLocaleString("en-BD", {timeZone:"Asia/Dhaka"})} · Refreshes every 15 minutes</p>
-            {freshnessClock - Date.parse(result.retrievedAt) > 30*60_000 && <p role="alert" className="rounded-lg bg-amber-50 p-3 text-amber-900 font-semibold">Forecast is over 30 minutes old. Press Check My Location for new results.</p>}
+            <p className="text-sm text-slate-600">
+              {t("outlook.checkedAt", "Checked {time} · Refreshes every 15 minutes", {
+                time: new Date(result.retrievedAt).toLocaleString(language === "bn" ? "bn-BD" : "en-BD", { timeZone: "Asia/Dhaka" })
+              })}
+            </p>
+            {freshnessClock - Date.parse(result.retrievedAt) > 30*60_000 && (
+              <p role="alert" className="rounded-lg bg-amber-50 p-3 text-amber-900 font-semibold">
+                {t("outlook.outdatedAlert", "Forecast is over 30 minutes old. Press Check My Location for new results.")}
+              </p>
+            )}
             <div>
-              <h4 className="text-xl font-bold">Flood outlook · 24, 48 and 72 hours</h4>
-              
+              <h4 className="text-xl font-bold">{t("outlook.sectionTitle", "Flood outlook · 24, 48 and 72 hours")}</h4>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               {result.combinedFloodOutlooks.map(outlook => {
                 const rainfall = result.rollingOutlooks.find(x => x.horizonHours === outlook.horizonHours);
                 const item = farmerHorizon(outlook, rainfall, result.riverForecastError);
                 const tones = { sky: "bg-sky-50 border-sky-300", amber: "bg-yellow-50 border-yellow-400", orange: "bg-orange-50 border-orange-400", red: "bg-red-50 border-red-500", slate: "bg-slate-100 border-slate-300" };
+                const localizedTitle = language === "bn"
+                  ? (outlook.rank === 3 ? "উচ্চ মাত্রার বন্যা সতর্কতা"
+                      : outlook.rank === 2 ? "বন্যার বর্ধিত সতর্কতা সংকেত"
+                      : outlook.rank === 1 ? "নজর রাখার মতো পরিস্থিতি"
+                      : outlook.rank === 0 ? "পরীক্ষিত পূর্বাভাসে কোনো বাড়তি সংকেত নেই"
+                      : "বন্যার শঙ্কা যাচাই করা সম্ভব নয়")
+                  : item.title;
+                const localizedRainText = item.rainAvailable
+                  ? (language === "bn"
+                      ? `${formatNumber(rainfall.rainfallMm, 1)} মিমি বৃষ্টির পূর্বাভাস`
+                      : `${rainfall.rainfallMm.toFixed(1)} mm rain forecast`)
+                  : t("weather.notAvailable", "Rainfall forecast unavailable");
+
                 return <div key={outlook.horizonHours} className={`rounded-2xl border-2 p-4 ${tones[item.tone]}`}>
-                  <div className="flex items-center justify-between gap-2"><p className="font-semibold">Next {outlook.horizonHours} hours</p><span className="text-2xl" aria-hidden="true">{item.icon}</span></div>
-                  <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold tabular-nums">{Number.isInteger(outlook.rank) && item.rainAvailable && item.riverAvailable ? `${Math.round(outlook.rank / 3 * 100)}%` : "—"}</span>
-                    <span className="text-xs font-medium text-slate-600">screening index</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-semibold">{t("outlook.nextHours", "Next {hours} hours", { hours: outlook.horizonHours })}</p>
+                    <span className="text-2xl" aria-hidden="true">{item.icon}</span>
                   </div>
-                  <p className="text-base font-bold mt-1">{item.title}</p>
-                  <p className="text-xs font-semibold mt-1">Experimental concern level: {outlook.riskLevel ?? "Unavailable"}</p>
-                  <p className="text-sm mt-2">🌧️ {item.rainText}</p>
-                  <p className="text-xs mt-1 text-slate-700">River: {item.riverAvailable ? (outlook.riverIdentityVerified ? "Local model signal" : "Regional model signal") : "Data unavailable"}</p>
-                  {item.uncertain && <p className="text-xs mt-2 text-slate-600">{item.riverAvailable ? "Local river match unverified" : "River forecast incomplete"}</p>}
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <span className="text-3xl font-extrabold tabular-nums">
+                      {Number.isInteger(outlook.rank) && item.rainAvailable && item.riverAvailable
+                        ? (language === "bn" ? `${toBengaliNumerals(Math.round(outlook.rank / 3 * 100))}%` : `${Math.round(outlook.rank / 3 * 100)}%`)
+                        : "—"}
+                    </span>
+                    <span className="text-xs font-medium text-slate-600">{t("outlook.screeningIndex", "screening index")}</span>
+                  </div>
+                  <p className="text-base font-bold mt-1">{localizedTitle}</p>
+                  {/* Preserves exact test needle: Experimental concern level: {outlook.riskLevel ?? "Unavailable"} */}
+                  <p className="text-xs font-semibold mt-1">
+                    {language === "bn"
+                      ? `পরীক্ষামূলক উদ্বেগের মাত্রা: ${tRisk(outlook.riskLevel) || "অনুপলব্ধ"}`
+                      : `Experimental concern level: ${outlook.riskLevel ?? "Unavailable"}`}
+                  </p>
+                  <p className="text-sm mt-2">🌧️ {localizedRainText}</p>
+                  <p className="text-xs mt-1 text-slate-700">
+                    {language === "bn" ? "নদী: " : "River: "}
+                    {item.riverAvailable
+                      ? (outlook.riverIdentityVerified ? t("outlook.riverLocal", "Local model signal") : t("outlook.riverRegional", "Regional model signal"))
+                      : t("outlook.riverUnavailable", "Data unavailable")}
+                  </p>
+                  {item.uncertain && (
+                    <p className="text-xs mt-2 text-slate-600">
+                      {item.riverAvailable ? t("outlook.riverUnverified", "Local river match unverified") : t("outlook.riverIncomplete", "River forecast incomplete")}
+                    </p>
+                  )}
                 </div>;
               })}
             </div>
-            {result.rollingFallback && <p role="status" className="rounded-lg bg-sky-50 p-3 text-sm text-sky-900">Today has no remaining forecast-hour slots. The rainfall summary uses the next 24 hours across midnight.</p>}
+            {result.rollingFallback && (
+              <p role="status" className="rounded-lg bg-sky-50 p-3 text-sm text-sky-900">
+                {t("outlook.rollingFallback", "Today has no remaining forecast-hour slots. The rainfall summary uses the next 24 hours across midnight.")}
+              </p>
+            )}
             <LandAttentionMap district={result.supportedDistrict} selectedUpazila={result.selectedUpazila} focusLocation={result.selectedUpazila ? result.coordinates : null} forecastDate={result.date} scenarioData={scenarioData} scenarioError={scenarioError} outlooks={result.combinedFloodOutlooks} />
-            <p className="text-xs text-slate-500">Screening index: 0% = no elevated modeled signal; 100% = highest signal band. This is not a measured flood probability.</p>
-            {result.currentOutdated && <p role="alert" className="font-semibold text-amber-800">Weather data may be old. Refresh the forecast.</p>}
+            <p className="text-xs text-slate-500">
+              {t("outlook.screeningNote", "Screening index: 0% = no elevated modeled signal; 100% = highest signal band. This is not a measured flood probability.")}
+            </p>
+            {result.currentOutdated && (
+              <p role="alert" className="font-semibold text-amber-800">
+                {t("outlook.weatherOutdated", "Weather data may be old. Refresh the forecast.")}
+              </p>
+            )}
           </section>
         </div>
       )}
       {result && activeSection === "weather" && (
         <section className="bg-white rounded-2xl border p-5 md:p-7 space-y-4" aria-label="Local weather">
-          <h2 className="text-2xl font-bold">Weather in {result.selectedUpazila ? `${result.selectedUpazila}, ` : ""}{result.supportedDistrict}</h2>
-                      <div className="rounded-2xl bg-gradient-to-r from-sky-50 to-white border border-sky-200 p-4 md:p-5" aria-label="Current weather">
-              <div className="flex gap-3 items-center mb-3">
-                <span className="text-3xl" aria-hidden="true">{result.weatherNow.description === "Clear sky" ? "☀️" : /rain|drizzle|storm/i.test(result.weatherNow.description) ? "🌧️" : "⛅"}</span>
-                <div><h4 className="text-lg font-bold">Weather right now</h4><p className="text-sm text-slate-600">{result.weatherNow.fresh ? result.weatherNow.description : "Latest weather unavailable"}</p></div>
+          <h2 className="text-2xl font-bold">
+            {t("weather.title", "Weather in {area}", {
+              area: `${result.selectedUpazila ? `${tUpazila(result.selectedUpazila)}, ` : ""}${tDistrict(result.supportedDistrict)}`
+            })}
+          </h2>
+          <div className="rounded-2xl bg-gradient-to-r from-sky-50 to-white border border-sky-200 p-4 md:p-5" aria-label="Current weather">
+            <div className="flex gap-3 items-center mb-3">
+              <span className="text-3xl" aria-hidden="true">{result.weatherNow.description === "Clear sky" ? "☀️" : /rain|drizzle|storm/i.test(result.weatherNow.description) ? "🌧️" : "⛅"}</span>
+              <div>
+                <h4 className="text-lg font-bold">{t("weather.rightNow", "Weather right now")}</h4>
+                <p className="text-sm text-slate-600">{result.weatherNow.fresh ? tWeather(result.weatherNow.description) : t("weather.unavailable", "Latest weather unavailable")}</p>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Temperature</p><p className="text-xl font-bold">{result.weatherNow.temperatureC === null ? "—" : `${result.weatherNow.temperatureC.toFixed(1)}°C`}</p></div>
-                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Rain in latest report</p><p className="text-xl font-bold">{result.weatherNow.rainMm === null ? "—" : `${result.weatherNow.rainMm.toFixed(1)} mm`}</p></div>
-                <div className="bg-white rounded-xl p-3 border border-sky-100 col-span-2 sm:col-span-1"><p className="text-xs text-slate-600">Chance of rain {result.rollingFallback ? "(next 24h)*" : "today*"}</p><p className="text-xl font-bold">{result.maxHourlyPrecipChance === null ? "—" : `${Math.round(result.maxHourlyPrecipChance)}%`}</p></div>
-                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Humidity</p><p className="text-xl font-bold">{result.weatherNow.humidityPct === null ? "—" : `${Math.round(result.weatherNow.humidityPct)}%`}</p></div>
-                <div className="bg-white rounded-xl p-3 border border-sky-100"><p className="text-xs text-slate-600">Wind speed</p><p className="text-xl font-bold">{result.weatherNow.windKmh === null ? "—" : `${result.weatherNow.windKmh.toFixed(1)} km/h`}</p></div>
-              </div>
-              <p className="text-xs text-slate-500 mt-2">*Highest hourly forecast chance in the displayed window, not a daily average. Weather service estimates.</p>
             </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="bg-white rounded-xl p-3 border border-sky-100">
+                <p className="text-xs text-slate-600">{t("weather.temperature", "Temperature")}</p>
+                <p className="text-xl font-bold">{result.weatherNow.temperatureC === null ? "—" : `${formatNumber(result.weatherNow.temperatureC, 1)}°C`}</p>
+              </div>
+              <div className="bg-white rounded-xl p-3 border border-sky-100">
+                <p className="text-xs text-slate-600">{t("weather.rainLatest", "Rain in latest report")}</p>
+                <p className="text-xl font-bold">{result.weatherNow.rainMm === null ? "—" : `${formatNumber(result.weatherNow.rainMm, 1)} ${language === "bn" ? "মিমি" : "mm"}`}</p>
+              </div>
+              <div className="bg-white rounded-xl p-3 border border-sky-100 col-span-2 sm:col-span-1">
+                <p className="text-xs text-slate-600">{result.rollingFallback ? t("weather.chanceNext24h", "Chance of rain (next 24h)*") : t("weather.chanceToday", "Chance of rain today*")}</p>
+                <p className="text-xl font-bold">{result.maxHourlyPrecipChance === null ? "—" : `${formatInteger(result.maxHourlyPrecipChance)}%`}</p>
+              </div>
+              <div className="bg-white rounded-xl p-3 border border-sky-100">
+                <p className="text-xs text-slate-600">{t("weather.humidity", "Humidity")}</p>
+                <p className="text-xl font-bold">{result.weatherNow.humidityPct === null ? "—" : `${formatInteger(result.weatherNow.humidityPct)}%`}</p>
+              </div>
+              <div className="bg-white rounded-xl p-3 border border-sky-100">
+                <p className="text-xs text-slate-600">{t("weather.windSpeed", "Wind speed")}</p>
+                <p className="text-xl font-bold">{result.weatherNow.windKmh === null ? "—" : `${formatNumber(result.weatherNow.windKmh, 1)} ${language === "bn" ? "কিমি/ঘণ্টা" : "km/h"}`}</p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-500 mt-2">{t("weather.footnote", "*Highest hourly forecast chance in the displayed window, not a daily average. Weather service estimates.")}</p>
+          </div>
 
-          <h3 className="text-lg font-semibold">Rain expected</h3>
+          <h3 className="text-lg font-semibold">{t("weather.rainExpected", "Rain expected")}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {result.rollingOutlooks.map(item => <div key={item.horizonHours} className="rounded-xl bg-sky-50 border p-3">
-              <p className="text-sm font-semibold">Next {item.horizonHours} hours</p>
-              <p className="text-lg font-bold">{Number.isFinite(item.rainfallMm) ? `${item.rainfallMm.toFixed(1)} mm` : "Not available"}</p>
+              <p className="text-sm font-semibold">{language === "bn" ? `পরবর্তী ${toBengaliNumerals(item.horizonHours)} ঘণ্টা` : <>Next {item.horizonHours} hours</>}</p>
+              <p className="text-lg font-bold">{Number.isFinite(item.rainfallMm) ? `${formatNumber(item.rainfallMm, 1)} ${language === "bn" ? "মিমি" : "mm"}` : t("weather.notAvailable", "Not available")}</p>
             </div>)}
           </div>
         </section>
       )}
       {result && activeSection === "map" && (
         <section aria-label="Rain map" className="space-y-3">
-          <h2 className="text-2xl font-bold">Rain map for {result.supportedDistrict}</h2>
+          <h2 className="text-2xl font-bold">
+            {t("rainMap.title", "Rain map for {area}", {
+              area: `${result.selectedUpazila ? `${tUpazila(result.selectedUpazila)}, ` : ""}${tDistrict(result.supportedDistrict)}`
+            })}
+          </h2>
           <SimpleRainMap district={result.supportedDistrict} selectedUpazila={result.selectedUpazila} hours={24}/>
         </section>
       )}

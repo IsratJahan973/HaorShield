@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLanguage } from "./LanguageContext.jsx";
 
 const CROPS = [
   ["rice_boro", "Boro rice"], ["rice_aman", "Aman rice"], ["rice_aus", "Aus rice"],
@@ -117,6 +118,7 @@ function visibleActions(items, phase) {
 }
 
 export default function FarmerCropAdvice({ concerns = [] }) {
+  const { t, tAction, language } = useLanguage();
   const [crop, setCrop] = useState("rice_aman");
   const [stage, setStage] = useState("unknown");
   const [field, setField] = useState("unknown");
@@ -125,37 +127,67 @@ export default function FarmerCropAdvice({ concerns = [] }) {
   const lackData = concerns.length === 0 || concerns.some(x => x?.riverAvailable === false || x?.riverStatus === "unknown" || x?.riverStatus === "unavailable");
   const anyHigh = concerns.some(x => typeof x?.rank === "number" && x.rank >= 2);
   const anyWatch = concerns.some(x => typeof x?.rank === "number" && x.rank === 1);
-  const heading = field === "river" ? "River rising — take precautions"
-    : field === "wet" ? "Standing water reported"
-    : anyHigh ? "Elevated flood concern"
-    : anyWatch ? "Conditions to watch"
-    : concerns.length === 0 ? "Forecast unavailable"
-    : lackData ? "No strong signal in available data"
-    : "No elevated signal detected";
-  const statusDetail = isObserved ? "Your field report takes priority."
-    : anyHigh || anyWatch ? advice.periodText
-    : lackData ? "Some forecast evidence is incomplete."
-    : "Continue routine field checks.";
+  const heading = field === "river" ? t("crops.headRiver", "River rising — take precautions")
+    : field === "wet" ? t("crops.headWet", "Standing water reported")
+    : anyHigh ? t("crops.headHigh", "Elevated flood concern")
+    : anyWatch ? t("crops.headWatch", "Conditions to watch")
+    : concerns.length === 0 ? t("crops.headUnavailable", "Forecast unavailable")
+    : lackData ? t("crops.headNoStrong", "No strong signal in available data")
+    : t("crops.headNoElevated", "No elevated signal detected");
+  const statusDetail = isObserved ? t("crops.statusFieldPriority", "Your field report takes priority.")
+    : anyHigh || anyWatch ? (language === "bn" ? "পূর্বাভাসে উদ্বেগের সংকেত পাওয়া গেছে" : advice.periodText)
+    : lackData ? t("crops.statusIncomplete", "Some forecast evidence is incomplete.")
+    : t("crops.statusRoutine", "Continue routine field checks.");
   const cards = [
-    { title: "Prepare now", items: visibleActions(advice.prepare, "prepare"), accent: "border-emerald-200", icon: "🌱", tint: "bg-emerald-50" },
-    { title: "If water rises", items: visibleActions(advice.duringFlood, "during"), accent: "border-amber-200", icon: "💧", tint: "bg-amber-50" },
-    { title: "After water recedes", items: visibleActions(advice.recovery, "recovery"), accent: "border-sky-200", icon: "🌤️", tint: "bg-sky-50" }
+    { title: t("crops.cardPrepare", "Prepare now"), items: visibleActions(advice.prepare, "prepare"), accent: "border-emerald-200", icon: "🌱", tint: "bg-emerald-50" },
+    { title: t("crops.cardDuring", "If water rises"), items: visibleActions(advice.duringFlood, "during"), accent: "border-amber-200", icon: "💧", tint: "bg-amber-50" },
+    { title: t("crops.cardRecovery", "After water recedes"), items: visibleActions(advice.recovery, "recovery"), accent: "border-sky-200", icon: "🌤️", tint: "bg-sky-50" }
   ];
+
+  const cropLabels = {
+    rice_boro: t("crops.boro", "Boro rice"),
+    rice_aman: t("crops.aman", "Aman rice"),
+    rice_aus: t("crops.aus", "Aus rice"),
+    vegetables: t("crops.vegetables", "Vegetables"),
+    other: t("crops.other", "Other crops / livestock")
+  };
+
+  const stageLabels = {
+    unknown: t("crops.stageUnknown", "Not sure"),
+    planning: t("crops.stagePlanning", "Preparing / planting"),
+    seedling: t("crops.stageSeedling", "Young plants"),
+    growing: t("crops.stageGrowing", "Growing"),
+    harvest: t("crops.stageHarvest", "Ready to harvest / harvested")
+  };
+
+  const fieldLabels = {
+    unknown: t("crops.fieldUnknown", "Not checked"),
+    normal: t("crops.fieldNormal", "Field is dry / draining well"),
+    wet: t("crops.fieldWet", "Water is standing in my field"),
+    river: t("crops.fieldRiver", "River is rising / warning received")
+  };
+
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 md:p-6 space-y-5" aria-label="Crop advice">
       <div>
-        <h3 className="text-xl font-bold text-slate-900">Protect your crops</h3>
-        <p className="text-sm text-slate-500 mt-1">Choose your crop, growth stage and field condition.</p>
+        <h3 className="text-xl font-bold text-slate-900">{t("crops.protectTitle", "Protect your crops")}</h3>
+        <p className="text-sm text-slate-500 mt-1">{t("crops.protectSubtitle", "Choose your crop, growth stage and field condition.")}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
-        <label className="text-sm font-semibold text-slate-800">What do you grow?
-          <select className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-base bg-white" value={crop} onChange={e => setCrop(e.target.value)}>{CROPS.map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select>
+        <label className="text-sm font-semibold text-slate-800">{t("crops.labelCrop", "What do you grow?")}
+          <select className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-base bg-white" value={crop} onChange={e => setCrop(e.target.value)}>
+            {CROPS.map(([id, label]) => <option key={id} value={id}>{cropLabels[id] || label}</option>)}
+          </select>
         </label>
-        <label className="text-sm font-semibold text-slate-800">Crop stage
-          <select className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-base bg-white" value={stage} onChange={e => setStage(e.target.value)}>{STAGES.map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select>
+        <label className="text-sm font-semibold text-slate-800">{t("crops.labelStage", "Crop stage")}
+          <select className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-base bg-white" value={stage} onChange={e => setStage(e.target.value)}>
+            {STAGES.map(([id, label]) => <option key={id} value={id}>{stageLabels[id] || label}</option>)}
+          </select>
         </label>
-        <label className="text-sm font-semibold text-slate-800">Field condition
-          <select className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-base bg-white" value={field} onChange={e => setField(e.target.value)}>{FIELD.map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select>
+        <label className="text-sm font-semibold text-slate-800">{t("crops.labelField", "Field condition")}
+          <select className="mt-1 block w-full rounded-xl border border-slate-200 p-3 text-base bg-white" value={field} onChange={e => setField(e.target.value)}>
+            {FIELD.map(([id, label]) => <option key={id} value={id}>{fieldLabels[id] || label}</option>)}
+          </select>
         </label>
       </div>
       <div className={`rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-2 ${advice.urgent ? "bg-amber-50 text-amber-950 border border-amber-200" : lackData ? "bg-slate-50 text-slate-900 border border-slate-200" : "bg-emerald-50 text-emerald-950 border border-emerald-200"}`} role="status">
@@ -170,12 +202,12 @@ export default function FarmerCropAdvice({ concerns = [] }) {
               <h4 className="font-semibold text-slate-900">{card.title}</h4>
             </div>
             <ul className="space-y-2.5 text-sm text-slate-700">
-              {card.items.map((item, i) => <li key={`${i}-${item}`} className="flex items-start gap-2"><span className="text-slate-400 mt-0.5" aria-hidden="true">•</span><span>{item}</span></li>)}
+              {card.items.map((item, i) => <li key={`${i}-${item}`} className="flex items-start gap-2"><span className="text-slate-400 mt-0.5" aria-hidden="true">•</span><span>{tAction(item)}</span></li>)}
             </ul>
           </div>
         ))}
       </div>
-      <p className="text-xs text-slate-500">For local crop-specific decisions, consult agriculture or fisheries staff.</p>
+      <p className="text-xs text-slate-500">{t("crops.consultNote", "For local crop-specific decisions, consult agriculture or fisheries staff.")}</p>
     </section>
   );
 }

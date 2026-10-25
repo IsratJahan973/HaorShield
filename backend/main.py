@@ -32,6 +32,10 @@ async def lifespan(app: FastAPI):
     model = joblib.load(
         MODEL_DIR / "haorshield_random_forest.joblib"
     )
+    if hasattr(model, "named_steps") and "imputer" in model.named_steps:
+        imputer = model.named_steps["imputer"]
+        if not hasattr(imputer, "_fill_dtype") and hasattr(imputer, "_fit_dtype"):
+            imputer._fill_dtype = imputer._fit_dtype
     yield
     model = None
 

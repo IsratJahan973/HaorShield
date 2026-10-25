@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import L from 'leaflet';
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import { HISTORICAL_EVENTS, followingFourDays, eventsForDate, eventExposure, eventPercentagePointChange } from './historicalExplorerData.js';
+import { useLanguage, toBengaliNumerals } from './LanguageContext.jsx';
 
 const DISTRICTS = ['All districts', 'Brahmanbaria', 'Habiganj', 'Kishoreganj', 'Moulvibazar', 'Netrakona', 'Sunamganj', 'Sylhet'];
 // Colors distinguish archived events, NOT within-event flood severity.
@@ -23,6 +24,7 @@ function districtMatch(properties, district) {
 }
 
 export default function HistoricalCalendarExplorer() {
+  const { t, tDistrict, formatNumber, language } = useLanguage();
   const [date, setDate] = useState('2017-03-28');
   const [district, setDistrict] = useState('Sunamganj');
   const [eventId, setEventId] = useState(4459);
@@ -71,29 +73,29 @@ export default function HistoricalCalendarExplorer() {
 
   function chooseEvent(event) { setDate(event.start); setSelectedDay(0); setEventId(event.id); }
   return <section className="space-y-4" aria-label="Historical flood explorer">
-    <div><h2 className="text-xl font-bold text-slate-900">Historical Flood Explorer</h2><p className="text-sm text-slate-500">Recorded flood maps · 2016–2017</p></div>
+    <div><h2 className="text-xl font-bold text-slate-900">{t("history.title", "Historical Flood Explorer")}</h2><p className="text-sm text-slate-500">{t("history.subtitle", "Recorded flood maps · 2016–2017")}</p></div>
     <div className="rounded-2xl border bg-white p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <label className="text-sm font-semibold">Starting date<input aria-label="Historical starting date" type="date" min="2016-01-01" max="2017-12-31" value={date} onChange={e => setDate(e.target.value)} className="mt-1 block w-full rounded-lg border px-3 py-2" /></label>
-      <label className="text-sm font-semibold">District<select aria-label="Historical district" value={district} onChange={e => setDistrict(e.target.value)} className="mt-1 block w-full rounded-lg border px-3 py-2">{DISTRICTS.map(d => <option key={d}>{d}</option>)}</select></label>
+      <label className="text-sm font-semibold">{t("history.startDate", "Starting date")}<input aria-label="Historical starting date" type="date" min="2016-01-01" max="2017-12-31" value={date} onChange={e => setDate(e.target.value)} className="mt-1 block w-full rounded-lg border px-3 py-2" /></label>
+      <label className="text-sm font-semibold">{t("history.district", "District")}<select aria-label="Historical district" value={district} onChange={e => setDistrict(e.target.value)} className="mt-1 block w-full rounded-lg border px-3 py-2">{DISTRICTS.map(d => <option key={d} value={d}>{d === 'All districts' ? t("history.allDistricts", "All districts") : tDistrict(d)}</option>)}</select></label>
     </div>
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2" aria-label="Four-day historical timeline">
       {days.map((d, i) => <button type="button" key={d} aria-pressed={selectedDay === i} onClick={() => { setSelectedDay(i); const found = eventsForDate(d); if (found.length) setEventId(found[0].id); }} className={`min-w-0 rounded-xl text-left p-2 sm:p-3 border ${selectedDay === i ? 'bg-orange-50 border-orange-500' : 'bg-white border-slate-200'}`}>
-        <span className="block text-xs text-slate-500">Day {i + 1}</span><span className="font-semibold text-sm">{d}</span><span className="block text-xs mt-1 text-slate-600">{eventsForDate(d).length ? 'Archived event period' : 'No dated map'}</span>
+        <span className="block text-xs text-slate-500">{t("history.day", "Day {day}", { day: i + 1 })}</span><span className="font-semibold text-sm">{language === "bn" ? toBengaliNumerals(d) : d}</span><span className="block text-xs mt-1 text-slate-600">{eventsForDate(d).length ? t("history.archivedPeriod", "Archived event period") : t("history.noDatedMap", "No dated map")}</span>
       </button>)}
     </div>
     <div className="rounded-2xl border bg-white p-4 space-y-4">
-      <div className="flex flex-wrap gap-2 items-center justify-between"><h3 className="font-bold text-lg">Recorded flood footprint</h3><div className="flex flex-wrap gap-1" aria-label="Archived flood events">{HISTORICAL_EVENTS.map(e => <button type="button" key={e.id} onClick={() => chooseEvent(e)} className={`rounded-lg border px-3 py-2 text-xs font-semibold ${eventMatchesDate && eventId === e.id ? 'bg-slate-900 text-white' : 'bg-white text-slate-700'}`}>{e.label}</button>)}</div></div>
+      <div className="flex flex-wrap gap-2 items-center justify-between"><h3 className="font-bold text-lg">{t("history.footprintTitle", "Recorded flood footprint")}</h3><div className="flex flex-wrap gap-1" aria-label="Archived flood events">{HISTORICAL_EVENTS.map(e => <button type="button" key={e.id} onClick={() => chooseEvent(e)} className={`rounded-lg border px-3 py-2 text-xs font-semibold ${eventMatchesDate && eventId === e.id ? 'bg-slate-900 text-white' : 'bg-white text-slate-700'}`}>{e.label}</button>)}</div></div>
       {eventMatchesDate ? <>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="sm:col-span-2 rounded-xl p-4 border" style={{ backgroundColor: '#fff7ed', borderColor: '#fed7aa' }}>
-            <div className="text-sm font-semibold text-orange-950">Estimated cropland flood overlap</div>
-            <div className="text-4xl font-extrabold text-orange-800 mt-1">{exposure ? `${exposure.percentage.toFixed(1)}%` : '—'}</div>
-            <div className="text-xs text-orange-900 mt-2">{district} · {selectedEvent?.label} event total</div>
+            <div className="text-sm font-semibold text-orange-950">{t("history.overlapTitle", "Estimated cropland flood overlap")}</div>
+            <div className="text-4xl font-extrabold text-orange-800 mt-1">{exposure ? `${formatNumber(exposure.percentage, 1)}%` : '—'}</div>
+            <div className="text-xs text-orange-900 mt-2">{t("history.totalEvent", "{district} · {event} event total", { district: district === 'All districts' ? t("history.allDistricts", "All districts") : tDistrict(district), event: selectedEvent?.label })}</div>
           </div>
-          <div className="rounded-xl bg-slate-50 border p-4"><div className="text-sm text-slate-600">{preceding ? `Compared with ${preceding.label}` : 'Previous archived event comparison'}</div><div className="text-2xl font-bold mt-2">{difference === null ? 'Not available' : difference === 0 ? 'No change' : `${Math.abs(difference).toFixed(1)} percentage points ${difference > 0 ? 'higher' : 'lower'}`}</div><div className="text-xs text-slate-600 mt-2">Estimated cropland flood overlap</div></div>
+          <div className="rounded-xl bg-slate-50 border p-4"><div className="text-sm text-slate-600">{preceding ? t("history.comparedWith", "Compared with {label}", { label: preceding.label }) : t("history.comparedDefault", "Previous archived event comparison")}</div><div className="text-2xl font-bold mt-2">{difference === null ? t("history.notAvailable", "Not available") : difference === 0 ? t("history.noChange", "No change") : t("history.percentDiff", "{val} percentage points {dir}", { val: formatNumber(Math.abs(difference), 1), dir: difference > 0 ? t("history.higher", "higher") : t("history.lower", "lower") })}</div><div className="text-xs text-slate-600 mt-2">{t("history.overlapTitle", "Estimated cropland flood overlap")}</div></div>
         </div>
-        <div className="flex items-center gap-3 flex-wrap text-sm"><span className="font-semibold">{selectedEvent?.label}:</span><span className="inline-flex items-center gap-2"><span className="inline-block h-4 w-5 rounded-sm border" style={{ backgroundColor: color, borderColor: '#7f1d1d' }} /> Recorded flood footprint</span><span className="text-slate-500">Gray outline: district boundary</span></div>
-      </> : <div className="bg-slate-50 rounded-xl border p-4 text-sm">No dated flood observation for this selection.</div>}
+        <div className="flex items-center gap-3 flex-wrap text-sm"><span className="font-semibold">{selectedEvent?.label}:</span><span className="inline-flex items-center gap-2"><span className="inline-block h-4 w-5 rounded-sm border" style={{ backgroundColor: color, borderColor: '#7f1d1d' }} /> {language === "bn" ? "রেকর্ডকৃত বন্যার বিস্তার" : "Recorded flood footprint"}</span><span className="text-slate-500">{t("history.grayOutline", "Gray outline: district boundary")}</span></div>
+      </> : <div className="bg-slate-50 rounded-xl border p-4 text-sm">{t("history.noObservation", "No dated flood observation for this selection.")}</div>}
       <div className="h-[280px] sm:h-[360px] rounded-xl overflow-hidden border" aria-label="Historical recorded flood map">
         <MapContainer center={[24.6,91.2]} zoom={8} scrollWheelZoom={false} style={{ height:'100%', width:'100%' }}>
           <TileLayer attribution="© OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -102,7 +104,7 @@ export default function HistoricalCalendarExplorer() {
           {eventMatchesDate && layer?.features?.length > 0 && <GeoJSON key={'historical-'+eventId} data={layer} style={() => ({ color:'#9a3412', weight:1.3, fillColor:color, fillOpacity:0.63 })} />}
         </MapContainer>
       </div>
-      <p className="text-xs text-slate-500">Percentages estimate overlap using 2021 cropland as a proxy for these 2016–2017 events. Colored MODIS flood footprints summarize each archived event, not an individual day. The map displays the wider event footprint; selecting a district changes the map focus and district percentage.</p>
+      <p className="text-xs text-slate-500">{t("history.footerNote", "Percentages estimate overlap using 2021 cropland as a proxy for these 2016–2017 events. Colored MODIS flood footprints summarize each archived event, not an individual day. The map displays the wider event footprint; selecting a district changes the map focus and district percentage.")}</p>
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
     </div>
   </section>;
