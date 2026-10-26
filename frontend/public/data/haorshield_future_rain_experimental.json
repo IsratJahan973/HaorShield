@@ -1,10 +1,10 @@
 {
-  "issued_at": "2026-10-26T19:04:54.698728+06:00",
-  "target_window_start_local": "2026-10-27",
+  "issued_at": "2026-10-27T04:41:17.176034+06:00",
+  "target_window_start_local": "2026-10-28",
   "target_window_end_local": {
-    "24": "2026-10-28",
-    "48": "2026-10-29",
-    "72": "2026-10-30"
+    "24": "2026-10-29",
+    "48": "2026-10-30",
+    "72": "2026-10-31"
   },
   "forecast_horizons_hours": [
     24,
@@ -23,72 +23,72 @@
       "station": "Sunamganj",
       "latitude": 25.0658,
       "longitude": 91.395,
-      "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 1.99,
-      "forecast_rain_48h_mm": 5.8,
-      "experimental_48h_score_pct": 1.95,
-      "forecast_rain_72h_mm": 11.3,
-      "experimental_72h_score_pct": 1.88
+      "forecast_rain_24h_mm": 9.3,
+      "experimental_24h_score_pct": 2.2,
+      "forecast_rain_48h_mm": 13.1,
+      "experimental_48h_score_pct": 2.15,
+      "forecast_rain_72h_mm": 15.7,
+      "experimental_72h_score_pct": 1.98
     },
     {
       "station_id": "SW174",
       "station": "Sylhet",
       "latitude": 24.8949,
       "longitude": 91.8687,
-      "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 1.98,
-      "forecast_rain_48h_mm": 10.1,
-      "experimental_48h_score_pct": 2.65,
-      "forecast_rain_72h_mm": 18.7,
-      "experimental_72h_score_pct": 2.69
+      "forecast_rain_24h_mm": 9.3,
+      "experimental_24h_score_pct": 2.19,
+      "forecast_rain_48h_mm": 14.7,
+      "experimental_48h_score_pct": 2.81,
+      "forecast_rain_72h_mm": 17.0,
+      "experimental_72h_score_pct": 2.64
     },
     {
       "station_id": "KU01",
       "station": "Sherpur (Sylhet)",
       "latitude": 24.6833,
       "longitude": 91.8667,
-      "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.28,
+      "forecast_rain_24h_mm": 6.5,
+      "experimental_24h_score_pct": 2.4,
       "forecast_rain_48h_mm": 8.0,
-      "experimental_48h_score_pct": 2.97,
-      "forecast_rain_72h_mm": 13.5,
-      "experimental_72h_score_pct": 5.53
+      "experimental_48h_score_pct": 2.93,
+      "forecast_rain_72h_mm": 8.6,
+      "experimental_72h_score_pct": 5.22
     },
     {
       "station_id": "KU02",
       "station": "Amalshid",
       "latitude": 24.8167,
       "longitude": 92.2,
-      "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.27,
-      "forecast_rain_48h_mm": 9.2,
-      "experimental_48h_score_pct": 3.66,
-      "forecast_rain_72h_mm": 17.4,
-      "experimental_72h_score_pct": 8.14
+      "forecast_rain_24h_mm": 10.0,
+      "experimental_24h_score_pct": 2.53,
+      "forecast_rain_48h_mm": 11.3,
+      "experimental_48h_score_pct": 3.76,
+      "forecast_rain_72h_mm": 11.9,
+      "experimental_72h_score_pct": 7.68
     },
     {
       "station_id": "NM01",
       "station": "Durgapur",
       "latitude": 25.15,
       "longitude": 90.7333,
-      "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.06,
-      "forecast_rain_48h_mm": 7.8,
-      "experimental_48h_score_pct": 2.79,
-      "forecast_rain_72h_mm": 9.2,
-      "experimental_72h_score_pct": 3.37
+      "forecast_rain_24h_mm": 2.2,
+      "experimental_24h_score_pct": 2.11,
+      "forecast_rain_48h_mm": 2.2,
+      "experimental_48h_score_pct": 2.59,
+      "forecast_rain_72h_mm": 12.0,
+      "experimental_72h_score_pct": 3.47
     },
     {
       "station_id": "ME02",
       "station": "Bhairab Bazar",
       "latitude": 24.05,
       "longitude": 90.9833,
-      "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.38,
-      "forecast_rain_48h_mm": 5.8,
-      "experimental_48h_score_pct": 3.46,
-      "forecast_rain_72h_mm": 6.1,
-      "experimental_72h_score_pct": 8.96
+      "forecast_rain_24h_mm": 6.8,
+      "experimental_24h_score_pct": 2.56,
+      "forecast_rain_48h_mm": 7.6,
+      "experimental_48h_score_pct": 3.55,
+      "forecast_rain_72h_mm": 7.6,
+      "experimental_72h_score_pct": 9.1
     }
   ]
 }
