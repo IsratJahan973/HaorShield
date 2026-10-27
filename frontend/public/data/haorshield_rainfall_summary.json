@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27T23:42:05.373222+06:00",
+  "generated_at": "2026-10-28T03:55:55.442628+06:00",
   "source": "Open-Meteo forecast API",
   "method": "10 km spatial rainfall-screening grid",
   "disclaimer": "Rainfall screening only. Not a validated flood forecast, probability or inundation estimate.",
@@ -37,8 +37,8 @@
     },
     "48": {
       "total_area_by_category_km2": {
-        "Low Forecast Rainfall": 19380.17,
-        "Moderate Rainfall": 148.22
+        "Low Forecast Rainfall": 19437.75,
+        "Moderate Rainfall": 90.64
       },
       "districts": {
         "Brahmanbaria": {
@@ -54,46 +54,47 @@
           "Low Forecast Rainfall": 2590.07
         },
         "Moulvibazar": {
-          "Low Forecast Rainfall": 2553.63
+          "Low Forecast Rainfall": 2462.99,
+          "Moderate Rainfall": 90.64
         },
         "Sunamganj": {
           "Low Forecast Rainfall": 3649.67
         },
         "Sylhet": {
-          "Low Forecast Rainfall": 3325.88,
-          "Moderate Rainfall": 148.22
+          "Low Forecast Rainfall": 3474.1
         }
       }
     },
     "72": {
       "total_area_by_category_km2": {
-        "Low Forecast Rainfall": 18714.8,
-        "Moderate Rainfall": 813.59
+        "Low Forecast Rainfall": 18634.76,
+        "Moderate Rainfall": 893.63
       },
       "districts": {
         "Brahmanbaria": {
           "Low Forecast Rainfall": 1913.64
         },
         "Kishoreganj": {
-          "Low Forecast Rainfall": 2557.44
+          "Low Forecast Rainfall": 2370.53,
+          "Moderate Rainfall": 186.91
         },
         "Netrakona": {
-          "Low Forecast Rainfall": 2789.83
+          "Low Forecast Rainfall": 2415.45,
+          "Moderate Rainfall": 374.38
         },
         "Habiganj": {
           "Low Forecast Rainfall": 2590.07
         },
         "Moulvibazar": {
-          "Low Forecast Rainfall": 2345.75,
-          "Moderate Rainfall": 207.88
+          "Low Forecast Rainfall": 2462.99,
+          "Moderate Rainfall": 90.64
         },
         "Sunamganj": {
-          "Low Forecast Rainfall": 3597.9,
-          "Moderate Rainfall": 51.78
+          "Low Forecast Rainfall": 3407.98,
+          "Moderate Rainfall": 241.7
         },
         "Sylhet": {
-          "Low Forecast Rainfall": 2920.17,
-          "Moderate Rainfall": 553.94
+          "Low Forecast Rainfall": 3474.1
         }
       }
     }
