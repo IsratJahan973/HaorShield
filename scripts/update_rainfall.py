@@ -126,7 +126,7 @@ def main():
             for hours in (24, 48, 72):
                 total = round(sum(future[:hours]), 2)
                 p[f"rain{hours}_mm"] = total
-               p[f"alert{hours}"] = classify(total, hours)
+                p[f"alert{hours}"] = classify(total, hours)
 
         print(
             f"Updated {min(start + batch_size, len(features))}"
