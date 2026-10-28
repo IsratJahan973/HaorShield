@@ -15,12 +15,17 @@ SUMMARY_PATH = DATA / "haorshield_rainfall_summary.json"
 
 TZ = ZoneInfo("Asia/Dhaka")
 
-def classify(mm):
-    if mm >= 100:
+def classify(mm, hours=24):
+    if mm is None or hours <= 0:
+        raise ValueError("Invalid rainfall data or forecast period")
+
+    rate = mm * 24 / hours
+
+    if rate >= 100:
         return "Very Heavy Rainfall"
-    if mm >= 50:
+    if rate >= 50:
         return "Heavy Rainfall"
-    if mm >= 20:
+    if rate >= 10:
         return "Moderate Rainfall"
     return "Low Forecast Rainfall"
 
@@ -121,7 +126,7 @@ def main():
             for hours in (24, 48, 72):
                 total = round(sum(future[:hours]), 2)
                 p[f"rain{hours}_mm"] = total
-                p[f"alert{hours}"] = classify(total)
+               p[f"alert{hours}"] = classify(total, hours)
 
         print(
             f"Updated {min(start + batch_size, len(features))}"
