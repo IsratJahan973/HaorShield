@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-10-28T18:56:06.568316+06:00",
+  "issued_at": "2026-10-29T04:36:37.137246+06:00",
   "coverage": "Six northeast-region river stations",
   "forecast_horizons_hours": [
     24,
@@ -16,54 +16,54 @@
       "station": "Sunamganj",
       "latitude": 25.0658,
       "longitude": 91.395,
-      "experimental_24h_score_pct": 0.0,
-      "experimental_48h_score_pct": 5.01,
-      "experimental_72h_score_pct": 7.29
+      "experimental_24h_score_pct": 5.95,
+      "experimental_48h_score_pct": 6.58,
+      "experimental_72h_score_pct": 8.28
     },
     {
       "station_id": "SW174",
       "station": "Sylhet",
       "latitude": 24.8949,
       "longitude": 91.8687,
-      "experimental_24h_score_pct": 0.0,
-      "experimental_48h_score_pct": 4.81,
-      "experimental_72h_score_pct": 7.05
+      "experimental_24h_score_pct": 6.57,
+      "experimental_48h_score_pct": 7.67,
+      "experimental_72h_score_pct": 10.58
     },
     {
       "station_id": "KU01",
       "station": "Sherpur (Sylhet)",
       "latitude": 24.6833,
       "longitude": 91.8667,
-      "experimental_24h_score_pct": 0.01,
-      "experimental_48h_score_pct": 5.56,
-      "experimental_72h_score_pct": 7.85
+      "experimental_24h_score_pct": 7.92,
+      "experimental_48h_score_pct": 9.4,
+      "experimental_72h_score_pct": 11.47
     },
     {
       "station_id": "KU02",
       "station": "Amalshid",
       "latitude": 24.8167,
       "longitude": 92.2,
-      "experimental_24h_score_pct": 0.34,
-      "experimental_48h_score_pct": 6.16,
-      "experimental_72h_score_pct": 8.64
+      "experimental_24h_score_pct": 7.6,
+      "experimental_48h_score_pct": 9.61,
+      "experimental_72h_score_pct": 12.35
     },
     {
       "station_id": "NM01",
       "station": "Durgapur (Netrakona)",
       "latitude": 25.15,
       "longitude": 90.7333,
-      "experimental_24h_score_pct": 0.0,
-      "experimental_48h_score_pct": 5.15,
-      "experimental_72h_score_pct": 7.12
+      "experimental_24h_score_pct": 6.61,
+      "experimental_48h_score_pct": 7.25,
+      "experimental_72h_score_pct": 9.95
     },
     {
       "station_id": "ME02",
       "station": "Bhairab Bazar",
       "latitude": 24.05,
       "longitude": 90.9833,
-      "experimental_24h_score_pct": 2.35,
-      "experimental_48h_score_pct": 7.13,
-      "experimental_72h_score_pct": 10.13
+      "experimental_24h_score_pct": 6.59,
+      "experimental_48h_score_pct": 9.09,
+      "experimental_72h_score_pct": 11.45
     }
   ]
 }
