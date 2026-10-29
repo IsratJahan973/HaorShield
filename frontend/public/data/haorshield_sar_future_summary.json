@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-28T22:44:36.820914+00:00",
-  "issue_anchor_date_utc": "2026-10-28",
+  "generated_at": "2026-10-29T03:58:22.618351+00:00",
+  "issue_anchor_date_utc": "2026-10-29",
   "horizons_hours": [
     24,
     48,
@@ -19,25 +19,25 @@
   "area_warning": "Research land and cropland hectare proxies assume SAR-candidate fractions apply uniformly to geographic cells and cropland. They are NOT estimated actual flooded hectares.",
   "horizons": {
     "24": {
-      "target_satellite_date_utc": "2026-10-29",
-      "research_land_proxy_ha": 113987.55,
-      "research_cropland_proxy_ha": 72998.54,
+      "target_satellite_date_utc": "2026-10-30",
+      "research_land_proxy_ha": 113940.37,
+      "research_cropland_proxy_ha": 72851.32,
       "cells": 306,
       "model_variant": "antecedent_flow",
       "model_output": "experimental_SAR_candidate_fraction"
     },
     "48": {
-      "target_satellite_date_utc": "2026-10-30",
-      "research_land_proxy_ha": 81409.81,
-      "research_cropland_proxy_ha": 52224.04,
+      "target_satellite_date_utc": "2026-10-31",
+      "research_land_proxy_ha": 80962.79,
+      "research_cropland_proxy_ha": 51938.2,
       "cells": 306,
       "model_variant": "antecedent_flow",
       "model_output": "experimental_SAR_candidate_fraction"
     },
     "72": {
-      "target_satellite_date_utc": "2026-10-31",
-      "research_land_proxy_ha": 95145.46,
-      "research_cropland_proxy_ha": 62180.33,
+      "target_satellite_date_utc": "2026-11-01",
+      "research_land_proxy_ha": 96061.33,
+      "research_cropland_proxy_ha": 62714.18,
       "cells": 306,
       "model_variant": "antecedent_flow",
       "model_output": "experimental_SAR_candidate_fraction"
