@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-29T04:20:15.834526+06:00",
+  "generated_at": "2026-10-29T10:53:32.110521+06:00",
   "source": "Open-Meteo forecast API",
   "method": "10 km spatial rainfall-screening grid",
   "disclaimer": "Rainfall screening only. Not a validated flood forecast, probability or inundation estimate.",
@@ -9,8 +9,8 @@
   "windows": {
     "24": {
       "total_area_by_category_km2": {
-        "Low Forecast Rainfall": 18868.28,
-        "Moderate Rainfall": 660.11
+        "Low Forecast Rainfall": 19211.03,
+        "Moderate Rainfall": 317.36
       },
       "districts": {
         "Brahmanbaria": {
@@ -23,18 +23,18 @@
           "Low Forecast Rainfall": 2789.83
         },
         "Habiganj": {
-          "Low Forecast Rainfall": 2590.07
+          "Low Forecast Rainfall": 2472.71,
+          "Moderate Rainfall": 117.36
         },
         "Moulvibazar": {
           "Low Forecast Rainfall": 2553.63
         },
         "Sunamganj": {
-          "Low Forecast Rainfall": 3648.03,
-          "Moderate Rainfall": 1.65
+          "Low Forecast Rainfall": 3449.67,
+          "Moderate Rainfall": 200.0
         },
         "Sylhet": {
-          "Low Forecast Rainfall": 2815.64,
-          "Moderate Rainfall": 658.46
+          "Low Forecast Rainfall": 3474.1
         }
       }
     },
