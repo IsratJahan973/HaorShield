@@ -73,7 +73,7 @@ Developed for **Hack for Humanity: Bangladesh**, organized by The AI Collective 
 
 HaorShield is an experimental research platform. Its flood-screening indicators are **not validated flood probabilities or official flood warnings**. 
 
-The platform is designed to support environmental awareness, research, and agricultural preparedness.
+The platform is designed especially to support environmental awareness, research, and agricultural preparedness.
 
 ---
 
