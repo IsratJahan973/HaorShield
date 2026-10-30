@@ -1,5 +1,5 @@
 # HaorShield
-### AI-Powered Flash Flood Risk & Agricultural Exposure Intelligence
+### AI-Powered Flash Flood Risk Prediction & Agricultural Exposure Intelligence
 
 **A climate-resilience platform designed for the flood-prone haor regions of northeastern Bangladesh.**
 
