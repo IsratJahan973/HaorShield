@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-31T10:39:24.128148+06:00",
+  "generated_at": "2026-10-31T17:52:29.960300+06:00",
   "source": "Open-Meteo forecast API",
   "method": "10 km spatial rainfall-screening grid",
   "disclaimer": "Rainfall screening only. Not a validated flood forecast, probability or inundation estimate.",
@@ -9,7 +9,8 @@
   "windows": {
     "24": {
       "total_area_by_category_km2": {
-        "Low Forecast Rainfall": 19528.39
+        "Low Forecast Rainfall": 19414.22,
+        "Moderate Rainfall": 114.17
       },
       "districts": {
         "Brahmanbaria": {
@@ -31,7 +32,8 @@
           "Low Forecast Rainfall": 3649.67
         },
         "Sylhet": {
-          "Low Forecast Rainfall": 3474.1
+          "Low Forecast Rainfall": 3359.94,
+          "Moderate Rainfall": 114.17
         }
       }
     },
