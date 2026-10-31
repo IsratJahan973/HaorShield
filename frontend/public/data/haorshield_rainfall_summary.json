@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-31T04:01:50.430512+06:00",
+  "generated_at": "2026-10-31T10:39:24.128148+06:00",
   "source": "Open-Meteo forecast API",
   "method": "10 km spatial rainfall-screening grid",
   "disclaimer": "Rainfall screening only. Not a validated flood forecast, probability or inundation estimate.",
