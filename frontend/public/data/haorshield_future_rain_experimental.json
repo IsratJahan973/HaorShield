@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-11-02T04:03:07.313172+06:00",
+  "issued_at": "2026-11-02T12:05:07.823153+06:00",
   "target_window_start_local": "2026-11-03",
   "target_window_end_local": {
     "24": "2026-11-04",
@@ -37,9 +37,9 @@
       "longitude": 91.8687,
       "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 2.09,
-      "forecast_rain_48h_mm": 0.0,
-      "experimental_48h_score_pct": 2.39,
-      "forecast_rain_72h_mm": 0.0,
+      "forecast_rain_48h_mm": 0.3,
+      "experimental_48h_score_pct": 2.4,
+      "forecast_rain_72h_mm": 0.3,
       "experimental_72h_score_pct": 2.22
     },
     {
@@ -59,11 +59,11 @@
       "station": "Amalshid",
       "latitude": 24.8167,
       "longitude": 92.2,
-      "forecast_rain_24h_mm": 0.1,
-      "experimental_24h_score_pct": 2.4,
-      "forecast_rain_48h_mm": 0.1,
-      "experimental_48h_score_pct": 3.37,
-      "forecast_rain_72h_mm": 0.1,
+      "forecast_rain_24h_mm": 0.0,
+      "experimental_24h_score_pct": 2.39,
+      "forecast_rain_48h_mm": 0.0,
+      "experimental_48h_score_pct": 3.36,
+      "forecast_rain_72h_mm": 0.0,
       "experimental_72h_score_pct": 6.87
     },
     {
