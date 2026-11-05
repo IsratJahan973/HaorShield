@@ -1,10 +1,10 @@
 {
-  "issued_at": "2026-11-05T12:48:29.266808+06:00",
-  "target_window_start_local": "2026-11-06",
+  "issued_at": "2026-11-06T01:57:57.467610+06:00",
+  "target_window_start_local": "2026-11-07",
   "target_window_end_local": {
-    "24": "2026-11-07",
-    "48": "2026-11-08",
-    "72": "2026-11-09"
+    "24": "2026-11-08",
+    "48": "2026-11-09",
+    "72": "2026-11-10"
   },
   "forecast_horizons_hours": [
     24,
@@ -36,10 +36,10 @@
       "latitude": 24.8949,
       "longitude": 91.8687,
       "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 1.99,
+      "experimental_24h_score_pct": 1.98,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.32,
-      "forecast_rain_72h_mm": 0.0,
+      "forecast_rain_72h_mm": 0.4,
       "experimental_72h_score_pct": 2.19
     },
     {
@@ -48,10 +48,10 @@
       "latitude": 24.6833,
       "longitude": 91.8667,
       "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.23,
+      "experimental_24h_score_pct": 2.22,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.63,
-      "forecast_rain_72h_mm": 0.0,
+      "forecast_rain_72h_mm": 0.1,
       "experimental_72h_score_pct": 4.75
     },
     {
@@ -72,7 +72,7 @@
       "latitude": 25.15,
       "longitude": 90.7333,
       "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.07,
+      "experimental_24h_score_pct": 2.06,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.52,
       "forecast_rain_72h_mm": 0.0,
@@ -87,8 +87,8 @@
       "experimental_24h_score_pct": 2.38,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 3.21,
-      "forecast_rain_72h_mm": 0.0,
-      "experimental_72h_score_pct": 8.41
+      "forecast_rain_72h_mm": 3.4,
+      "experimental_72h_score_pct": 8.71
     }
   ]
 }
