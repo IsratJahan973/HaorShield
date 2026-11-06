@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-11-06T01:57:57.467610+06:00",
+  "issued_at": "2026-11-06T12:48:01.506402+06:00",
   "target_window_start_local": "2026-11-07",
   "target_window_end_local": {
     "24": "2026-11-08",
@@ -39,8 +39,8 @@
       "experimental_24h_score_pct": 1.98,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.32,
-      "forecast_rain_72h_mm": 0.4,
-      "experimental_72h_score_pct": 2.19
+      "forecast_rain_72h_mm": 0.0,
+      "experimental_72h_score_pct": 2.18
     },
     {
       "station_id": "KU01",
@@ -51,7 +51,7 @@
       "experimental_24h_score_pct": 2.22,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.63,
-      "forecast_rain_72h_mm": 0.1,
+      "forecast_rain_72h_mm": 0.0,
       "experimental_72h_score_pct": 4.75
     },
     {
@@ -87,8 +87,8 @@
       "experimental_24h_score_pct": 2.38,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 3.21,
-      "forecast_rain_72h_mm": 3.4,
-      "experimental_72h_score_pct": 8.71
+      "forecast_rain_72h_mm": 0.0,
+      "experimental_72h_score_pct": 8.41
     }
   ]
 }
