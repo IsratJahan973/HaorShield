@@ -1,10 +1,10 @@
 {
-  "issued_at": "2026-11-06T12:48:01.506402+06:00",
-  "target_window_start_local": "2026-11-07",
+  "issued_at": "2026-11-07T01:25:39.424327+06:00",
+  "target_window_start_local": "2026-11-08",
   "target_window_end_local": {
-    "24": "2026-11-08",
-    "48": "2026-11-09",
-    "72": "2026-11-10"
+    "24": "2026-11-09",
+    "48": "2026-11-10",
+    "72": "2026-11-11"
   },
   "forecast_horizons_hours": [
     24,
@@ -27,7 +27,7 @@
       "experimental_24h_score_pct": 1.99,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 1.81,
-      "forecast_rain_72h_mm": 0.0,
+      "forecast_rain_72h_mm": 0.2,
       "experimental_72h_score_pct": 1.66
     },
     {
@@ -39,8 +39,8 @@
       "experimental_24h_score_pct": 1.98,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.32,
-      "forecast_rain_72h_mm": 0.0,
-      "experimental_72h_score_pct": 2.18
+      "forecast_rain_72h_mm": 0.3,
+      "experimental_72h_score_pct": 2.19
     },
     {
       "station_id": "KU01",
@@ -51,8 +51,8 @@
       "experimental_24h_score_pct": 2.22,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.63,
-      "forecast_rain_72h_mm": 0.0,
-      "experimental_72h_score_pct": 4.75
+      "forecast_rain_72h_mm": 0.9,
+      "experimental_72h_score_pct": 4.79
     },
     {
       "station_id": "KU02",
@@ -63,8 +63,8 @@
       "experimental_24h_score_pct": 2.27,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 3.25,
-      "forecast_rain_72h_mm": 0.0,
-      "experimental_72h_score_pct": 6.77
+      "forecast_rain_72h_mm": 0.6,
+      "experimental_72h_score_pct": 6.82
     },
     {
       "station_id": "NM01",
@@ -75,8 +75,8 @@
       "experimental_24h_score_pct": 2.06,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.52,
-      "forecast_rain_72h_mm": 0.0,
-      "experimental_72h_score_pct": 3.04
+      "forecast_rain_72h_mm": 0.2,
+      "experimental_72h_score_pct": 3.05
     },
     {
       "station_id": "ME02",
@@ -87,8 +87,8 @@
       "experimental_24h_score_pct": 2.38,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 3.21,
-      "forecast_rain_72h_mm": 0.0,
-      "experimental_72h_score_pct": 8.41
+      "forecast_rain_72h_mm": 1.8,
+      "experimental_72h_score_pct": 8.57
     }
   ]
 }
