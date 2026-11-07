@@ -1,10 +1,10 @@
 {
-  "issued_at": "2026-11-07T19:02:27.125111+06:00",
-  "target_window_start_local": "2026-11-08",
+  "issued_at": "2026-11-08T03:52:02.874311+06:00",
+  "target_window_start_local": "2026-11-09",
   "target_window_end_local": {
-    "24": "2026-11-09",
-    "48": "2026-11-10",
-    "72": "2026-11-11"
+    "24": "2026-11-10",
+    "48": "2026-11-11",
+    "72": "2026-11-12"
   },
   "forecast_horizons_hours": [
     24,
@@ -27,8 +27,8 @@
       "experimental_24h_score_pct": 1.99,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 1.81,
-      "forecast_rain_72h_mm": 0.2,
-      "experimental_72h_score_pct": 1.66
+      "forecast_rain_72h_mm": 0.6,
+      "experimental_72h_score_pct": 1.67
     },
     {
       "station_id": "SW174",
@@ -39,8 +39,8 @@
       "experimental_24h_score_pct": 1.98,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.32,
-      "forecast_rain_72h_mm": 3.0,
-      "experimental_72h_score_pct": 2.26
+      "forecast_rain_72h_mm": 1.2,
+      "experimental_72h_score_pct": 2.21
     },
     {
       "station_id": "KU01",
@@ -51,8 +51,8 @@
       "experimental_24h_score_pct": 2.22,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.63,
-      "forecast_rain_72h_mm": 0.5,
-      "experimental_72h_score_pct": 4.77
+      "forecast_rain_72h_mm": 1.3,
+      "experimental_72h_score_pct": 4.82
     },
     {
       "station_id": "KU02",
@@ -63,8 +63,8 @@
       "experimental_24h_score_pct": 2.27,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 3.25,
-      "forecast_rain_72h_mm": 0.4,
-      "experimental_72h_score_pct": 6.8
+      "forecast_rain_72h_mm": 2.3,
+      "experimental_72h_score_pct": 6.94
     },
     {
       "station_id": "NM01",
@@ -75,20 +75,20 @@
       "experimental_24h_score_pct": 2.06,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.52,
-      "forecast_rain_72h_mm": 0.4,
-      "experimental_72h_score_pct": 3.05
+      "forecast_rain_72h_mm": 5.4,
+      "experimental_72h_score_pct": 3.23
     },
     {
       "station_id": "ME02",
       "station": "Bhairab Bazar",
       "latitude": 24.05,
       "longitude": 90.9833,
-      "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.38,
-      "forecast_rain_48h_mm": 1.3,
-      "experimental_48h_score_pct": 3.27,
-      "forecast_rain_72h_mm": 1.3,
-      "experimental_72h_score_pct": 8.52
+      "forecast_rain_24h_mm": 2.3,
+      "experimental_24h_score_pct": 2.43,
+      "forecast_rain_48h_mm": 2.3,
+      "experimental_48h_score_pct": 3.31,
+      "forecast_rain_72h_mm": 2.7,
+      "experimental_72h_score_pct": 8.65
     }
   ]
 }
