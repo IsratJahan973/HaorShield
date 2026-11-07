@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-11-07T01:25:39.424327+06:00",
+  "issued_at": "2026-11-07T11:59:18.127792+06:00",
   "target_window_start_local": "2026-11-08",
   "target_window_end_local": {
     "24": "2026-11-09",
@@ -27,7 +27,7 @@
       "experimental_24h_score_pct": 1.99,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 1.81,
-      "forecast_rain_72h_mm": 0.2,
+      "forecast_rain_72h_mm": 0.0,
       "experimental_72h_score_pct": 1.66
     },
     {
@@ -39,7 +39,7 @@
       "experimental_24h_score_pct": 1.98,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.32,
-      "forecast_rain_72h_mm": 0.3,
+      "forecast_rain_72h_mm": 0.4,
       "experimental_72h_score_pct": 2.19
     },
     {
@@ -51,8 +51,8 @@
       "experimental_24h_score_pct": 2.22,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.63,
-      "forecast_rain_72h_mm": 0.9,
-      "experimental_72h_score_pct": 4.79
+      "forecast_rain_72h_mm": 0.0,
+      "experimental_72h_score_pct": 4.75
     },
     {
       "station_id": "KU02",
@@ -63,8 +63,8 @@
       "experimental_24h_score_pct": 2.27,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 3.25,
-      "forecast_rain_72h_mm": 0.6,
-      "experimental_72h_score_pct": 6.82
+      "forecast_rain_72h_mm": 0.0,
+      "experimental_72h_score_pct": 6.77
     },
     {
       "station_id": "NM01",
@@ -75,8 +75,8 @@
       "experimental_24h_score_pct": 2.06,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.52,
-      "forecast_rain_72h_mm": 0.2,
-      "experimental_72h_score_pct": 3.05
+      "forecast_rain_72h_mm": 0.0,
+      "experimental_72h_score_pct": 3.04
     },
     {
       "station_id": "ME02",
@@ -87,8 +87,8 @@
       "experimental_24h_score_pct": 2.38,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 3.21,
-      "forecast_rain_72h_mm": 1.8,
-      "experimental_72h_score_pct": 8.57
+      "forecast_rain_72h_mm": 0.3,
+      "experimental_72h_score_pct": 8.43
     }
   ]
 }
