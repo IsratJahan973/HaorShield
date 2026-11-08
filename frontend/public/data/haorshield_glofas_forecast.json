@@ -1,5 +1,5 @@
 {
-  "retrieved_at": "2026-11-08T05:08:54.996304+00:00",
+  "retrieved_at": "2026-11-08T12:59:09.167658+00:00",
   "source": "Copernicus GloFAS v4 via Open-Meteo",
   "hydrology_model": "forecast_v4",
   "historical_reference": "1984-2021 consolidated_v4",
@@ -90,11 +90,11 @@
       "model_longitude": 91.875,
       "flow_band_24": 0,
       "flow_label_24": "Below historical high-flow threshold",
-      "peak_discharge_24_m3_s": 6.98,
+      "peak_discharge_24_m3_s": 7.0,
       "daily_forecasts_24": [
         {
           "date_utc": "2026-11-09",
-          "discharge_m3_s": 6.98,
+          "discharge_m3_s": 7.0,
           "flow_band": 0,
           "historical_p95_m3_s": 13.146,
           "historical_p99_m3_s": 15.216
@@ -102,18 +102,18 @@
       ],
       "flow_band_48": 0,
       "flow_label_48": "Below historical high-flow threshold",
-      "peak_discharge_48_m3_s": 6.98,
+      "peak_discharge_48_m3_s": 7.0,
       "daily_forecasts_48": [
         {
           "date_utc": "2026-11-09",
-          "discharge_m3_s": 6.98,
+          "discharge_m3_s": 7.0,
           "flow_band": 0,
           "historical_p95_m3_s": 13.146,
           "historical_p99_m3_s": 15.216
         },
         {
           "date_utc": "2026-11-10",
-          "discharge_m3_s": 6.89,
+          "discharge_m3_s": 6.91,
           "flow_band": 0,
           "historical_p95_m3_s": 13.146,
           "historical_p99_m3_s": 15.216
@@ -121,18 +121,18 @@
       ],
       "flow_band_72": 0,
       "flow_label_72": "Below historical high-flow threshold",
-      "peak_discharge_72_m3_s": 6.98,
+      "peak_discharge_72_m3_s": 7.0,
       "daily_forecasts_72": [
         {
           "date_utc": "2026-11-09",
-          "discharge_m3_s": 6.98,
+          "discharge_m3_s": 7.0,
           "flow_band": 0,
           "historical_p95_m3_s": 13.146,
           "historical_p99_m3_s": 15.216
         },
         {
           "date_utc": "2026-11-10",
-          "discharge_m3_s": 6.89,
+          "discharge_m3_s": 6.91,
           "flow_band": 0,
           "historical_p95_m3_s": 13.146,
           "historical_p99_m3_s": 15.216
@@ -204,7 +204,7 @@
         },
         {
           "date_utc": "2026-11-11",
-          "discharge_m3_s": 1024.65,
+          "discharge_m3_s": 1027.02,
           "flow_band": 0,
           "historical_p95_m3_s": 1861.519,
           "historical_p99_m3_s": 2114.974
@@ -269,7 +269,7 @@
         },
         {
           "date_utc": "2026-11-11",
-          "discharge_m3_s": 3.98,
+          "discharge_m3_s": 3.97,
           "flow_band": 0,
           "historical_p95_m3_s": 7.81,
           "historical_p99_m3_s": 8.89
@@ -373,7 +373,7 @@
         },
         {
           "date_utc": "2026-11-10",
-          "discharge_m3_s": 1.23,
+          "discharge_m3_s": 1.26,
           "flow_band": 0,
           "historical_p95_m3_s": 3.46,
           "historical_p99_m3_s": 4.281
@@ -392,14 +392,14 @@
         },
         {
           "date_utc": "2026-11-10",
-          "discharge_m3_s": 1.23,
+          "discharge_m3_s": 1.26,
           "flow_band": 0,
           "historical_p95_m3_s": 3.46,
           "historical_p99_m3_s": 4.281
         },
         {
           "date_utc": "2026-11-11",
-          "discharge_m3_s": 1.21,
+          "discharge_m3_s": 1.24,
           "flow_band": 0,
           "historical_p95_m3_s": 3.46,
           "historical_p99_m3_s": 4.281
