@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-11-12T01:37:13.956036+06:00",
+  "issued_at": "2026-11-12T13:12:31.599023+06:00",
   "target_window_start_local": "2026-11-13",
   "target_window_end_local": {
     "24": "2026-11-14",
@@ -72,11 +72,11 @@
       "latitude": 25.15,
       "longitude": 90.7333,
       "forecast_rain_24h_mm": 0.0,
-      "experimental_24h_score_pct": 2.14,
+      "experimental_24h_score_pct": 2.15,
       "forecast_rain_48h_mm": 0.0,
-      "experimental_48h_score_pct": 2.57,
+      "experimental_48h_score_pct": 2.59,
       "forecast_rain_72h_mm": 0.0,
-      "experimental_72h_score_pct": 3.07
+      "experimental_72h_score_pct": 3.08
     },
     {
       "station_id": "ME02",
