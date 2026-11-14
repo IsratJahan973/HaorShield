@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-11-14T01:43:42.552159+06:00",
+  "issued_at": "2026-11-14T12:24:39.891818+06:00",
   "target_window_start_local": "2026-11-15",
   "target_window_end_local": {
     "24": "2026-11-16",
@@ -25,9 +25,9 @@
       "longitude": 91.395,
       "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 2.0,
-      "forecast_rain_48h_mm": 0.6,
-      "experimental_48h_score_pct": 1.83,
-      "forecast_rain_72h_mm": 0.6,
+      "forecast_rain_48h_mm": 0.2,
+      "experimental_48h_score_pct": 1.82,
+      "forecast_rain_72h_mm": 0.2,
       "experimental_72h_score_pct": 1.67
     },
     {
@@ -37,10 +37,10 @@
       "longitude": 91.8687,
       "forecast_rain_24h_mm": 0.2,
       "experimental_24h_score_pct": 2.08,
-      "forecast_rain_48h_mm": 0.4,
-      "experimental_48h_score_pct": 2.41,
-      "forecast_rain_72h_mm": 0.4,
-      "experimental_72h_score_pct": 2.23
+      "forecast_rain_48h_mm": 0.3,
+      "experimental_48h_score_pct": 2.4,
+      "forecast_rain_72h_mm": 0.3,
+      "experimental_72h_score_pct": 2.22
     },
     {
       "station_id": "KU01",
@@ -49,10 +49,10 @@
       "longitude": 91.8667,
       "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 2.35,
-      "forecast_rain_48h_mm": 0.1,
+      "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 2.73,
-      "forecast_rain_72h_mm": 0.1,
-      "experimental_72h_score_pct": 4.83
+      "forecast_rain_72h_mm": 0.0,
+      "experimental_72h_score_pct": 4.82
     },
     {
       "station_id": "KU02",
@@ -73,10 +73,10 @@
       "longitude": 90.7333,
       "forecast_rain_24h_mm": 0.0,
       "experimental_24h_score_pct": 2.12,
-      "forecast_rain_48h_mm": 0.3,
-      "experimental_48h_score_pct": 2.56,
-      "forecast_rain_72h_mm": 0.3,
-      "experimental_72h_score_pct": 3.07
+      "forecast_rain_48h_mm": 0.5,
+      "experimental_48h_score_pct": 2.57,
+      "forecast_rain_72h_mm": 0.5,
+      "experimental_72h_score_pct": 3.08
     },
     {
       "station_id": "ME02",
