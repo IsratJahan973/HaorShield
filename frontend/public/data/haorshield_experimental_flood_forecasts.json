@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-11-16T00:52:17.583411+06:00",
+  "issued_at": "2026-11-16T12:31:12.455400+06:00",
   "coverage": "Six northeast-region river stations",
   "forecast_horizons_hours": [
     24,
@@ -62,7 +62,7 @@
       "latitude": 24.05,
       "longitude": 90.9833,
       "experimental_24h_score_pct": 0.29,
-      "experimental_48h_score_pct": 1.67,
+      "experimental_48h_score_pct": 1.57,
       "experimental_72h_score_pct": 3.56
     }
   ]
