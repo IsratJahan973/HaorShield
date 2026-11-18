@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-11-17T01:46:07.106405+00:00",
+  "generated_at": "2026-11-18T00:43:21.446263+00:00",
   "data_type": "forecast_conditioned_historical_exposure_screening",
-  "forecast_start_utc": "2026-11-18",
+  "forecast_start_utc": "2026-11-19",
   "river_forecast_source": "Copernicus GloFAS v4",
   "rainfall_forecast_fresh": true,
-  "rainfall_data_issued_at": "2026-11-17T07:43:39.758879+06:00",
+  "rainfall_data_issued_at": "2026-11-18T06:43:12.331193+06:00",
   "historic_flood_events": [
     4382,
     4459,
@@ -47,7 +47,7 @@
       "districts": {}
     },
     "72": {
-      "monitor_cells": 0,
+      "monitor_cells": 55,
       "elevated_cells": 0,
       "screened_historical_land_ha": 0.0,
       "screened_cropland_ha": 0.0,
