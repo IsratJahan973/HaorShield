@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-24T00:10:00.095602+00:00",
+  "generated_at": "2026-11-24T10:12:37.124817+00:00",
   "issue_anchor_date_utc": "2026-11-24",
   "horizons_hours": [
     24,
@@ -20,24 +20,24 @@
   "horizons": {
     "24": {
       "target_satellite_date_utc": "2026-11-25",
-      "research_land_proxy_ha": 83194.73,
-      "research_cropland_proxy_ha": 48331.78,
+      "research_land_proxy_ha": 82757.9,
+      "research_cropland_proxy_ha": 48119.71,
       "cells": 306,
       "model_variant": "antecedent_flow",
       "model_output": "experimental_SAR_candidate_fraction"
     },
     "48": {
       "target_satellite_date_utc": "2026-11-26",
-      "research_land_proxy_ha": 57047.2,
-      "research_cropland_proxy_ha": 32859.27,
+      "research_land_proxy_ha": 57202.24,
+      "research_cropland_proxy_ha": 32946.06,
       "cells": 306,
       "model_variant": "antecedent_flow",
       "model_output": "experimental_SAR_candidate_fraction"
     },
     "72": {
       "target_satellite_date_utc": "2026-11-27",
-      "research_land_proxy_ha": 64108.17,
-      "research_cropland_proxy_ha": 37817.88,
+      "research_land_proxy_ha": 64128.09,
+      "research_cropland_proxy_ha": 37838.05,
       "cells": 306,
       "model_variant": "antecedent_flow",
       "model_output": "experimental_SAR_candidate_fraction"
