@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-11-26T21:06:04.085323+00:00",
+  "generated_at": "2026-11-27T07:20:59.897040+00:00",
   "data_type": "forecast_conditioned_historical_exposure_screening",
-  "forecast_start_utc": "2026-11-27",
+  "forecast_start_utc": "2026-11-28",
   "river_forecast_source": "Copernicus GloFAS v4",
   "rainfall_forecast_fresh": true,
-  "rainfall_data_issued_at": "2026-11-27T03:05:54.575946+06:00",
+  "rainfall_data_issued_at": "2026-11-27T13:20:49.852683+06:00",
   "historic_flood_events": [
     4382,
     4459,
