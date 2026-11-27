@@ -1,5 +1,5 @@
 {
-  "issued_at": "2026-11-27T03:33:17.987235+06:00",
+  "issued_at": "2026-11-27T14:35:41.736238+06:00",
   "target_window_start_local": "2026-11-28",
   "target_window_end_local": {
     "24": "2026-11-29",
@@ -63,8 +63,8 @@
       "experimental_24h_score_pct": 2.41,
       "forecast_rain_48h_mm": 0.0,
       "experimental_48h_score_pct": 3.31,
-      "forecast_rain_72h_mm": 0.0,
-      "experimental_72h_score_pct": 6.87
+      "forecast_rain_72h_mm": 0.1,
+      "experimental_72h_score_pct": 6.88
     },
     {
       "station_id": "NM01",
